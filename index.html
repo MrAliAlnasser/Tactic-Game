@@ -3281,9 +3281,7 @@
     function renderGenerals() {
       const row = document.getElementById('generals-row');
       row.innerHTML = '';
-      document.getElementById('panel-title').textContent = G.isEnemyFound
-        ? '⚔️ استشارات الجنرالات — العدو مكشوف! اختر خطة الهجوم'
-        : '⭐ استشارات الجنرالات — اختر خطتك';
+
 
       const serialCodes = ['W-01', 'X-17', 'Z-04', 'A-33', 'K-09', 'M-22'];
       G.currentAdvice.forEach((adv, i) => {
