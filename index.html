@@ -1402,23 +1402,29 @@
 
     /* ALLY BANNER (Red Phone Urgent Message) */
     .ally-banner {
-      position: absolute;
-      bottom: 80px;
+      position: fixed;
+      top: 50%;
       left: 50%;
-      transform: translateX(-50%);
-      background: rgba(139, 0, 0, 0.95);
-      border: 2px solid #ff3333;
-      border-radius: 8px;
-      padding: 14px 28px;
-      z-index: 8;
+      transform: translate(-50%, -50%);
+      background: rgba(30, 5, 5, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 50, 50, 0.3);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,0,0,0.1);
+      border-radius: 12px;
+      padding: 24px;
+      z-index: 9999;
       font-size: 15px;
       font-weight: bold;
       color: #fff;
       display: none;
+      flex-direction: column;
       gap: 16px;
       align-items: center;
-      animation: allySlide 0.5s ease forwards, redPhonePulse 1.5s infinite 0.5s;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+      text-align: center;
+      min-width: 320px;
+      max-width: 90vw;
+      animation: allySlide 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .ally-banner.active {
@@ -1427,12 +1433,11 @@
 
     @keyframes allySlide {
       from {
-        transform: translateX(-50%) translateY(30px);
+        transform: translate(-50%, -40%);
         opacity: 0;
       }
-
       to {
-        transform: translateX(-50%) translateY(0);
+        transform: translate(-50%, -50%);
         opacity: 1;
       }
     }
@@ -1889,16 +1894,15 @@
 
         <!-- ALLY BANNER -->
         <div class="ally-banner" id="ally-banner">
-          <span style="font-size:24px; animation: phoneRing 0.1s infinite; display: inline-block;">☎️</span>
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <span style="color:#ff9999; font-size:11px; letter-spacing:1px; text-shadow: 0 0 5px red;">🚨 وارد من الهاتف
-              الأحمر 🚨</span>
-            <span id="ally-text">حلفاؤك يقدمون دعمًا!</span>
+          <span style="font-size:36px; animation: phoneRing 0.1s infinite; display: inline-block;">☎️</span>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <span style="color:#ff9999; font-size:13px; letter-spacing:1px; text-shadow: 0 0 5px red;">🚨 وارد من الهاتف الأحمر 🚨</span>
+            <span id="ally-text" style="font-size:18px;">حلفاؤك يقدمون دعمًا!</span>
           </div>
-          <button class="btn btn-red" onclick="acceptAlly()" style="font-size:12px;padding:6px 16px; margin-right:15px;"
-            id="btn-ally">قبول</button>
-          <button class="btn" onclick="declineAlly()"
-            style="font-size:12px;padding:6px 16px; border-color:#999; color:#999; background:transparent;">تجاهل</button>
+          <div style="display: flex; gap: 12px; margin-top: 5px; width: 100%; justify-content: center;">
+            <button class="btn btn-red" onclick="acceptAlly()" style="font-size:14px;padding:8px 24px;" id="btn-ally">قبول</button>
+            <button class="btn" onclick="declineAlly()" style="font-size:14px;padding:8px 24px; border-color:#999; color:#999; background:transparent;">تجاهل</button>
+          </div>
         </div>
       </div>
     </div>
