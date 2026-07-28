@@ -3024,7 +3024,12 @@
         }
 
         if (planeVisible && animState !== 'enemy_attack') {
+          ctx.save();
+          ctx.translate(px, py);
+          ctx.scale(-1, 1);
+          ctx.translate(-px, -py);
           drawDetailedPlane(ctx, px, py, planeScale, frame, animState);
+          ctx.restore();
         }
 
         if (fires.length > 0) {
