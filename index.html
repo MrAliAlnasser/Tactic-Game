@@ -2834,7 +2834,7 @@
         ctx.restore();
       }
 
-    function playAirportAnimation(callback, animState = 'idle') {
+    function playAirportAnimation(callback, forceAnimState = null) {
       if (window.airportAnimFrame) cancelAnimationFrame(window.airportAnimFrame);
       if (G.animating) {
         document.getElementById('btn-execute')?.setAttribute('disabled', 'true');
@@ -2845,11 +2845,14 @@
       let frame = 0;
       let totalFrames = 60;
 
-      if (G.turn === 1) animState = 'idle';
-      else if (G.tookRest) animState = 'resource_gain';
-      else if (G.currentAdvice[G.selectedGeneral] && ['strike', 'blind_strike', 'stealth_strike', 'full_assault', 'diversion'].includes(G.currentAdvice[G.selectedGeneral].action)) animState = 'takeoff';
-
-      if (G.enemyKnowsUs && Math.random() < 0.2) animState = 'enemy_attack';
+      let animState = 'idle';
+      if (forceAnimState) {
+        animState = forceAnimState;
+      } else {
+        if (G.turn === 1) animState = 'idle';
+        else if (G.tookRest) animState = 'resource_gain';
+        else if (G.selectedGeneral >= 0 && G.currentAdvice[G.selectedGeneral] && ['strike', 'blind_strike', 'stealth_strike', 'full_assault', 'diversion'].includes(G.currentAdvice[G.selectedGeneral].action)) animState = 'takeoff';
+      }
 
       if (animState === 'takeoff') totalFrames = 200;
       if (animState === 'resource_gain') totalFrames = 90;
@@ -3010,8 +3013,16 @@
           ctx.fillStyle = '#1c2533'; ctx.beginPath(); ctx.moveTo(tx-5, ty-20); ctx.lineTo(tx+tw+5, ty-20); ctx.lineTo(tx+tw-10, ty-35); ctx.lineTo(tx+10, ty-35); ctx.fill();
           
           if (G.upgrades && G.upgrades.radar) {
-              ctx.save(); ctx.translate(tx + tw/2, ty - 45); ctx.rotate(globalTime * 0.05);
-              ctx.fillStyle = '#d4a030'; ctx.fillRect(-25, -2, 50, 4); ctx.beginPath(); ctx.arc(0,0,10,Math.PI,0); ctx.fill();
+              ctx.save(); ctx.translate(tx + tw/2, ty - 45); 
+              ctx.fillStyle = '#2c332c'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.lineTo(5, -15); ctx.lineTo(-5, -15); ctx.fill();
+              ctx.translate(0, -15);
+              ctx.rotate(globalTime * 0.05);
+              ctx.fillStyle = '#a0aab5'; ctx.beginPath(); ctx.ellipse(0, 0, 25, 8, 0, 0, Math.PI*2); ctx.fill();
+              ctx.fillStyle = '#7a8590'; ctx.beginPath(); ctx.ellipse(0, 0, 20, 5, 0, 0, Math.PI*2); ctx.fill();
+              ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10, -15); ctx.moveTo(0,0); ctx.lineTo(10, -15); ctx.lineTo(-10, -15); ctx.stroke();
+              if (Math.sin(globalTime * 0.2) > 0) {
+                ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.arc(0, -18, 3, 0, Math.PI*2); ctx.fill();
+              }
               ctx.restore();
           }
           
@@ -3034,10 +3045,72 @@
           }
         }
 
+        // Upgrades Drawing
         if (G.upgrades && G.upgrades.stealth) {
-          const sx = W * 0.65; const sy = runwayY - 40;
-          ctx.fillStyle = '#151a22'; ctx.fillRect(sx, sy, 80, 20);
-          ctx.beginPath(); ctx.moveTo(sx-20, sy+20); ctx.lineTo(sx, sy); ctx.lineTo(sx, sy+20); ctx.fill();
+          const sx = W * 0.65; const sy = runwayY - 10;
+          ctx.save(); ctx.translate(sx, sy);
+          ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(60, -20); ctx.lineTo(20, -5); ctx.lineTo(60, 10); ctx.fill();
+          ctx.fillStyle = '#11151c'; 
+          ctx.beginPath(); 
+          ctx.moveTo(-10, -5); ctx.lineTo(40, -25); ctx.lineTo(25, -5); ctx.lineTo(35, -5); 
+          ctx.lineTo(30, -2); ctx.lineTo(30, 2); ctx.lineTo(35, 5); ctx.lineTo(25, 5); ctx.lineTo(40, 25); 
+          ctx.closePath(); ctx.fill();
+          ctx.strokeStyle = '#2a3240'; ctx.lineWidth = 1; ctx.stroke();
+          ctx.fillStyle = '#051020'; ctx.beginPath(); ctx.moveTo(-5, -2); ctx.lineTo(5, -4); ctx.lineTo(5, 4); ctx.fill();
+          ctx.fillStyle = '#44ccff'; ctx.fillRect(28, -8, 4, 3); ctx.fillRect(28, 5, 4, 3);
+          ctx.restore();
+        }
+
+        if (G.upgrades && G.upgrades.walls) {
+          ctx.fillStyle = '#4a5059'; ctx.fillRect(0, H - 40, W, 40);
+          ctx.fillStyle = '#30343a';
+          for (let wx = 0; wx < W; wx += 80) ctx.fillRect(wx, H - 40, 2, 40);
+          for (let wx = 0; wx < W; wx += 40) {
+            ctx.fillStyle = '#ffcc00';
+            ctx.beginPath(); ctx.moveTo(wx, H - 40); ctx.lineTo(wx + 20, H - 40); ctx.lineTo(wx + 10, H - 30); ctx.lineTo(wx - 10, H - 30); ctx.fill();
+            ctx.fillStyle = '#111';
+            ctx.beginPath(); ctx.moveTo(wx + 20, H - 40); ctx.lineTo(wx + 40, H - 40); ctx.lineTo(wx + 30, H - 30); ctx.lineTo(wx + 10, H - 30); ctx.fill();
+          }
+          ctx.fillStyle = '#3a3f47'; ctx.fillRect(0, H * 0.55 - 15, W, 15);
+        }
+
+        if (G.upgrades && G.upgrades.aa) {
+          const aax = W * 0.72; const aay = H * 0.55 + 20;
+          ctx.fillStyle = '#2c332c'; ctx.beginPath(); ctx.moveTo(aax-20, aay); ctx.lineTo(aax+20, aay); ctx.lineTo(aax+15, aay-15); ctx.lineTo(aax-15, aay-15); ctx.fill();
+          ctx.save(); ctx.translate(aax, aay-15); ctx.rotate(Math.sin(globalTime * 0.02) * 0.5 - 0.2);
+          ctx.fillStyle = '#1a1f1a'; ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI, true); ctx.fill();
+          ctx.fillStyle = '#cfd4d0';
+          ctx.fillRect(-15, -12, 30, 4); ctx.fillRect(-15, -18, 30, 4);
+          ctx.fillStyle = '#ff2222'; ctx.fillRect(-15, -12, 4, 4); ctx.fillRect(-15, -18, 4, 4);
+          ctx.restore();
+        }
+
+        if (G.upgrades && G.upgrades.eng) {
+          const ex = W * 0.05; const ey = H * 0.55 + 10;
+          ctx.strokeStyle = '#cda34f'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex, ey-50); ctx.moveTo(ex+40, ey); ctx.lineTo(ex+40, ey-50);
+          ctx.moveTo(ex, ey-25); ctx.lineTo(ex+40, ey-25); ctx.moveTo(ex, ey-50); ctx.lineTo(ex+40, ey-50);
+          ctx.moveTo(ex, ey); ctx.lineTo(ex+40, ey-25); ctx.moveTo(ex, ey-25); ctx.lineTo(ex+40, ey-50); ctx.stroke();
+          ctx.strokeStyle = '#d9aa38'; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.moveTo(ex-10, ey); ctx.lineTo(ex-10, ey-80); ctx.lineTo(ex+50, ey-80); ctx.stroke();
+          ctx.lineWidth = 1; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(ex+45, ey-80); ctx.lineTo(ex+45, ey-20); ctx.stroke();
+          if (Math.random() < 0.3) {
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(ex+20 + (Math.random()-0.5)*10, ey-15 + (Math.random()-0.5)*10, Math.random()*3+1, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#aaaaff'; ctx.beginPath(); ctx.arc(ex+20 + (Math.random()-0.5)*20, ey-15 + (Math.random()-0.5)*20, Math.random()*2, 0, Math.PI*2); ctx.fill();
+          }
+        }
+
+        if (G.upgrades && G.upgrades.ammo) {
+          const amx = W * 0.45; const amy = H * 0.55 + 15;
+          ctx.fillStyle = '#222'; ctx.fillRect(amx, amy-20, 60, 20);
+          ctx.fillStyle = '#333'; ctx.fillRect(amx+5, amy-15, 50, 15);
+          ctx.fillStyle = '#111'; ctx.fillRect(amx+15, amy-15, 10, 15); ctx.fillRect(amx+35, amy-15, 10, 15);
+          ctx.fillStyle = '#ffaa00'; ctx.fillRect(amx+10, amy-25, 40, 5);
+          ctx.fillStyle = '#111'; ctx.fillRect(amx+15, amy-25, 5, 5); ctx.fillRect(amx+25, amy-25, 5, 5); ctx.fillRect(amx+35, amy-25, 5, 5);
+          if (Math.sin(globalTime * 0.1) > 0) {
+            ctx.fillStyle = '#ff3300'; ctx.beginPath(); ctx.arc(amx+5, amy-22, 2, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(amx+55, amy-22, 2, 0, Math.PI*2); ctx.fill();
+          }
         }
 
         if (isRainy) {
@@ -3515,7 +3588,7 @@
     function selectGeneral(idx) {
       if (G.animating) return;
       G.selectedGeneral = idx;
-      document.querySelectorAll('.general-card').forEach((c, i) => {
+      document.querySelectorAll('#generals-row .general-card').forEach((c, i) => {
         c.classList.toggle('selected', i === idx);
       });
       const btn = document.getElementById('btn-execute');
@@ -4500,19 +4573,16 @@
         });
       }
       m.classList.toggle('active');
-      if (typeof SFX !== 'undefined') SFX.play('click');
     }
 
     function toggleLogModal() {
       const m = document.getElementById('log-modal');
       m.classList.toggle('active');
-      if (typeof SFX !== 'undefined') SFX.play('click');
     }
 
     function toggleMapModal() {
       const m = document.getElementById('map-modal');
       m.classList.toggle('active');
-      if (typeof SFX !== 'undefined') SFX.play('click');
     }
     function toggleRnDModal() {
       const m = document.getElementById('rnd-modal');
@@ -4522,7 +4592,6 @@
         m.classList.add('active');
         renderConsultation();
       }
-      if (typeof SFX !== 'undefined') SFX.play('click');
     }
     function closeModalOnOutside(e) {
       if (e.target.classList.contains('glass-modal')) {
