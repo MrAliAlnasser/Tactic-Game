@@ -1160,8 +1160,11 @@
     }
 
     #battleCanvas {
-      width: 800px;
-      height: 400px;
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+      aspect-ratio: 2 / 1;
+      object-fit: contain;
       border: 2px solid var(--border-color);
       border-radius: 8px;
       background: var(--bg-darkest);
@@ -1685,6 +1688,7 @@
       .bottom-panel {
         flex: none;
         height: auto;
+        padding-bottom: 35px;
       }
 
       .status-container {
@@ -1707,10 +1711,15 @@
         flex: none;
       }
 
-      #airportCanvas,
-      #battleCanvas {
+      #airportCanvas {
         max-width: 100% !important;
         height: 100% !important;
+      }
+      #battleCanvas {
+        max-width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 2 / 1;
+        object-fit: contain;
       }
 
       .top-bar {
@@ -1796,6 +1805,7 @@
             <span class="stat-label">القاعدة</span>
             <div class="health-display" id="health-display"></div>
           </div>
+          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleLogModal()" title="سجل الأحداث">📜</button>
           <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleMapModal()">🗺️</button>
           <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleCodexModal()">🃏</button>
           <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleRnDModal()">🔬</button>
@@ -1826,6 +1836,24 @@
             <button class="close-btn" onclick="toggleCodexModal()">✖</button>
             <div class="map-title" style="margin-bottom: 20px;">🃏 أرشيف الاستشارات والخطط</div>
             <div id="codex-grid" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>
+          </div>
+        </div>
+
+        <!-- LOG MODAL -->
+        <div class="glass-modal" id="log-modal" onclick="closeModalOnOutside(event)">
+          <div class="glass-modal-content map-panel" style="width: 90vw; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+            <button class="close-btn" onclick="toggleLogModal()">✖</button>
+            <div class="map-title" style="margin-bottom: 20px;">📜 سجل الأحداث والعمليات</div>
+            <div class="event-log" id="event-log" style="flex: 1; min-height: 300px; overflow-y: auto; text-align: right; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;"></div>
+          </div>
+        </div>
+
+        <!-- LOG MODAL -->
+        <div class="glass-modal" id="log-modal" onclick="closeModalOnOutside(event)">
+          <div class="glass-modal-content map-panel" style="width: 90vw; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+            <button class="close-btn" onclick="toggleLogModal()">✖</button>
+            <div class="map-title" style="margin-bottom: 20px;">📜 سجل الأحداث والعمليات</div>
+            <div class="event-log" id="event-log" style="flex: 1; min-height: 300px; overflow-y: auto; text-align: right; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;"></div>
           </div>
         </div>
 
@@ -1878,10 +1906,7 @@
     <!-- BOTTOM PANEL -->
     <div class="bottom-panel" id="bottom-panel">
       <div class="bottom-layout">
-        <!-- RIGHT SIDE: STATUS -->
-        <div class="status-container">
-          <div class="event-log" id="event-log" style="margin-top: auto; flex: 1;"></div>
-        </div>
+
 
         <!-- LEFT SIDE: GENERALS -->
         <div class="generals-container">
@@ -2329,6 +2354,35 @@
       addLog('مرحبًا بك أيها القائد. مطارك جاهز.', 'important');
       addLog('حدد موقع قاعدة العدو ودمرها!', 'important');
       startTurn();
+    }
+
+    // ===== MODAL TOGGLES =====
+    function toggleLogModal() {
+      const m = document.getElementById('log-modal');
+      m.classList.toggle('active');
+      if (typeof SFX !== 'undefined') SFX.play('click');
+    }
+
+    function toggleMapModal() {
+      const m = document.getElementById('map-modal');
+      m.classList.toggle('active');
+      if (typeof SFX !== 'undefined') SFX.play('click');
+    }
+
+    function toggleCodexModal() {
+      const m = document.getElementById('codex-modal');
+      m.classList.toggle('active');
+      if (typeof SFX !== 'undefined') SFX.play('click');
+    }
+
+    function toggleRnDModal() {
+      const m = document.getElementById('rnd-modal');
+      m.classList.toggle('active');
+      if (typeof SFX !== 'undefined') SFX.play('click');
+    }
+
+    function closeModalOnOutside(e) {
+      if (e.target.classList.contains('glass-modal')) e.target.classList.remove('active');
     }
 
     // ===== MAP =====
@@ -4315,6 +4369,12 @@
           grid.appendChild(el);
         });
       }
+      m.classList.toggle('active');
+      if (typeof SFX !== 'undefined') SFX.play('click');
+    }
+
+    function toggleLogModal() {
+      const m = document.getElementById('log-modal');
       m.classList.toggle('active');
       if (typeof SFX !== 'undefined') SFX.play('click');
     }
