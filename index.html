@@ -1341,6 +1341,27 @@
       justify-content: center;
     }
 
+    .result-columns {
+      display: flex;
+      gap: 10px;
+      text-align: right;
+      font-size: 0.9em;
+    }
+
+    @media (max-width: 600px) {
+      .result-columns {
+        flex-direction: column;
+      }
+      .notification {
+        padding: 15px;
+        width: 90%;
+        box-sizing: border-box;
+      }
+      .notification .notif-body {
+        margin-bottom: 10px;
+      }
+    }
+
     @keyframes notifPop {
       from {
         transform: translate(-50%, -50%) scale(0.8);
@@ -1856,10 +1877,7 @@
 
         <!-- LEFT SIDE: GENERALS -->
         <div class="generals-container">
-          <div class="panel-header" style="justify-content: center; font-size: 16px; margin-bottom: 20px;">
-            <span>⭐</span>
-            <span id="panel-title">استشارات الجنرالات</span>
-          </div>
+
           <div class="generals-row" id="generals-row"></div>
         </div>
       </div>
@@ -3469,7 +3487,7 @@
     function showResultModal(title, story, pros, cons, callback) {
       const html = `
         <div style="font-style: italic; color: #a0b0c0; margin-bottom: 15px; font-size: 1.05em; line-height: 1.5; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">"${story}"</div>
-        <div style="display: flex; gap: 10px; text-align: right; font-size: 0.9em;">
+        <div class="result-columns">
             <div style="flex: 1; background: rgba(50, 150, 50, 0.1); padding: 10px; border-right: 3px solid #3c3; border-radius: 4px;">
                 <h4 style="color: #3c3; margin-top: 0; margin-bottom: 5px;">الإيجابيات</h4>
                 <ul style="margin: 0; padding-right: 15px; color: #dfd;">
@@ -4244,6 +4262,57 @@
     }
 
     // ===== MODAL TOGGLES =====
+    const CODEX_CARDS = [
+      { general: { name: 'الجنرال الصارم', rank: 'جنرال الهجوم', emoji: '⚔️' }, title: 'هجوم موجه مباشر', cost: 3, advice: 'قصف مباشر على قاعدة العدو. سيكشف موقعنا للعدو!', actionLabel: 'تأكيد الهجوم' },
+      { general: { name: 'الجنرال ذو الظل', rank: 'جنرال تخفي', emoji: '🥷' }, title: 'هجوم جوي خفي', cost: 5, advice: 'قصف موقع العدو باستخدام طائرات الشبح. موقعنا سيبقى آمناً.', actionLabel: 'تنفيذ القصف الخفي' },
+      { general: { name: 'الجنرال العاصفة الحديدية', rank: 'مشير جوي', emoji: '🌪️' }, title: 'هجوم شامل وقصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف تماماً. أضرار جسيمة!', actionLabel: 'إطلاق العاصفة' },
+      { general: { name: 'جنرال استطلاع', rank: 'استطلاع', emoji: '🔭' }, title: 'استطلاع جوي', cost: 1, advice: 'إرسال طائرة استطلاع لمسح منطقة محددة في الخريطة.', actionLabel: 'بدء الاستطلاع' },
+      { general: { name: 'جنرال معلومات', rank: 'استخبارات', emoji: '📡' }, title: 'جمع الاستخبارات', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف موقعين في الخريطة.', actionLabel: 'تأكيد الاختراق' },
+      { general: { name: 'جنرال الدفاع', rank: 'دفاع', emoji: '🛡️' }, title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو.', actionLabel: 'تأكيد التعزيز' },
+      { general: { name: 'جنرال مهندس', rank: 'هندسة', emoji: '🔧' }, title: 'ترميم المطار', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة.', actionLabel: 'بدء الإصلاحات' },
+      { general: { name: 'الجنرال الماكر', rank: 'تكتيكات', emoji: '🦊' }, title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة.', actionLabel: 'شن الغارة' },
+      { general: { name: 'جنرال عمليات', rank: 'تكتيكات', emoji: '♟️' }, title: 'شن هجوم وهمي', cost: 1, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته.', actionLabel: 'تأكيد التمويه' },
+      { general: { name: 'جنرال متوازن', rank: 'متوازن', emoji: '⚖️' }, title: 'خطة متوازنة', cost: 2, advice: 'تأمين الموارد وكشف مناطق جديدة بشكل متوازن ومنهجي.', actionLabel: 'بدء التأمين' },
+      { general: { name: 'جنرال هجوم', rank: 'هجوم', emoji: '⚔️' }, title: 'قصف عشوائي', cost: 2, advice: 'قصف منطقة مجهولة بشكل عشوائي بحثاً عن هدف.', actionLabel: 'إطلاق النار' },
+      { general: { name: 'جميع الجنرالات', rank: 'متنوع', emoji: '💤' }, title: 'إراحة الطاقم', cost: 0, advice: 'أعطِ الجنود قسطاً من الراحة لجمع بعض الموارد ببطء.', actionLabel: 'تأكيد الراحة' }
+    ];
+
+    function toggleCodexModal() {
+      const m = document.getElementById('codex-modal');
+      const grid = document.getElementById('codex-grid');
+      
+      if (!m.classList.contains('active')) {
+        grid.innerHTML = '';
+        CODEX_CARDS.forEach((card, i) => {
+          const el = document.createElement('div');
+          el.className = 'general-card';
+          el.style.transform = 'none';
+          el.style.position = 'relative';
+          el.style.width = '240px';
+          el.style.margin = '0';
+          el.style.cursor = 'default';
+          
+          el.innerHTML = `
+            <div class="card-header" style="background: var(--primary-bg);">
+              <div class="general-emoji">${card.general.emoji}</div>
+              <div class="general-info">
+                <div class="general-name">${card.general.name}</div>
+                <div class="general-rank">${card.general.rank}</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="action-title">${card.title}</div>
+              <div class="action-desc">${card.advice}</div>
+              <div class="cost-badge" style="position: static; margin-top: 15px; display: inline-block;">🪙 ${card.cost} موارد</div>
+            </div>
+          `;
+          grid.appendChild(el);
+        });
+      }
+      m.classList.toggle('active');
+      if (typeof SFX !== 'undefined') SFX.play('click');
+    }
+
     function toggleMapModal() {
       const m = document.getElementById('map-modal');
       m.classList.toggle('active');
