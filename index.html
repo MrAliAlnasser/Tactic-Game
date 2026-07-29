@@ -14,10 +14,13 @@
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <style>
-        /* ===== EXECUTION OVERLAY ===== */
+    /* ===== EXECUTION OVERLAY ===== */
     .execution-overlay {
       position: fixed;
-      top: 0; left: 0; width: 100vw; height: 100vh;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       background: rgba(10, 15, 25, 0.95);
       z-index: 9999;
       display: flex;
@@ -29,30 +32,40 @@
       transition: opacity 0.5s ease;
       backdrop-filter: blur(8px);
     }
+
     .execution-overlay.active {
       opacity: 1;
       pointer-events: auto;
     }
+
     .exec-spinner-container {
       position: relative;
-      width: 100px; height: 100px;
+      width: 100px;
+      height: 100px;
       margin-bottom: 30px;
     }
+
     .exec-spinner {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       border: 4px solid rgba(212, 160, 48, 0.2);
       border-top-color: var(--gold);
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+
     .exec-progress-ring {
       position: absolute;
-      top: 10px; left: 10px; right: 10px; bottom: 10px;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
       border: 3px solid rgba(100, 200, 255, 0.2);
       border-bottom-color: #6df;
       border-radius: 50%;
       animation: spin 2s linear infinite reverse;
     }
+
     .exec-text-container {
       height: 40px;
       overflow: hidden;
@@ -60,6 +73,7 @@
       align-items: center;
       justify-content: center;
     }
+
     .exec-text {
       color: var(--gold);
       font-size: 24px;
@@ -69,18 +83,21 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     .exec-text.show {
       opacity: 1;
       transform: translateY(0);
     }
+
     .exec-progress-bar {
       width: 300px;
       height: 6px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.1);
       border-radius: 3px;
       margin-top: 20px;
       overflow: hidden;
     }
+
     .exec-progress-fill {
       height: 100%;
       width: 0%;
@@ -88,6 +105,7 @@
       box-shadow: 0 0 10px var(--gold);
       transition: width 0.3s ease;
     }
+
     /* ===== THMANYAH FONT ===== */
     @font-face {
       font-family: "Thmanyah";
@@ -760,6 +778,121 @@
       padding: 8px 0;
     }
 
+    /* ===== CODEX CARD ===== */
+    .codex-card {
+      background: linear-gradient(145deg, #1e2530, #151a22, #1a2028);
+      border: 2px solid #3a4050;
+      border-radius: 16px;
+      padding: 15px 20px;
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+      width: 100%;
+      max-width: 600px;
+      box-sizing: border-box;
+      direction: rtl;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .codex-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: 16px;
+      padding: 1px;
+      background: linear-gradient(145deg, #5a6570, #2a3040, #4a5565, #2a3040);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      transition: all 0.3s;
+    }
+    
+    .codex-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 160, 48, 0.1);
+    }
+    
+    .codex-card:hover::before {
+      background: linear-gradient(145deg, #8a7a40, #3a4050, #8a7a40, #3a4050);
+    }
+
+    .codex-avatar-wrapper {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      width: 130px;
+    }
+
+    .codex-avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 3px solid var(--primary-color);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+    }
+
+    .codex-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      flex: 1;
+      text-align: right;
+    }
+
+    .codex-name {
+      margin: 0 0 5px 0;
+      font-size: 1.4em;
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+
+    .codex-title {
+      margin: 0 0 12px 0;
+      font-size: 1.1em;
+      color: var(--gold);
+    }
+
+    .codex-desc {
+      font-size: 1.05em;
+      line-height: 1.6;
+      color: #ddd;
+      background: rgba(0,0,0,0.25);
+      padding: 12px 15px;
+      border-radius: 10px;
+      border-right: 3px solid var(--primary-color);
+    }
+
+    @media (max-width: 600px) {
+      .codex-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 15px;
+        gap: 12px;
+      }
+      .codex-info {
+        text-align: center;
+      }
+      .codex-desc {
+        border-right: none;
+        border-top: 3px solid var(--primary-color);
+        padding: 12px;
+        text-align: center;
+      }
+      .codex-avatar {
+        width: 100px;
+        height: 100px;
+      }
+    }
+
     /* ===== DOG TAG CARD ===== */
     .general-card {
       flex: 1 1 280px;
@@ -1324,19 +1457,25 @@
     @media (max-width: 600px) {
       .result-columns {
         flex-direction: column;
-        gap: 5px; /* Tighter gap on mobile */
+        gap: 5px;
+        /* Tighter gap on mobile */
       }
+
       .notification {
         padding: 12px;
         width: 95%;
         box-sizing: border-box;
-        max-height: 85vh; /* Prevent taking full vertical space */
-        overflow-y: auto; /* Allow scrolling if content is too large */
+        max-height: 85vh;
+        /* Prevent taking full vertical space */
+        overflow-y: auto;
+        /* Allow scrolling if content is too large */
       }
+
       .notification .notif-title {
         font-size: 16px;
         margin-bottom: 8px;
       }
+
       .notification .notif-body {
         margin-bottom: 8px;
         line-height: 1.4;
@@ -1380,7 +1519,7 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 50, 50, 0.3);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,0,0,0.1);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(255, 0, 0, 0.1);
       border-radius: 12px;
       padding: 24px;
       z-index: 9999;
@@ -1406,6 +1545,7 @@
         transform: translate(-50%, -40%);
         opacity: 0;
       }
+
       to {
         transform: translate(-50%, -50%);
         opacity: 1;
@@ -1690,6 +1830,7 @@
         max-width: 100% !important;
         height: 100% !important;
       }
+
       #battleCanvas {
         max-width: 100% !important;
         height: auto !important;
@@ -1706,6 +1847,7 @@
         flex: none;
       }
     }
+
     /* RED ALARM OVERLAY */
     .red-alarm-overlay {
       position: fixed;
@@ -1731,6 +1873,7 @@
         box-shadow: inset 0 0 20px rgba(255, 0, 0, 0.1);
         background: radial-gradient(circle, transparent 70%, rgba(255, 0, 0, 0.1) 100%);
       }
+
       100% {
         box-shadow: inset 0 0 80px rgba(255, 0, 0, 0.4);
         background: radial-gradient(circle, transparent 50%, rgba(255, 0, 0, 0.3) 100%);
@@ -1780,12 +1923,16 @@
             <span class="stat-label">القاعدة</span>
             <div class="health-display" id="health-display"></div>
           </div>
-          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleCodexModal()" title="فهرس الاستشارات">🃏</button>
+          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleCodexModal()"
+            title="فهرس الاستشارات">🃏</button>
         </div>
         <div class="top-bar-section">
-          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleLogModal()" title="سجل الأحداث">📜</button>
-          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleMapModal()" title="الخريطة">🗺️</button>
-          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleRnDModal()" title="الأبحاث">🔬</button>
+          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleLogModal()"
+            title="سجل الأحداث">📜</button>
+          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleMapModal()"
+            title="الخريطة">🗺️</button>
+          <button class="btn" style="padding: 4px 10px; font-size: 18px;" onclick="toggleRnDModal()"
+            title="الأبحاث">🔬</button>
           <div class="stat-box has-tooltip">
             <span class="stat-label">🛢️</span>
             <span class="stat-value" id="stat-resources">5</span>
@@ -1806,32 +1953,41 @@
 
       <div class="game-main">
         <!-- TURN STATUS BANNER -->
-        <div id="turn-status-banner" style="position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(10, 15, 25, 0.95); border: 2px solid var(--gold); padding: 8px 20px; border-radius: 20px; color: #fff; z-index: 10000; font-weight: bold; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); pointer-events: none; transition: all 0.3s ease; opacity: 0; visibility: hidden;"></div>
+        <div id="turn-status-banner"
+          style="position: fixed; top: 15px; left: 50%; transform: translateX(-50%); background: rgba(10, 15, 25, 0.95); border: 2px solid var(--gold); padding: 8px 20px; border-radius: 20px; color: #fff; z-index: 10000; font-weight: bold; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); pointer-events: none; transition: all 0.3s ease; opacity: 0; visibility: hidden;">
+        </div>
 
         <!-- CODEX MODAL -->
         <div class="glass-modal" id="codex-modal" onclick="closeModalOnOutside(event)">
-          <div class="glass-modal-content map-panel" style="width: 90vw; max-width: 1000px; max-height: 80vh; overflow-y: auto;">
+          <div class="glass-modal-content map-panel"
+            style="width: 90vw; max-width: 1000px; max-height: 80vh; overflow-y: auto;">
             <button class="close-btn" onclick="toggleCodexModal()">✖</button>
             <div class="map-title" style="margin-bottom: 20px;">🃏 أرشيف الاستشارات والخطط</div>
-            <div id="codex-grid" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;"></div>
+            <div id="codex-grid" style="display: flex; flex-direction: column; align-items: center; gap: 15px;"></div>
           </div>
         </div>
 
         <!-- LOG MODAL -->
         <div class="glass-modal" id="log-modal" onclick="closeModalOnOutside(event)">
-          <div class="glass-modal-content map-panel" style="width: 90vw; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+          <div class="glass-modal-content map-panel"
+            style="width: 90vw; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
             <button class="close-btn" onclick="toggleLogModal()">✖</button>
             <div class="map-title" style="margin-bottom: 20px;">📜 سجل الأحداث والعمليات</div>
-            <div class="event-log" id="event-log" style="flex: 1; min-height: 300px; overflow-y: auto; text-align: right; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;"></div>
+            <div class="event-log" id="event-log"
+              style="flex: 1; min-height: 300px; overflow-y: auto; text-align: right; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;">
+            </div>
           </div>
         </div>
 
         <!-- LOG MODAL -->
         <div class="glass-modal" id="log-modal" onclick="closeModalOnOutside(event)">
-          <div class="glass-modal-content map-panel" style="width: 90vw; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
+          <div class="glass-modal-content map-panel"
+            style="width: 90vw; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column;">
             <button class="close-btn" onclick="toggleLogModal()">✖</button>
             <div class="map-title" style="margin-bottom: 20px;">📜 سجل الأحداث والعمليات</div>
-            <div class="event-log" id="event-log" style="flex: 1; min-height: 300px; overflow-y: auto; text-align: right; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;"></div>
+            <div class="event-log" id="event-log"
+              style="flex: 1; min-height: 300px; overflow-y: auto; text-align: right; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px;">
+            </div>
           </div>
         </div>
 
@@ -1852,7 +2008,9 @@
         <!-- AIRPORT VIEW -->
         <div class="airport-view" id="airport-view" style="position: relative;">
           <canvas id="airportCanvas"></canvas>
-          <div id="floating-log-container" style="position: absolute; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; max-width: 300px; text-align: right;"></div>
+          <div id="floating-log-container"
+            style="position: absolute; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; max-width: 300px; text-align: right;">
+          </div>
         </div>
 
         <!-- R&D MODAL -->
@@ -1868,21 +2026,31 @@
 
         <!-- IMAGE PREVIEW MODAL -->
         <div class="glass-modal" id="image-preview-modal" onclick="closeModalOnOutside(event)">
-          <div class="glass-modal-content" style="padding: 10px; background: transparent; border: none; box-shadow: none; display: flex; justify-content: center; align-items: center; pointer-events: none;">
+          <div class="glass-modal-content"
+            style="padding: 10px; background: transparent; border: none; box-shadow: none; display: flex; justify-content: center; align-items: center; pointer-events: none;">
             <div style="position: relative; pointer-events: auto;">
-              <button class="close-btn" onclick="document.getElementById('image-preview-modal').classList.remove('active')" style="position: absolute; top: -15px; right: -15px; z-index: 100; background: rgba(0,0,0,0.7); border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; font-size: 14px; border: 1px solid rgba(255,255,255,0.2);">✖</button>
-              <img id="image-preview-img" src="" alt="Preview" style="max-width: 90vw; max-height: 90vh; border-radius: 10px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+              <button class="close-btn"
+                onclick="document.getElementById('image-preview-modal').classList.remove('active')"
+                style="position: absolute; top: -15px; right: -15px; z-index: 100; background: rgba(0,0,0,0.7); border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; font-size: 14px; border: 1px solid rgba(255,255,255,0.2);">✖</button>
+              <img id="image-preview-img" src="" alt="Preview"
+                style="max-width: 90vw; max-height: 90vh; border-radius: 10px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             </div>
           </div>
         </div>
 
         <!-- DISCOVERY MODAL -->
         <div class="glass-modal" id="discovery-modal" style="z-index: 10500;">
-          <div class="glass-modal-content" style="max-width: 500px; text-align: center; border: 2px solid #f44; box-shadow: 0 0 40px rgba(255, 0, 0, 0.4); padding: 20px;">
-            <h2 style="color: #f44; font-size: 28px; margin-top: 0; text-shadow: 0 0 10px rgba(255,0,0,0.8);">🚨 الإنذار الأحمر 🚨</h2>
-            <div id="discovery-story" style="font-size: 16px; line-height: 1.6; color: #fcc; margin-bottom: 20px;"></div>
-            <div id="discovery-advice" style="font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 25px;"></div>
-            <button class="btn btn-red" onclick="closeDiscoveryModal()" style="font-size: 18px; padding: 10px 30px; box-shadow: 0 0 15px rgba(255,0,0,0.5);">إعلان حالة الطوارئ!</button>
+          <div class="glass-modal-content"
+            style="max-width: 500px; text-align: center; border: 2px solid #f44; box-shadow: 0 0 40px rgba(255, 0, 0, 0.4); padding: 20px;">
+            <h2 style="color: #f44; font-size: 28px; margin-top: 0; text-shadow: 0 0 10px rgba(255,0,0,0.8);">🚨 الإنذار
+              الأحمر 🚨</h2>
+            <div id="discovery-story" style="font-size: 16px; line-height: 1.6; color: #fcc; margin-bottom: 20px;">
+            </div>
+            <div id="discovery-advice" style="font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 25px;">
+            </div>
+            <button class="btn btn-red" onclick="closeDiscoveryModal()"
+              style="font-size: 18px; padding: 10px 30px; box-shadow: 0 0 15px rgba(255,0,0,0.5);">إعلان حالة
+              الطوارئ!</button>
           </div>
         </div>
 
@@ -1890,13 +2058,17 @@
         <div class="ally-banner" id="ally-banner">
           <span style="font-size:36px; animation: phoneRing 0.1s infinite; display: inline-block;">☎️</span>
           <div style="display: flex; flex-direction: column; gap: 8px;">
-            <span style="color:#ff9999; font-size:13px; letter-spacing:1px; text-shadow: 0 0 5px red;">🚨 وارد من الهاتف الأحمر 🚨</span>
+            <span style="color:#ff9999; font-size:13px; letter-spacing:1px; text-shadow: 0 0 5px red;">🚨 وارد من الهاتف
+              الأحمر 🚨</span>
             <span id="ally-text" style="font-size:18px;">حلفاؤك يقدمون دعمًا!</span>
-            <span id="ally-warning-text" style="color:#ffaaaa; font-size:12px; margin-top:-4px;">(تبقى 3 محاولات مساعدة قبل كشف موقعهم للعدو)</span>
+            <span id="ally-warning-text" style="color:#ffaaaa; font-size:12px; margin-top:-4px;">(تبقى 3 محاولات مساعدة
+              قبل كشف موقعهم للعدو)</span>
           </div>
           <div style="display: flex; gap: 12px; margin-top: 5px; width: 100%; justify-content: center;">
-            <button class="btn btn-red" onclick="acceptAlly()" style="font-size:14px;padding:8px 24px;" id="btn-ally">قبول</button>
-            <button class="btn" onclick="declineAlly()" style="font-size:14px;padding:8px 24px; border-color:#999; color:#999; background:transparent;">تجاهل</button>
+            <button class="btn btn-red" onclick="acceptAlly()" style="font-size:14px;padding:8px 24px;"
+              id="btn-ally">قبول</button>
+            <button class="btn" onclick="declineAlly()"
+              style="font-size:14px;padding:8px 24px; border-color:#999; color:#999; background:transparent;">تجاهل</button>
           </div>
         </div>
       </div>
@@ -1916,7 +2088,7 @@
     </div>
   </div>
 
-    <!-- ===== EXECUTION OVERLAY ===== -->
+  <!-- ===== EXECUTION OVERLAY ===== -->
   <div class="execution-overlay" id="execution-overlay">
     <div class="exec-spinner-container">
       <div class="exec-spinner"></div>
@@ -2053,7 +2225,7 @@
         if (!this.bgm) return;
         // Priority logic: If discovery is playing, do not switch to red-alarm
         if (this.currentTrack === 'discovery' && state === 'red-alarm') {
-            return;
+          return;
         }
         if (this.currentTrack === state) return;
 
@@ -2068,7 +2240,7 @@
         } else if (state === 'red-alarm') {
           this.bgm.src = 'Red-Alarm.mp3';
         }
-        
+
         this.bgm.loop = true;
         this.bgm.volume = currentVol;
         if (wasPlaying) {
@@ -2316,7 +2488,7 @@
 
     // ===== STORY =====
     const STORY = [
-      'وصلت تقارير معلوماتية مقلقة...\nعدو مجهول يهدد أمن المنطقة بأكملها.\nمطارك العسكري هو خط الدفاع الأخير.\n\n<span>مهمتك: اكتشف موقع العدو ودمر قاعدته قبل أن يدمر قاعدتك.</span>',
+      'وصلت تقارير مقلقة...\nعدوٌ مجهولٌ يهدّد أمن المنطقة .\nمطارك العسكري هو خط الدفاع الأخير.\n\n<span>المهمّة: اكتشف موقع العدو ودمّر قاعدته قبل أن يدمر قاعدتك!.</span>',
     ];
 
     // ===== INIT =====
@@ -2432,19 +2604,19 @@
       const m = document.getElementById('discovery-modal');
       const storyEl = document.getElementById('discovery-story');
       const adviceEl = document.getElementById('discovery-advice');
-      
+
       if (reason === 'enemy_blind_hit') {
         storyEl.innerHTML = "لقد حدث ما لم يكن بالحسبان!<br>قذيفة طائشة من قصف العدو أو طائرة استطلاع معادية حلقت بالخطأ فوق مطارنا السري.<br><br>النشاط الملحوظ كشف إحداثياتنا للعدو بشكل قاطع!";
       } else if (reason === 'player_strike') {
         storyEl.innerHTML = "رادارات العدو تمكنت من تتبع مسار طائراتنا العائدة من الهجوم الأخير وكشفت موقع مطارنا السري!<br><br>لم يعد التخفي خياراً متاحاً.";
       }
-      
+
       if (!G.isEnemyFound) {
         adviceEl.innerHTML = "نحن الآن على أهبة الاستعداد.<br><br><span style='color: #ff9999;'>يجب علينا الإسراع في البحث عن قاعدة العدو وكشفها</span><br>قبل أن يمطرنا بوابل من النيران المركزة.";
       } else {
         adviceEl.innerHTML = "العدو يعرف مكاننا ونحن نعرف مكانه.<br><br><span style='color: #ff9999;'>يجب علينا ضربه فوراً والتخلص من تهديده</span><br>قبل أن يدمرنا تماماً!";
       }
-      
+
       G.discoveryCallback = callback;
       m.classList.add('active');
     }
@@ -2642,7 +2814,7 @@
 
 
     // ===== PIXEL ART SPRITES =====
-            const PALETTE = {
+    const PALETTE = {
       'H': '#2b3340', 'h': '#43556d', 'F': '#222222', 'f': '#e0b080',
       'S': '#4a5a72', 's': '#6a8099', 'O': '#d48830', 'o': '#d4a030',
       'B': '#111111', 'C': '#283c28', 'c': '#3a5a3a', 'W': '#8b7020', 'w': '#c2a870',
@@ -2784,7 +2956,7 @@
         "    BBBBB    BBBBB      ",
         "    BBBBB    BBBBB      "
       ],
-      };
+    };
 
     function drawPixelArt(ctx, x, y, scale, spriteName) {
       const sprite = SPRITES[spriteName];
@@ -2809,21 +2981,21 @@
       G.selectedGeneral = -1;
 
       if (G.intel >= 10 && !G.isEnemyFound) {
-          G.isEnemyFound = true;
-          G.map[G.enemyPos] = 2;
-          awardTrophy('eagle_eye');
-          
-          showNotification('اكتشاف حاسم! 🎯', 'بفضل تراكم 10 نقاط معلومات، استخباراتنا تمكنت أخيراً من فك شفرة موقع قاعدة العدو الرئيسية!\n\n<span style="color:#f0ad4e; font-weight:bold;">طائراتنا الهجومية بانتظار أوامرك لتدميرهم.</span>', [{ 
-            text: 'ممتاز! استعدوا للهجوم', 
-            gold: true, 
-            action: () => {
-              hideNotification();
-              setTimeout(() => {
-                continueStartTurn();
-              }, 100);
-            }
-          }]);
-          return;
+        G.isEnemyFound = true;
+        G.map[G.enemyPos] = 2;
+        awardTrophy('eagle_eye');
+
+        showNotification('اكتشاف حاسم! 🎯', 'بفضل تراكم 10 نقاط معلومات، استخباراتنا تمكنت أخيراً من فك شفرة موقع قاعدة العدو الرئيسية!\n\n<span style="color:#f0ad4e; font-weight:bold;">طائراتنا الهجومية بانتظار أوامرك لتدميرهم.</span>', [{
+          text: 'ممتاز! استعدوا للهجوم',
+          gold: true,
+          action: () => {
+            hideNotification();
+            setTimeout(() => {
+              continueStartTurn();
+            }, 100);
+          }
+        }]);
+        return;
       }
 
       continueStartTurn();
@@ -2844,55 +3016,55 @@
     }
 
     // ===== AIRPORT CANVAS ANIMATION =====
-    
 
-      function drawDetailedPlane(ctx, px, py, scale, frame, animState) {
-        ctx.save();
-        ctx.translate(px, py);
-        ctx.scale(scale, scale);
-        
-        if (py > 200) {
-            ctx.fillStyle = 'rgba(0,0,0,0.3)';
-            ctx.beginPath();
-            ctx.ellipse(0, 30, 45, 10, 0, 0, Math.PI*2);
-            ctx.fill();
-        }
 
-        if (animState === 'takeoff' && frame > 100) {
-          const glowLen = 20 + Math.sin(frame * 0.5) * 15;
-          const grad = ctx.createLinearGradient(40, 0, 40 + glowLen, 0);
-          grad.addColorStop(0, '#fff');
-          grad.addColorStop(0.2, '#0df');
-          grad.addColorStop(1, 'rgba(0, 200, 255, 0)');
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.moveTo(40, -5); ctx.lineTo(40 + glowLen, -15); ctx.lineTo(40 + glowLen, 15); ctx.lineTo(40, 5);
-          ctx.fill();
-        }
+    function drawDetailedPlane(ctx, px, py, scale, frame, animState) {
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.scale(scale, scale);
 
-        ctx.fillStyle = '#4a5565';
+      if (py > 200) {
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
         ctx.beginPath();
-        ctx.moveTo(-50, 0); ctx.lineTo(-40, -8); ctx.lineTo(20, -10); ctx.lineTo(40, -5);
-        ctx.lineTo(40, 5); ctx.lineTo(20, 10); ctx.lineTo(-40, 8); ctx.closePath();
+        ctx.ellipse(0, 30, 45, 10, 0, 0, Math.PI * 2);
         ctx.fill();
-        
-        ctx.fillStyle = '#1c2533';
-        ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(-40, -8); ctx.lineTo(-20, -8); ctx.lineTo(-30, 0); ctx.fill();
-        ctx.fillStyle = '#4fc4d0';
-        ctx.beginPath(); ctx.moveTo(-45, -2); ctx.lineTo(-35, -7); ctx.lineTo(-25, -7); ctx.lineTo(-35, -2); ctx.fill();
-
-        ctx.fillStyle = '#3a4050';
-        ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.lineTo(30, -30); ctx.lineTo(15, -30); ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.moveTo(-10, 5); ctx.lineTo(10, 5); ctx.lineTo(30, 35); ctx.lineTo(15, 35); ctx.closePath(); ctx.fill();
-        
-        ctx.fillStyle = '#2a3240';
-        ctx.beginPath(); ctx.moveTo(25, -8); ctx.lineTo(35, -25); ctx.lineTo(40, -25); ctx.lineTo(40, -5); ctx.closePath(); ctx.fill();
-        
-        ctx.fillStyle = '#111'; ctx.fillRect(-30, 0, 15, 2);
-        ctx.fillStyle = '#ff3333'; ctx.fillRect(-40, 0, 4, 2);
-
-        ctx.restore();
       }
+
+      if (animState === 'takeoff' && frame > 100) {
+        const glowLen = 20 + Math.sin(frame * 0.5) * 15;
+        const grad = ctx.createLinearGradient(40, 0, 40 + glowLen, 0);
+        grad.addColorStop(0, '#fff');
+        grad.addColorStop(0.2, '#0df');
+        grad.addColorStop(1, 'rgba(0, 200, 255, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(40, -5); ctx.lineTo(40 + glowLen, -15); ctx.lineTo(40 + glowLen, 15); ctx.lineTo(40, 5);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = '#4a5565';
+      ctx.beginPath();
+      ctx.moveTo(-50, 0); ctx.lineTo(-40, -8); ctx.lineTo(20, -10); ctx.lineTo(40, -5);
+      ctx.lineTo(40, 5); ctx.lineTo(20, 10); ctx.lineTo(-40, 8); ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#1c2533';
+      ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(-40, -8); ctx.lineTo(-20, -8); ctx.lineTo(-30, 0); ctx.fill();
+      ctx.fillStyle = '#4fc4d0';
+      ctx.beginPath(); ctx.moveTo(-45, -2); ctx.lineTo(-35, -7); ctx.lineTo(-25, -7); ctx.lineTo(-35, -2); ctx.fill();
+
+      ctx.fillStyle = '#3a4050';
+      ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.lineTo(30, -30); ctx.lineTo(15, -30); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-10, 5); ctx.lineTo(10, 5); ctx.lineTo(30, 35); ctx.lineTo(15, 35); ctx.closePath(); ctx.fill();
+
+      ctx.fillStyle = '#2a3240';
+      ctx.beginPath(); ctx.moveTo(25, -8); ctx.lineTo(35, -25); ctx.lineTo(40, -25); ctx.lineTo(40, -5); ctx.closePath(); ctx.fill();
+
+      ctx.fillStyle = '#111'; ctx.fillRect(-30, 0, 15, 2);
+      ctx.fillStyle = '#ff3333'; ctx.fillRect(-40, 0, 4, 2);
+
+      ctx.restore();
+    }
 
     function playAirportAnimation(callback, forceAnimState = null) {
       if (window.airportAnimFrame) cancelAnimationFrame(window.airportAnimFrame);
@@ -2924,11 +3096,11 @@
       let smokes = [];
       if (G.health < G.maxHealth) {
         const missing = G.maxHealth - G.health;
-        for(let i=0; i<missing; i++) {
-           fireOrigins.push({
-             x: 0.2 + Math.random() * 0.6,
-             y: 0.6 + Math.random() * 0.2
-           });
+        for (let i = 0; i < missing; i++) {
+          fireOrigins.push({
+            x: 0.2 + Math.random() * 0.6,
+            y: 0.6 + Math.random() * 0.2
+          });
         }
         for (let i = 0; i < missing * 40; i++) {
           fires.push({
@@ -3007,17 +3179,17 @@
 
         ctx.fillStyle = isDay ? '#2b3b4a' : (isSunset ? '#36222b' : '#0f141e');
         ctx.beginPath(); ctx.moveTo(0, H * 0.55);
-        for(let x=0; x<=W; x+=40) {
-            let mH = H * 0.55 - 40 - Math.sin(x * 0.01) * 30 - Math.cos(x * 0.02) * 50;
-            ctx.lineTo(x, mH);
+        for (let x = 0; x <= W; x += 40) {
+          let mH = H * 0.55 - 40 - Math.sin(x * 0.01) * 30 - Math.cos(x * 0.02) * 50;
+          ctx.lineTo(x, mH);
         }
         ctx.lineTo(W, H * 0.55); ctx.closePath(); ctx.fill();
 
         ctx.fillStyle = isDay ? '#1e2c38' : (isSunset ? '#26141a' : '#080b12');
         ctx.beginPath(); ctx.moveTo(0, H * 0.55);
-        for(let x=0; x<=W; x+=30) {
-            let mH = H * 0.55 - 20 - Math.cos(x * 0.015) * 40 - Math.sin(x * 0.03) * 20;
-            ctx.lineTo(x, mH);
+        for (let x = 0; x <= W; x += 30) {
+          let mH = H * 0.55 - 20 - Math.cos(x * 0.015) * 40 - Math.sin(x * 0.03) * 20;
+          ctx.lineTo(x, mH);
         }
         ctx.lineTo(W, H * 0.55); ctx.closePath(); ctx.fill();
 
@@ -3032,30 +3204,30 @@
         groundGrad.addColorStop(0, isDay ? '#2c402c' : '#1a261a');
         groundGrad.addColorStop(1, isDay ? '#1b291b' : '#0d140d');
         ctx.fillStyle = groundGrad; ctx.fillRect(0, H * 0.55, W, H * 0.45);
-        
+
         const runwayY = H * 0.68;
         const runwayH = 100;
-        
+
         const rwGrad = ctx.createLinearGradient(0, runwayY, 0, runwayY + runwayH);
         rwGrad.addColorStop(0, '#2a2d33'); rwGrad.addColorStop(0.5, '#30353c'); rwGrad.addColorStop(1, '#2a2d33');
         ctx.fillStyle = rwGrad; ctx.fillRect(0, runwayY, W, runwayH);
-        
+
         ctx.fillStyle = 'rgba(0,0,0,0.15)';
-        for(let x=0; x<W; x+=150) { ctx.fillRect(x, runwayY + 40, 80, 8); ctx.fillRect(x+50, runwayY + 50, 60, 6); }
+        for (let x = 0; x < W; x += 150) { ctx.fillRect(x, runwayY + 40, 80, 8); ctx.fillRect(x + 50, runwayY + 50, 60, 6); }
 
         ctx.fillStyle = '#ffcc00'; ctx.fillRect(0, runwayY + 2, W, 4); ctx.fillRect(0, runwayY + runwayH - 6, W, 4);
         ctx.fillStyle = '#eeeeee';
         for (let i = 0; i < W; i += 80) ctx.fillRect(i, runwayY + runwayH / 2 - 3, 40, 6);
-        
+
         for (let i = 0; i < W; i += 60) {
           const glow = Math.sin(globalTime * 0.1 + i * 0.05) > 0;
           if (glow && !isDay) {
-            ctx.fillStyle = 'rgba(100, 200, 255, 0.4)'; ctx.beginPath(); ctx.arc(i+2, runwayY-4, 8, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#6df'; ctx.fillRect(i, runwayY-6, 4, 4); 
-            ctx.fillStyle = 'rgba(100, 200, 255, 0.4)'; ctx.beginPath(); ctx.arc(i+2, runwayY+runwayH+4, 8, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#6df'; ctx.fillRect(i, runwayY+runwayH+2, 4, 4);
+            ctx.fillStyle = 'rgba(100, 200, 255, 0.4)'; ctx.beginPath(); ctx.arc(i + 2, runwayY - 4, 8, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#6df'; ctx.fillRect(i, runwayY - 6, 4, 4);
+            ctx.fillStyle = 'rgba(100, 200, 255, 0.4)'; ctx.beginPath(); ctx.arc(i + 2, runwayY + runwayH + 4, 8, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#6df'; ctx.fillRect(i, runwayY + runwayH + 2, 4, 4);
           } else {
-            ctx.fillStyle = '#111'; ctx.fillRect(i, runwayY-6, 4, 4); ctx.fillRect(i, runwayY+runwayH+2, 4, 4);
+            ctx.fillStyle = '#111'; ctx.fillRect(i, runwayY - 6, 4, 4); ctx.fillRect(i, runwayY + runwayH + 2, 4, 4);
           }
         }
 
@@ -3064,24 +3236,24 @@
         for (let i = 0; i < 3; i++) {
           const bx = W * 0.1 + i * W * 0.28;
           const by = H * 0.55 - hangarH + 20;
-          
+
           ctx.fillStyle = '#4a5565';
-          ctx.beginPath(); ctx.arc(bx + hangarW/2, by + 20, hangarW/2, Math.PI, 0); ctx.fill();
-          
+          ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 20, hangarW / 2, Math.PI, 0); ctx.fill();
+
           ctx.fillStyle = '#3a4050'; ctx.fillRect(bx, by + 20, hangarW, hangarH - 20);
-          
+
           ctx.fillStyle = '#10151c'; ctx.fillRect(bx + 15, by + 30, hangarW - 30, hangarH - 30);
-          
-          for(let s=0; s<hangarW-30; s+=10) {
-              ctx.fillStyle = (s/10)%2===0 ? '#ffcc00' : '#111';
-              ctx.fillRect(bx + 15 + s, by + 20, 10, 10);
+
+          for (let s = 0; s < hangarW - 30; s += 10) {
+            ctx.fillStyle = (s / 10) % 2 === 0 ? '#ffcc00' : '#111';
+            ctx.fillRect(bx + 15 + s, by + 20, 10, 10);
           }
-          
+
           if (!isDay && Math.sin(globalTime * 0.08 + i) > 0) {
-             ctx.fillStyle = 'rgba(255,255,100,0.5)'; ctx.beginPath(); ctx.arc(bx+hangarW/2, by+10, 20, 0, Math.PI*2); ctx.fill();
-             ctx.fillStyle = '#fff999'; ctx.fillRect(bx+hangarW/2-5, by+8, 10, 4);
+            ctx.fillStyle = 'rgba(255,255,100,0.5)'; ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 10, 20, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff999'; ctx.fillRect(bx + hangarW / 2 - 5, by + 8, 10, 4);
           }
-          
+
 
         }
 
@@ -3090,39 +3262,39 @@
           ctx.fillStyle = '#2a3240'; ctx.fillRect(tx + 10, ty, tw - 20, th);
           ctx.fillStyle = '#3a4050'; ctx.fillRect(tx, ty - 20, tw, 20);
           ctx.fillStyle = '#4fc4d0'; ctx.fillRect(tx + 5, ty - 15, tw - 10, 10);
-          ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(tx + 5, ty - 15, 10, 10); 
-          ctx.fillStyle = '#1c2533'; ctx.beginPath(); ctx.moveTo(tx-5, ty-20); ctx.lineTo(tx+tw+5, ty-20); ctx.lineTo(tx+tw-10, ty-35); ctx.lineTo(tx+10, ty-35); ctx.fill();
-          
+          ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(tx + 5, ty - 15, 10, 10);
+          ctx.fillStyle = '#1c2533'; ctx.beginPath(); ctx.moveTo(tx - 5, ty - 20); ctx.lineTo(tx + tw + 5, ty - 20); ctx.lineTo(tx + tw - 10, ty - 35); ctx.lineTo(tx + 10, ty - 35); ctx.fill();
+
           if (G.upgrades && G.upgrades.radar) {
-              ctx.save(); ctx.translate(tx + tw/2, ty - 45); 
-              ctx.fillStyle = '#2c332c'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.lineTo(5, -15); ctx.lineTo(-5, -15); ctx.fill();
-              ctx.translate(0, -15);
-              ctx.rotate(globalTime * 0.05);
-              ctx.fillStyle = '#a0aab5'; ctx.beginPath(); ctx.ellipse(0, 0, 25, 8, 0, 0, Math.PI*2); ctx.fill();
-              ctx.fillStyle = '#7a8590'; ctx.beginPath(); ctx.ellipse(0, 0, 20, 5, 0, 0, Math.PI*2); ctx.fill();
-              ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(-10, -15); ctx.moveTo(0,0); ctx.lineTo(10, -15); ctx.lineTo(-10, -15); ctx.stroke();
-              if (Math.sin(globalTime * 0.2) > 0) {
-                ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.arc(0, -18, 3, 0, Math.PI*2); ctx.fill();
-              }
-              ctx.restore();
+            ctx.save(); ctx.translate(tx + tw / 2, ty - 45);
+            ctx.fillStyle = '#2c332c'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.lineTo(5, -15); ctx.lineTo(-5, -15); ctx.fill();
+            ctx.translate(0, -15);
+            ctx.rotate(globalTime * 0.05);
+            ctx.fillStyle = '#a0aab5'; ctx.beginPath(); ctx.ellipse(0, 0, 25, 8, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#7a8590'; ctx.beginPath(); ctx.ellipse(0, 0, 20, 5, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-10, -15); ctx.moveTo(0, 0); ctx.lineTo(10, -15); ctx.lineTo(-10, -15); ctx.stroke();
+            if (Math.sin(globalTime * 0.2) > 0) {
+              ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.arc(0, -18, 3, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.restore();
           }
-          
+
           if (G.enemyKnowsUs || G.health < G.maxHealth) G.alarmActive = true;
           if (G.alarmActive) {
             const rotAngle = globalTime * 0.08;
             const isFront = Math.sin(rotAngle) > 0;
             ctx.fillStyle = isFront ? '#ff3333' : '#660000';
-            ctx.beginPath(); ctx.arc(tx + tw/2, ty - 40, 4, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(tx + tw / 2, ty - 40, 4, 0, Math.PI * 2); ctx.fill();
             if (isFront) {
-              ctx.save(); ctx.translate(tx + tw/2, ty - 40);
-              const beamX = Math.cos(rotAngle) * 250; const beamY = Math.sin(rotAngle) * 80 + 40; 
+              ctx.save(); ctx.translate(tx + tw / 2, ty - 40);
+              const beamX = Math.cos(rotAngle) * 250; const beamY = Math.sin(rotAngle) * 80 + 40;
               const grad = ctx.createLinearGradient(0, 0, beamX, beamY);
               grad.addColorStop(0, 'rgba(255, 20, 20, 0.5)'); grad.addColorStop(1, 'rgba(255, 20, 20, 0)');
               ctx.fillStyle = grad; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(beamX - 80, beamY); ctx.lineTo(beamX + 80, beamY); ctx.fill();
               ctx.restore();
             }
           } else {
-             ctx.fillStyle = '#660000'; ctx.beginPath(); ctx.arc(tx + tw/2, ty - 40, 4, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#660000'; ctx.beginPath(); ctx.arc(tx + tw / 2, ty - 40, 4, 0, Math.PI * 2); ctx.fill();
           }
         }
 
@@ -3130,11 +3302,11 @@
         if (G.upgrades && G.upgrades.stealth) {
           const sx = W * 0.65; const sy = runwayY - 10;
           ctx.save(); ctx.translate(sx, sy);
-          ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(60, -20); ctx.lineTo(20, -5); ctx.lineTo(60, 10); ctx.fill();
-          ctx.fillStyle = '#11151c'; 
-          ctx.beginPath(); 
-          ctx.moveTo(-10, -5); ctx.lineTo(40, -25); ctx.lineTo(25, -5); ctx.lineTo(35, -5); 
-          ctx.lineTo(30, -2); ctx.lineTo(30, 2); ctx.lineTo(35, 5); ctx.lineTo(25, 5); ctx.lineTo(40, 25); 
+          ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(60, -20); ctx.lineTo(20, -5); ctx.lineTo(60, 10); ctx.fill();
+          ctx.fillStyle = '#11151c';
+          ctx.beginPath();
+          ctx.moveTo(-10, -5); ctx.lineTo(40, -25); ctx.lineTo(25, -5); ctx.lineTo(35, -5);
+          ctx.lineTo(30, -2); ctx.lineTo(30, 2); ctx.lineTo(35, 5); ctx.lineTo(25, 5); ctx.lineTo(40, 25);
           ctx.closePath(); ctx.fill();
           ctx.strokeStyle = '#2a3240'; ctx.lineWidth = 1; ctx.stroke();
           ctx.fillStyle = '#051020'; ctx.beginPath(); ctx.moveTo(-5, -2); ctx.lineTo(5, -4); ctx.lineTo(5, 4); ctx.fill();
@@ -3157,14 +3329,14 @@
 
         if (G.upgrades && G.upgrades.aa) {
           const aax = W * 0.72; const aay = H * 0.55 + 20;
-          ctx.fillStyle = '#2c332c'; ctx.beginPath(); ctx.moveTo(aax-20, aay); ctx.lineTo(aax+20, aay); ctx.lineTo(aax+15, aay-15); ctx.lineTo(aax-15, aay-15); ctx.fill();
-          ctx.save(); ctx.translate(aax, aay-15); ctx.rotate(Math.sin(globalTime * 0.02) * 0.5 - 0.2);
+          ctx.fillStyle = '#2c332c'; ctx.beginPath(); ctx.moveTo(aax - 20, aay); ctx.lineTo(aax + 20, aay); ctx.lineTo(aax + 15, aay - 15); ctx.lineTo(aax - 15, aay - 15); ctx.fill();
+          ctx.save(); ctx.translate(aax, aay - 15); ctx.rotate(Math.sin(globalTime * 0.02) * 0.5 - 0.2);
           ctx.fillStyle = '#1a1f1a'; ctx.beginPath(); ctx.arc(0, 0, 10, 0, Math.PI, true); ctx.fill();
           ctx.fillStyle = '#cfd4d0';
           ctx.fillRect(-15, -12, 30, 4); ctx.fillRect(-15, -18, 30, 4);
           ctx.fillStyle = '#ff2222'; ctx.fillRect(-15, -12, 4, 4); ctx.fillRect(-15, -18, 4, 4);
           ctx.restore();
-          
+
           if (G.aaCooldown && G.aaCooldown > 0) {
             ctx.fillStyle = 'rgba(30, 30, 30, 0.8)';
             ctx.beginPath(); ctx.ellipse(aax, aay - 45, 24, 14, 0, 0, Math.PI * 2); ctx.fill();
@@ -3180,38 +3352,38 @@
           const dx = W * 0.4; const dy = H * 0.55 + 20;
           ctx.fillStyle = '#333'; ctx.fillRect(dx - 15, dy - 5, 30, 10);
           ctx.fillStyle = '#222'; ctx.fillRect(dx + 10, dy - 12, 15, 12);
-          ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(dx - 5, dy, 12, 0, Math.PI*2); ctx.fill();
+          ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(dx - 5, dy, 12, 0, Math.PI * 2); ctx.fill();
           if (Math.random() < 0.5) {
-              ctx.fillStyle = 'rgba(100,100,100,0.5)';
-              ctx.beginPath(); ctx.arc(dx + (Math.random()-0.5)*20, dy - 10 - Math.random()*20, 10+Math.random()*10, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = 'rgba(100,100,100,0.5)';
+            ctx.beginPath(); ctx.arc(dx + (Math.random() - 0.5) * 20, dy - 10 - Math.random() * 20, 10 + Math.random() * 10, 0, Math.PI * 2); ctx.fill();
           }
         }
 
         if (G.upgrades && G.upgrades.eng) {
           const ex = W * 0.05; const ey = H * 0.55 + 10;
           ctx.strokeStyle = '#cda34f'; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex, ey-50); ctx.moveTo(ex+40, ey); ctx.lineTo(ex+40, ey-50);
-          ctx.moveTo(ex, ey-25); ctx.lineTo(ex+40, ey-25); ctx.moveTo(ex, ey-50); ctx.lineTo(ex+40, ey-50);
-          ctx.moveTo(ex, ey); ctx.lineTo(ex+40, ey-25); ctx.moveTo(ex, ey-25); ctx.lineTo(ex+40, ey-50); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex, ey - 50); ctx.moveTo(ex + 40, ey); ctx.lineTo(ex + 40, ey - 50);
+          ctx.moveTo(ex, ey - 25); ctx.lineTo(ex + 40, ey - 25); ctx.moveTo(ex, ey - 50); ctx.lineTo(ex + 40, ey - 50);
+          ctx.moveTo(ex, ey); ctx.lineTo(ex + 40, ey - 25); ctx.moveTo(ex, ey - 25); ctx.lineTo(ex + 40, ey - 50); ctx.stroke();
           ctx.strokeStyle = '#d9aa38'; ctx.lineWidth = 4;
-          ctx.beginPath(); ctx.moveTo(ex-10, ey); ctx.lineTo(ex-10, ey-80); ctx.lineTo(ex+50, ey-80); ctx.stroke();
-          ctx.lineWidth = 1; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(ex+45, ey-80); ctx.lineTo(ex+45, ey-20); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(ex - 10, ey); ctx.lineTo(ex - 10, ey - 80); ctx.lineTo(ex + 50, ey - 80); ctx.stroke();
+          ctx.lineWidth = 1; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(ex + 45, ey - 80); ctx.lineTo(ex + 45, ey - 20); ctx.stroke();
           if (Math.random() < 0.3) {
-            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(ex+20 + (Math.random()-0.5)*10, ey-15 + (Math.random()-0.5)*10, Math.random()*3+1, 0, Math.PI*2); ctx.fill();
-            ctx.fillStyle = '#aaaaff'; ctx.beginPath(); ctx.arc(ex+20 + (Math.random()-0.5)*20, ey-15 + (Math.random()-0.5)*20, Math.random()*2, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(ex + 20 + (Math.random() - 0.5) * 10, ey - 15 + (Math.random() - 0.5) * 10, Math.random() * 3 + 1, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#aaaaff'; ctx.beginPath(); ctx.arc(ex + 20 + (Math.random() - 0.5) * 20, ey - 15 + (Math.random() - 0.5) * 20, Math.random() * 2, 0, Math.PI * 2); ctx.fill();
           }
         }
 
         if (G.upgrades && G.upgrades.ammo) {
           const amx = W * 0.45; const amy = H * 0.55 + 15;
-          ctx.fillStyle = '#222'; ctx.fillRect(amx, amy-20, 60, 20);
-          ctx.fillStyle = '#333'; ctx.fillRect(amx+5, amy-15, 50, 15);
-          ctx.fillStyle = '#111'; ctx.fillRect(amx+15, amy-15, 10, 15); ctx.fillRect(amx+35, amy-15, 10, 15);
-          ctx.fillStyle = '#ffaa00'; ctx.fillRect(amx+10, amy-25, 40, 5);
-          ctx.fillStyle = '#111'; ctx.fillRect(amx+15, amy-25, 5, 5); ctx.fillRect(amx+25, amy-25, 5, 5); ctx.fillRect(amx+35, amy-25, 5, 5);
+          ctx.fillStyle = '#222'; ctx.fillRect(amx, amy - 20, 60, 20);
+          ctx.fillStyle = '#333'; ctx.fillRect(amx + 5, amy - 15, 50, 15);
+          ctx.fillStyle = '#111'; ctx.fillRect(amx + 15, amy - 15, 10, 15); ctx.fillRect(amx + 35, amy - 15, 10, 15);
+          ctx.fillStyle = '#ffaa00'; ctx.fillRect(amx + 10, amy - 25, 40, 5);
+          ctx.fillStyle = '#111'; ctx.fillRect(amx + 15, amy - 25, 5, 5); ctx.fillRect(amx + 25, amy - 25, 5, 5); ctx.fillRect(amx + 35, amy - 25, 5, 5);
           if (Math.sin(globalTime * 0.1) > 0) {
-            ctx.fillStyle = '#ff3300'; ctx.beginPath(); ctx.arc(amx+5, amy-22, 2, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(amx+55, amy-22, 2, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#ff3300'; ctx.beginPath(); ctx.arc(amx + 5, amy - 22, 2, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(amx + 55, amy - 22, 2, 0, Math.PI * 2); ctx.fill();
           }
         }
 
@@ -3247,13 +3419,13 @@
         if (animState === 'aa_intercept') {
           const mx = W * 0.4 + Math.sin(globalTime * 0.1) * 10;
           let my = -100 + Math.min(frame / 40, 1) * (H * 0.4 + 100);
-          
+
           if (frame < 40) {
             ctx.fillStyle = 'rgba(255, 50, 0, 0.1)'; ctx.fillRect(0, 0, W, H);
             ctx.fillStyle = '#ddd'; ctx.fillRect(mx - 4, my - 20, 8, 30);
             const fireSize = 10 + Math.random() * 10;
             ctx.fillStyle = '#f90'; ctx.beginPath(); ctx.arc(mx, my - 30 - fireSize / 2, fireSize, 0, Math.PI * 2); ctx.fill();
-            
+
             if (frame > 20) {
               const aax = W * 0.72; const aay = H * 0.55 + 20;
               const prog = (frame - 20) / 20;
@@ -3265,12 +3437,12 @@
           } else {
             if (frame === 40 && typeof SFX !== 'undefined') SFX.play("explosion");
             const expProgress = Math.min((frame - 40) / 40, 1);
-            
+
             if (expProgress < 0.5) {
-                const alpha = 1 - (expProgress * 2);
-                const expSize = expProgress * 300;
-                ctx.fillStyle = `rgba(255, 150, 0, ${alpha})`; ctx.beginPath(); ctx.arc(mx, H * 0.4, expSize, 0, Math.PI * 2); ctx.fill();
-                ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`; ctx.beginPath(); ctx.arc(mx, H * 0.4, expSize * 0.3, 0, Math.PI * 2); ctx.fill();
+              const alpha = 1 - (expProgress * 2);
+              const expSize = expProgress * 300;
+              ctx.fillStyle = `rgba(255, 150, 0, ${alpha})`; ctx.beginPath(); ctx.arc(mx, H * 0.4, expSize, 0, Math.PI * 2); ctx.fill();
+              ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`; ctx.beginPath(); ctx.arc(mx, H * 0.4, expSize * 0.3, 0, Math.PI * 2); ctx.fill();
             }
 
             const debrisY = H * 0.4 + expProgress * (H * 0.15 + 20);
@@ -3285,7 +3457,7 @@
         let planeVisible = true;
         let pilotVisible = true;
         let pilotState = 'pilot_idle';
-        let pilotX = px - 90, pilotY = py - 30; 
+        let pilotX = px - 90, pilotY = py - 30;
 
         if (animState === 'takeoff') {
           if (frame < 30) {
@@ -3317,7 +3489,7 @@
 
         let pilotYOffset = (animState === 'idle') ? Math.sin(globalTime * 0.05 + 1) * 2 : 0;
         if (pilotVisible && animState !== 'enemy_attack') {
-          drawPixelArt(ctx, pilotX, pilotY + pilotYOffset, 4.5, pilotState); 
+          drawPixelArt(ctx, pilotX, pilotY + pilotYOffset, 4.5, pilotState);
         }
 
         if (planeVisible && animState !== 'enemy_attack') {
@@ -3343,17 +3515,17 @@
             const py = H * origin.y + f.ry;
             const alpha = Math.max(0, f.life / f.maxLife);
             const radius = f.size * (0.5 + 0.5 * (1 - alpha));
-            
+
             const grad = ctx.createRadialGradient(px, py, 0, px, py, radius);
             const r = 255;
             const g = Math.floor(200 * alpha);
             grad.addColorStop(0, `rgba(${r}, ${g}, 0, ${alpha})`);
             grad.addColorStop(1, `rgba(${r}, 0, 0, 0)`);
-            
+
             ctx.fillStyle = grad;
             ctx.beginPath(); ctx.arc(px, py, radius, 0, Math.PI * 2); ctx.fill();
           });
-          
+
           ctx.globalCompositeOperation = 'source-over';
           smokes.forEach(f => {
             f.rx += f.vx; f.ry += f.vy; f.life--;
@@ -3367,11 +3539,11 @@
             const py = H * origin.y + f.ry;
             const alpha = Math.max(0, f.life / f.maxLife);
             const radius = f.size * (1 + (1 - alpha));
-            
+
             const grad = ctx.createRadialGradient(px, py, 0, px, py, radius);
             grad.addColorStop(0, `rgba(30, 30, 30, ${alpha * 0.7})`);
             grad.addColorStop(1, `rgba(30, 30, 30, 0)`);
-            
+
             ctx.fillStyle = grad;
             ctx.beginPath(); ctx.arc(px, py, radius, 0, Math.PI * 2); ctx.fill();
           });
@@ -3734,7 +3906,7 @@
     }
 
     // ===== MOBILE CAROUSEL =====
-    
+
     function rerollCards() {
       if (G.intel < 3) return;
       G.intel -= 3;
@@ -3744,7 +3916,7 @@
       generateAdvice();
       renderGenerals();
       updateUI();
-      
+
       const row = document.getElementById('generals-row');
       if (row) {
         row.style.animation = 'none';
@@ -3821,27 +3993,27 @@
       const overlay = document.getElementById('execution-overlay');
       const textEl = document.getElementById('exec-text');
       const progressFill = document.getElementById('exec-progress-fill');
-      
+
       const seq = ["⚡ جاري إرسال الأوامر والتحرك التنفيذي..."];
-      
+
       let step = 0;
       progressFill.style.width = '0%';
       textEl.classList.remove('show');
-      
+
       overlay.style.display = 'flex';
       overlay.classList.add('active');
       if (typeof SFX !== 'undefined') SFX.play("ui_click");
 
       function nextStep() {
         if (step >= seq.length) {
-           setTimeout(() => {
-             overlay.classList.remove('active');
-             setTimeout(() => {
-               overlay.style.display = 'none';
-               if (callback) callback();
-             }, 300);
-           }, 800);
-           return;
+          setTimeout(() => {
+            overlay.classList.remove('active');
+            setTimeout(() => {
+              overlay.style.display = 'none';
+              if (callback) callback();
+            }, 300);
+          }, 800);
+          return;
         }
         textEl.classList.remove('show');
         setTimeout(() => {
@@ -3873,7 +4045,7 @@
       G.animating = true;
       setWaitState(true, '⏳ جاري تنفيذ الخطة...');
       document.getElementById('generals-row').innerHTML = '';
-      
+
       playExecutionSequence(() => {
         G.resources -= cost;
 
@@ -3917,13 +4089,13 @@
         let story = "خيم الهدوء على المطار لأول مرة منذ بدء العمليات. ارتاح الجنود وتلقت الطائرات صيانة شاملة، بينما وصلت إمدادات جديدة بهدوء استعداداً للجولة القادمة.";
         showResultModal("التقاط الأنفاس ⛺", story, pros, cons, () => {
           addLog(`+2 موارد${healLog} (التقاط الأنفاس وأعمال الصيانة)`, 'ally');
-          endPlayerTurn(); 
+          endPlayerTurn();
         });
         updateUI();
       });
     }
 
-    
+
     function showResultModal(title, story, pros, cons, callback) {
       setWaitState(false);
       const html = `
@@ -3953,12 +4125,12 @@
         let cons = [];
         let story = "";
         let title = "نتائج الاستطلاع 🔍";
-        
+
         if (consequenceType === 'scout_risk' && Math.random() > 0.6) {
           G.enemyAggressionBoost += 0.1;
           cons.push('العدو رصد طائرات الاستطلاع وأصبح أكثر حذراً');
         } else {
-            pros.push('مهمة الاستطلاع تمت بسرية تامة');
+          pros.push('مهمة الاستطلاع تمت بسرية تامة');
         }
 
         if (target === G.enemyPos) {
@@ -3978,7 +4150,7 @@
           G.totalScouted++;
           pros.push(`مسح القطاع ${getCellName(target)} وتأكيد خلوه من القواعد الرئيسية`);
           pros.push('كسب +1 نقاط معلومات');
-          
+
           if (G.intel >= 10) {
             story = "رغم أن القطاع فارغ، إلا أن طائراتنا التقطت آخر إشارة ناقصة ليكتمل لغز موقع العدو تماماً!";
             pros.push('اكتملت المعلومات الاستخباراتية بنسبة 100%!');
@@ -4003,7 +4175,7 @@
         let pros = [`جمع +${intelGain} نقاط معلومات هامة`];
         let cons = ["استهلاك للموارد والوقت دون القيام بهجوم مباشر"];
         let story = "عملت شبكة جواسيسنا وراداراتنا على مدار الساعة، لجمع الشذرات المتناثرة من البيانات لتركيب الصورة الكاملة للموقف.";
-        
+
         if (G.intel >= 10 && !G.isEnemyFound) {
           G.isEnemyFound = true;
           G.map[G.enemyPos] = 2;
@@ -4103,7 +4275,7 @@
         const newlyDiscovered = !G.enemyKnowsUs;
         G.enemyKnowsUs = true;
         G.enemyAggressionBoost += 0.4;
-        
+
         if (newlyDiscovered) cons.push('العدو كشف مطارنا بشكل قطعي بسبب حجم الهجوم!');
         cons.push('ارتفاع كبير جداً في مستوى عدوانية العدو');
 
@@ -4111,7 +4283,7 @@
         if (G.enemyHp <= 0) { victory(); return; }
 
         let story = "السماء أظلمت بأسراب طائراتنا في هجوم شامل لا يبقي ولا يذر. سُحقت مباني العدو تحت وابل القنابل، إلا أن دوي الانفجارات كشف مكاننا وجعلنا هدفاً صريحاً للانتقام!";
-        
+
         const counterHit = Math.random() < 0.7;
         if (counterHit) {
           triggerRedAlarm();
@@ -4125,7 +4297,7 @@
           }
           if (G.health === 1) awardTrophy('survivor');
         } else {
-           pros.push('لحسن الحظ لم يتمكن العدو من الرد فوراً رغم شراسة الهجوم');
+          pros.push('لحسن الحظ لم يتمكن العدو من الرد فوراً رغم شراسة الهجوم');
         }
 
         if (newlyDiscovered) {
@@ -4152,7 +4324,7 @@
           G.enemyHp -= dmg;
           G.map[G.enemyPos] = 3;
           G.enemyAggressionBoost = Math.max(0, G.enemyAggressionBoost - 0.2);
-          
+
           pros.push(`ضربة التفافية ناجحة من الخلف (-${dmg} صحة)`);
           pros.push('العدو في حالة ارتباك مما قلل من عدوانيته وتماسكه');
           story = "ابتلعت قوات العدو الطعم، متجهة بكل قوتها نحو طائراتنا الوهمية. في هذه الأثناء، انقضت قواتنا الحقيقية من الخلف كشبح قاتل، محققة إصابة مدمرة دون مقاومة تذكر.";
@@ -4177,7 +4349,7 @@
       playActionAnimation('strike', '🎯 جاري تنفيذ الضربة الاستكشافية...', () => {
         let pros = []; let cons = []; let story = ""; let title = "";
         let newlyDiscovered = false;
-        
+
         if (target === G.enemyPos) {
           const dmg = G.upgrades.ammo ? 2 : 1;
           G.enemyHp -= dmg;
@@ -4204,7 +4376,7 @@
             cons.push('نشاطنا العسكري لفت انتباه العدو ورفع من جاهزيته');
           }
         }
-        
+
         if (newlyDiscovered) {
           showDiscoveryModal('player_strike', () => {
             showResultModal(title, story, pros, cons, () => { checkBanterAndEndTurn('strike', target === G.enemyPos); });
@@ -4247,7 +4419,7 @@
         let pros = ['كسب (+1) نقاط معلومات', 'تأمين (+1) موارد إضافية'];
         let cons = ['مكاسب بسيطة مقارنة بالعمليات المخصصة لجانب واحد'];
         let story = "قررت القيادة اتباع نهج حذر ومتوازن، حيث تم إرسال فرق كشافة صغيرة مع تأمين خطوط الإمداد المتاحة. خطوة هادئة لترتيب الأوراق استعداداً للقرارات الكبيرة.";
-        
+
         if (G.intel >= 10 && !G.isEnemyFound) {
           G.isEnemyFound = true;
           G.map[G.enemyPos] = 2;
@@ -4376,20 +4548,20 @@
           // Background walls
           ctx.fillStyle = '#11151c';
           ctx.fillRect(0, 0, W, H);
-          
+
           // Window showing sky
           ctx.save();
           ctx.beginPath(); ctx.rect(50, 20, 700, 180); ctx.clip();
           drawSky(W, H);
-          
+
           // Rain inside window
           if (isRainy) {
-             ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)'; ctx.lineWidth = 1; ctx.beginPath();
-             for (let i = 0; i < 150; i++) {
-               let rx = (i * 37 + frame * 10) % W; let ry = (i * 73 + frame * 20) % H;
-               ctx.moveTo(rx, ry); ctx.lineTo(rx - 5, ry + 15);
-             }
-             ctx.stroke();
+            ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)'; ctx.lineWidth = 1; ctx.beginPath();
+            for (let i = 0; i < 150; i++) {
+              let rx = (i * 37 + frame * 10) % W; let ry = (i * 73 + frame * 20) % H;
+              ctx.moveTo(rx, ry); ctx.lineTo(rx - 5, ry + 15);
+            }
+            ctx.stroke();
           }
 
           // Plane passing by (NO BOMB)
@@ -4398,7 +4570,7 @@
           ctx.save(); ctx.translate(px, py); ctx.scale(-1, 1); ctx.translate(-px, -py);
           drawDetailedPlane(ctx, px, py, 1.2, frame, 'idle');
           ctx.restore();
-          
+
           ctx.restore(); // End window clip
 
           // Window Frame
@@ -4409,16 +4581,16 @@
           // Operations Room Foreground (Radar & Monitors)
           ctx.fillStyle = '#0a0d14';
           ctx.fillRect(0, 200, W, 200);
-          
+
           // Giant Radar Screen in center
           ctx.fillStyle = '#051a05';
-          ctx.beginPath(); ctx.arc(400, 300, 80, 0, Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(400, 300, 80, 0, Math.PI * 2); ctx.fill();
           ctx.strokeStyle = '#0f0'; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.arc(400, 300, 80, 0, Math.PI*2); ctx.stroke();
-          ctx.beginPath(); ctx.arc(400, 300, 40, 0, Math.PI*2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(400, 300, 80, 0, Math.PI * 2); ctx.stroke();
+          ctx.beginPath(); ctx.arc(400, 300, 40, 0, Math.PI * 2); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(400, 220); ctx.lineTo(400, 380); ctx.stroke();
           ctx.beginPath(); ctx.moveTo(320, 300); ctx.lineTo(480, 300); ctx.stroke();
-          
+
           // Sweeping radar line
           ctx.save();
           ctx.translate(400, 300);
@@ -4428,15 +4600,15 @@
           rgrd.addColorStop(0, 'rgba(0, 255, 0, 0.4)');
           rgrd.addColorStop(1, 'rgba(0, 255, 0, 0)');
           ctx.fillStyle = rgrd;
-          ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0, 0, 80, -Math.PI/2, -Math.PI/6); ctx.fill();
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, 80, -Math.PI / 2, -Math.PI / 6); ctx.fill();
           ctx.restore();
 
           // Blips on Radar
           if (frame % 60 > 10) {
             ctx.fillStyle = '#0f0';
-            ctx.beginPath(); ctx.arc(430, 270, 4, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(430, 270, 4, 0, Math.PI * 2); ctx.fill();
             if (frame % 60 > 30) {
-               ctx.beginPath(); ctx.arc(360, 330, 3, 0, Math.PI*2); ctx.fill();
+              ctx.beginPath(); ctx.arc(360, 330, 3, 0, Math.PI * 2); ctx.fill();
             }
           }
 
@@ -4444,20 +4616,20 @@
           ctx.fillStyle = '#1a2230';
           ctx.fillRect(100, 320, 150, 80);
           ctx.fillRect(550, 320, 150, 80);
-          
+
           ctx.fillStyle = '#000';
           ctx.fillRect(120, 280, 60, 40); ctx.fillRect(600, 280, 60, 40);
           ctx.strokeStyle = '#333'; ctx.lineWidth = 3;
           ctx.strokeRect(120, 280, 60, 40); ctx.strokeRect(600, 280, 60, 40);
-          
+
           // Data streams on monitors
           ctx.fillStyle = '#0ff';
-          ctx.fillRect(125, 285 + (frame%20)*1.5, 40, 2);
-          ctx.fillRect(125, 295 + ((frame+10)%20)*1.5, 30, 2);
-          
+          ctx.fillRect(125, 285 + (frame % 20) * 1.5, 40, 2);
+          ctx.fillRect(125, 295 + ((frame + 10) % 20) * 1.5, 30, 2);
+
           ctx.fillStyle = '#f0f';
-          ctx.fillRect(605, 310 - (frame%15)*2, 35, 2);
-          ctx.fillRect(605, 315 - ((frame+5)%15)*2, 20, 2);
+          ctx.fillRect(605, 310 - (frame % 15) * 2, 35, 2);
+          ctx.fillRect(605, 315 - ((frame + 5) % 15) * 2, 20, 2);
 
         } else if (type === 'balanced') {
           // --- SECURING SUPPLY LINES ---
@@ -4470,13 +4642,13 @@
           // Draw Road
           ctx.fillStyle = isDay ? '#333' : (isSunset ? '#222' : '#111');
           ctx.beginPath(); ctx.moveTo(0, 330); ctx.lineTo(W, 330); ctx.lineTo(W, 390); ctx.lineTo(0, 400); ctx.fill();
-          
+
           // Draw Road dashed lines
           ctx.fillStyle = isSunset ? '#aa8866' : '#ddccaa';
           for (let i = 0; i < 10; i++) {
-             let lx = (i * 100 - frame * 0.5) % W;
-             if (lx < 0) lx += W;
-             ctx.fillRect(lx, 360, 40, 5);
+            let lx = (i * 100 - frame * 0.5) % W;
+            if (lx < 0) lx += W;
+            ctx.fillRect(lx, 360, 40, 5);
           }
 
           // Draw Supply Crates
@@ -4485,29 +4657,29 @@
           ctx.fillRect(290, 290, 50, 30);
           ctx.fillStyle = '#111';
           ctx.fillRect(200, 280, 80, 5); ctx.fillRect(235, 270, 5, 50); // bands
-          
+
           ctx.fillStyle = isSunset ? '#2a1010' : '#3a4a3a'; // military boxes
           ctx.fillRect(140, 290, 50, 40);
 
           // Draw Soldiers guarding the road
           const soldierScale = 4;
           const yPos = 250; // properly standing on the road (26 * 4 = 104px tall)
-          
+
           // Slight bobbing for idle, none for guard
           const idleY = yPos + Math.sin(frame * 0.1) * 2;
-          
+
           drawPixelArt(ctx, 350, yPos, soldierScale, 'soldier_guard');
           drawPixelArt(ctx, 500, idleY + 5, soldierScale, 'soldier_idle');
           drawPixelArt(ctx, 650, yPos - 10, soldierScale, 'soldier_guard');
           drawPixelArt(ctx, 50, idleY + 10, soldierScale, 'soldier_idle');
 
           if (isRainy) {
-             ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)'; ctx.lineWidth = 1; ctx.beginPath();
-             for (let i = 0; i < 150; i++) {
-               let rx = (i * 37 + frame * 10) % W; let ry = (i * 73 + frame * 20) % H;
-               ctx.moveTo(rx, ry); ctx.lineTo(rx - 5, ry + 15);
-             }
-             ctx.stroke();
+            ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)'; ctx.lineWidth = 1; ctx.beginPath();
+            for (let i = 0; i < 150; i++) {
+              let rx = (i * 37 + frame * 10) % W; let ry = (i * 73 + frame * 20) % H;
+              ctx.moveTo(rx, ry); ctx.lineTo(rx - 5, ry + 15);
+            }
+            ctx.stroke();
           }
 
         } else {
@@ -4524,28 +4696,28 @@
             const cx = 800 - frame * 1.5;
             ctx.fillStyle = isSunset ? '#2c1e1e' : '#3a4a3a';
             ctx.fillRect(cx, 270, 60, 30);
-            ctx.fillRect(cx + 60, 280, 20, 20); 
+            ctx.fillRect(cx + 60, 280, 20, 20);
             ctx.fillRect(cx - 80, 275, 50, 25);
             ctx.fillRect(cx - 30, 285, 15, 15);
             ctx.fillStyle = '#111';
-            ctx.beginPath(); ctx.arc(cx + 10, 300, 10, 0, Math.PI*2); ctx.arc(cx + 50, 300, 10, 0, Math.PI*2); ctx.fill();
-            ctx.beginPath(); ctx.arc(cx - 70, 300, 10, 0, Math.PI*2); ctx.arc(cx - 40, 300, 10, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx + 10, 300, 10, 0, Math.PI * 2); ctx.arc(cx + 50, 300, 10, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(cx - 70, 300, 10, 0, Math.PI * 2); ctx.arc(cx - 40, 300, 10, 0, Math.PI * 2); ctx.fill();
           } else {
             ctx.fillStyle = isSunset ? '#1a1010' : (isDay ? '#2a3a2a' : '#1a202a');
             ctx.fillRect(520, 260, 180, 40);
             ctx.fillStyle = '#151a22';
             ctx.fillRect(540, 270, 20, 20); ctx.fillRect(580, 270, 20, 20); ctx.fillRect(620, 270, 20, 20);
-            
+
             ctx.fillStyle = isSunset ? '#1a1010' : (isDay ? '#3a4a3a' : '#1f2530');
             ctx.fillRect(540, 180, 10, 80);
-            ctx.fillRect(530, 180, 30, 5); 
-            ctx.beginPath(); ctx.moveTo(545, 180); ctx.lineTo(545, 150); ctx.stroke(); 
-            ctx.fillStyle = 'red'; ctx.fillRect(543, 145, 4, 4); 
+            ctx.fillRect(530, 180, 30, 5);
+            ctx.beginPath(); ctx.moveTo(545, 180); ctx.lineTo(545, 150); ctx.stroke();
+            ctx.fillStyle = 'red'; ctx.fillRect(543, 145, 4, 4);
 
             ctx.fillStyle = isSunset ? '#221515' : (isDay ? '#4a5a4a' : '#2a303a');
-            ctx.fillRect(640, 240, 20, 20); 
-            ctx.beginPath(); ctx.ellipse(650, 230, 30, 10, Math.PI/4, 0, Math.PI*2); ctx.fill(); 
-            ctx.beginPath(); ctx.moveTo(650, 230); ctx.lineTo(630, 210); ctx.strokeStyle='#111'; ctx.lineWidth=2; ctx.stroke(); 
+            ctx.fillRect(640, 240, 20, 20);
+            ctx.beginPath(); ctx.ellipse(650, 230, 30, 10, Math.PI / 4, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(650, 230); ctx.lineTo(630, 210); ctx.strokeStyle = '#111'; ctx.lineWidth = 2; ctx.stroke();
           }
 
           const px = 100 + frame * 3;
@@ -4559,105 +4731,105 @@
           ctx.restore();
 
           if (frame > 40 && frame < 90) {
-             const dropProgress = (frame - 40) / 50;
-             const startX = 100 + 40 * 3;
-             const startY = 80 + Math.sin(40 * 0.08) * 15;
-             const targetEx = type === 'raid' ? 800 - 90 * 1.5 + 30 : 610;
-             const targetEy = 280;
-             
-             const bombX = startX + (targetEx - startX) * dropProgress;
-             const bombY = startY + (targetEy - startY) * Math.pow(dropProgress, 2);
-             
-             ctx.save();
-             ctx.globalCompositeOperation = 'lighter';
-             for(let t=0; t<5; t++) {
-               ctx.fillStyle = `rgba(255, ${150 - t*30}, 0, ${1 - t*0.2})`;
-               ctx.beginPath(); ctx.arc(bombX - t*3, bombY - t*6, 3, 0, Math.PI*2); ctx.fill();
-             }
-             ctx.restore();
+            const dropProgress = (frame - 40) / 50;
+            const startX = 100 + 40 * 3;
+            const startY = 80 + Math.sin(40 * 0.08) * 15;
+            const targetEx = type === 'raid' ? 800 - 90 * 1.5 + 30 : 610;
+            const targetEy = 280;
 
-             ctx.fillStyle = '#222';
-             ctx.beginPath(); ctx.ellipse(bombX, bombY, 12, 6, Math.PI/3, 0, Math.PI*2); ctx.fill();
-             ctx.fillStyle = '#555';
-             ctx.beginPath(); ctx.ellipse(bombX+4, bombY-2, 3, 2, Math.PI/3, 0, Math.PI*2); ctx.fill(); 
+            const bombX = startX + (targetEx - startX) * dropProgress;
+            const bombY = startY + (targetEy - startY) * Math.pow(dropProgress, 2);
+
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            for (let t = 0; t < 5; t++) {
+              ctx.fillStyle = `rgba(255, ${150 - t * 30}, 0, ${1 - t * 0.2})`;
+              ctx.beginPath(); ctx.arc(bombX - t * 3, bombY - t * 6, 3, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.restore();
+
+            ctx.fillStyle = '#222';
+            ctx.beginPath(); ctx.ellipse(bombX, bombY, 12, 6, Math.PI / 3, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#555';
+            ctx.beginPath(); ctx.ellipse(bombX + 4, bombY - 2, 3, 2, Math.PI / 3, 0, Math.PI * 2); ctx.fill();
           }
 
           if (frame >= 90) {
             const ef = frame - 90;
             const ex = type === 'raid' ? 800 - 90 * 1.5 + 30 : 610;
             const ey = 280;
-            
+
             ctx.save();
             ctx.globalCompositeOperation = 'lighter';
-            
+
             // Initial Flash
             if (ef < 10) {
-               ctx.fillStyle = `rgba(255, 255, 255, ${1 - ef/10})`;
-               ctx.beginPath(); ctx.arc(ex, ey, 100 + ef*10, 0, Math.PI*2); ctx.fill();
+              ctx.fillStyle = `rgba(255, 255, 255, ${1 - ef / 10})`;
+              ctx.beginPath(); ctx.arc(ex, ey, 100 + ef * 10, 0, Math.PI * 2); ctx.fill();
             }
-            
+
             // Fire Core and Sparks
             if (ef < 50) {
-               const coreRadius = 40 + ef * 2.5;
-               const coreAlpha = 1 - ef/50;
-               const grad = ctx.createRadialGradient(ex, ey, 0, ex, ey, coreRadius);
-               grad.addColorStop(0, `rgba(255, 255, 100, ${coreAlpha})`);
-               grad.addColorStop(0.2, `rgba(255, 150, 0, ${coreAlpha * 0.8})`);
-               grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
-               ctx.fillStyle = grad;
-               ctx.beginPath(); ctx.arc(ex, ey, coreRadius, 0, Math.PI*2); ctx.fill();
-               
-               for (let i = 0; i < 30; i++) {
-                 const seed = (i * 137) % 100 / 100;
-                 const angle = seed * Math.PI + Math.PI; // top half hemisphere
-                 const speed = 2 + seed * 8;
-                 const sx = ex + Math.cos(angle) * speed * ef;
-                 const sy = ey + Math.sin(angle) * speed * ef + (ef * ef * 0.05); // pseudo-gravity
-                 const sparkAlpha = Math.max(0, coreAlpha - seed * 0.2);
-                 ctx.fillStyle = `rgba(255, 200, 50, ${sparkAlpha})`;
-                 ctx.beginPath(); ctx.arc(sx, sy, 2 + seed*3, 0, Math.PI*2); ctx.fill();
-               }
+              const coreRadius = 40 + ef * 2.5;
+              const coreAlpha = 1 - ef / 50;
+              const grad = ctx.createRadialGradient(ex, ey, 0, ex, ey, coreRadius);
+              grad.addColorStop(0, `rgba(255, 255, 100, ${coreAlpha})`);
+              grad.addColorStop(0.2, `rgba(255, 150, 0, ${coreAlpha * 0.8})`);
+              grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+              ctx.fillStyle = grad;
+              ctx.beginPath(); ctx.arc(ex, ey, coreRadius, 0, Math.PI * 2); ctx.fill();
+
+              for (let i = 0; i < 30; i++) {
+                const seed = (i * 137) % 100 / 100;
+                const angle = seed * Math.PI + Math.PI; // top half hemisphere
+                const speed = 2 + seed * 8;
+                const sx = ex + Math.cos(angle) * speed * ef;
+                const sy = ey + Math.sin(angle) * speed * ef + (ef * ef * 0.05); // pseudo-gravity
+                const sparkAlpha = Math.max(0, coreAlpha - seed * 0.2);
+                ctx.fillStyle = `rgba(255, 200, 50, ${sparkAlpha})`;
+                ctx.beginPath(); ctx.arc(sx, sy, 2 + seed * 3, 0, Math.PI * 2); ctx.fill();
+              }
             }
-            
+
             ctx.globalCompositeOperation = 'source-over';
-            
+
             // Expanding Smoke Cloud
             if (ef < 90) {
-               const smokeRadius = 40 + ef * 3;
-               const smokeAlpha = Math.max(0, (1 - Math.pow(ef/90, 2)) * 0.9);
-               const sgrad = ctx.createRadialGradient(ex, ey - ef*0.6, 0, ex, ey - ef*0.6, smokeRadius);
-               sgrad.addColorStop(0, `rgba(40, 40, 40, ${smokeAlpha})`);
-               sgrad.addColorStop(1, 'rgba(30, 30, 30, 0)');
-               ctx.fillStyle = sgrad;
-               ctx.beginPath(); ctx.arc(ex, ey - ef*0.6, smokeRadius, 0, Math.PI*2); ctx.fill();
-               
-               // Secondary smoke puffs
-               for(let i = 0; i < 7; i++) {
-                 const seed = (i * 73) % 100 / 100;
-                 const px = ex + (seed - 0.5) * smokeRadius * 1.5;
-                 const py = ey - ef*(0.4 + seed*0.5) - (seed*25);
-                 const pradius = smokeRadius * (0.4 + seed*0.6);
-                 const pgrad = ctx.createRadialGradient(px, py, 0, px, py, pradius);
-                 pgrad.addColorStop(0, `rgba(50, 50, 50, ${smokeAlpha})`);
-                 pgrad.addColorStop(1, 'rgba(50, 50, 50, 0)');
-                 ctx.fillStyle = pgrad;
-                 ctx.beginPath(); ctx.arc(px, py, pradius, 0, Math.PI*2); ctx.fill();
-               }
+              const smokeRadius = 40 + ef * 3;
+              const smokeAlpha = Math.max(0, (1 - Math.pow(ef / 90, 2)) * 0.9);
+              const sgrad = ctx.createRadialGradient(ex, ey - ef * 0.6, 0, ex, ey - ef * 0.6, smokeRadius);
+              sgrad.addColorStop(0, `rgba(40, 40, 40, ${smokeAlpha})`);
+              sgrad.addColorStop(1, 'rgba(30, 30, 30, 0)');
+              ctx.fillStyle = sgrad;
+              ctx.beginPath(); ctx.arc(ex, ey - ef * 0.6, smokeRadius, 0, Math.PI * 2); ctx.fill();
+
+              // Secondary smoke puffs
+              for (let i = 0; i < 7; i++) {
+                const seed = (i * 73) % 100 / 100;
+                const px = ex + (seed - 0.5) * smokeRadius * 1.5;
+                const py = ey - ef * (0.4 + seed * 0.5) - (seed * 25);
+                const pradius = smokeRadius * (0.4 + seed * 0.6);
+                const pgrad = ctx.createRadialGradient(px, py, 0, px, py, pradius);
+                pgrad.addColorStop(0, `rgba(50, 50, 50, ${smokeAlpha})`);
+                pgrad.addColorStop(1, 'rgba(50, 50, 50, 0)');
+                ctx.fillStyle = pgrad;
+                ctx.beginPath(); ctx.arc(px, py, pradius, 0, Math.PI * 2); ctx.fill();
+              }
             }
             ctx.restore();
           }
-          
+
           if (isRainy) {
-             ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)';
-             ctx.lineWidth = 1;
-             ctx.beginPath();
-             for (let i = 0; i < 150; i++) {
-               let rx = (i * 37 + frame * 10) % W;
-               let ry = (i * 73 + frame * 20) % H;
-               ctx.moveTo(rx, ry);
-               ctx.lineTo(rx - 5, ry + 15);
-             }
-             ctx.stroke();
+            ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let i = 0; i < 150; i++) {
+              let rx = (i * 37 + frame * 10) % W;
+              let ry = (i * 73 + frame * 20) % H;
+              ctx.moveTo(rx, ry);
+              ctx.lineTo(rx - 5, ry + 15);
+            }
+            ctx.stroke();
           }
         }
 
@@ -4681,7 +4853,7 @@
     }
 
     // ===== ENEMY TURN =====
-    
+
     function buildBanterHTML(img1, name1, color1, msg1, img2, name2, color2, msg2) {
       return `
         <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 5px; direction: rtl;">
@@ -4706,7 +4878,7 @@
     function checkBanterAndEndTurn(actionType, success) {
       if (!success) {
         if (actionType === 'strike') {
-          const banterText = buildBanterHTML(GENERALS[2].img, 'الجنرال المهندس', '#d9534f', 'ألم أقل لك لا تستمع لجنرال الهجوم، الطائرات تحتاج للصيانة والوقود وليس للحماس الفارغ.', GENERALS[0].img, 'جنرال الهجوم', '#f0ad4e', 'الدفاع لن ينهي هذه الحرب يا سيدي، أعطني الإذن وسأحيل مطارهم إلى رماد!');
+          const banterText = buildBanterHTML(GENERALS[2].img, 'جنرال التحصينات', '#d9534f', 'ألم أقل لك لا تستمع لجنرال الهجوم، الطائرات تحتاج للصيانة والوقود وليس للحماس الفارغ.', GENERALS[0].img, 'جنرال الهجوم', '#f0ad4e', 'الدفاع لن ينهي هذه الحرب يا سيدي، أعطني الإذن وسأحيل مطارهم إلى رماد!');
           setTimeout(() => {
             showNotification('مناوشات القيادة 🗣️', banterText, [{ text: 'متابعة', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
           }, 100);
@@ -4720,7 +4892,7 @@
           return;
         }
         if (actionType === 'raid') {
-          const banterText = buildBanterHTML(GENERALS[2].img, 'الجنرال المهندس', '#d9534f', 'هل اقتنعت الآن يا سيف العدالة؟ القوات الخاصة لا تنفع إذا لم تجد ما تسرقه! كان الأجدر ترك الموارد لتعزيز دفاعاتنا.', GENERALS[4].img, 'الجنرال سيف', '#5bc0de', 'التكتيكات الجريئة تحمل المخاطر. الجلوس خلف الجدران لن يحسم المعركة، بل يؤجل الهزيمة فقط.');
+          const banterText = buildBanterHTML(GENERALS[2].img, 'جنرال التحصينات', '#d9534f', 'هل اقتنعت الآن يا سيف العدالة؟ القوات الخاصة لا تنفع إذا لم تجد ما تسرقه! كان الأجدر ترك الموارد لتعزيز دفاعاتنا.', GENERALS[4].img, 'الجنرال سيف', '#5bc0de', 'التكتيكات الجريئة تحمل المخاطر. الجلوس خلف الجدران لن يحسم المعركة، بل يؤجل الهزيمة فقط.');
           setTimeout(() => {
             showNotification('مناوشات القيادة 🗣️', banterText, [{ text: 'متابعة', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
           }, 100);
@@ -4768,10 +4940,10 @@
         if (fortified && Math.random() < 0.7) {
           addLog('🏰 التحصينات صدت هجوم العدو بالكامل!', 'important');
           if (!G.enemyKnowsUs) {
-             G.enemyKnowsUs = true;
-             newlyDiscoveredByEnemy = true;
-             triggerRedAlarm();
-             addLog('🚨 العدو رصد موقع انطلاق دفاعاتنا! تم كشف القاعدة!', 'danger');
+            G.enemyKnowsUs = true;
+            newlyDiscoveredByEnemy = true;
+            triggerRedAlarm();
+            addLog('🚨 العدو رصد موقع انطلاق دفاعاتنا! تم كشف القاعدة!', 'danger');
           }
         } else if (G.upgrades.aa && (G.aaCooldown || 0) <= 0) {
           G.animating = true;
@@ -4784,10 +4956,10 @@
             G.aaDebrisTurns = 1;
 
             if (!G.enemyKnowsUs) {
-               G.enemyKnowsUs = true;
-               newlyDiscoveredByEnemy = true;
-               triggerRedAlarm();
-               addLog('🚨 العدو رصد مسار صواريخنا الدفاعية! تم كشف القاعدة!', 'danger');
+              G.enemyKnowsUs = true;
+              newlyDiscoveredByEnemy = true;
+              triggerRedAlarm();
+              addLog('🚨 العدو رصد مسار صواريخنا الدفاعية! تم كشف القاعدة!', 'danger');
             }
 
             updateUI();
@@ -4815,9 +4987,9 @@
 
             let resourceLossMsg = "";
             if (G.resources > 0) {
-               G.resources--;
-               resourceLossMsg = "<br><br><span style='color:#ff4444; font-weight:bold;'>[-1 موارد بسبب دمار المستودعات]</span>";
-               addLog('🔥 تضرر مستودع الإمدادات (-1 موارد)', 'danger');
+              G.resources--;
+              resourceLossMsg = "<br><br><span style='color:#ff4444; font-weight:bold;'>[-1 موارد بسبب دمار المستودعات]</span>";
+              addLog('🔥 تضرر مستودع الإمدادات (-1 موارد)', 'danger');
             }
 
             const boughtUpgrades = Object.keys(G.upgrades).filter(k => G.upgrades[k]);
@@ -4863,21 +5035,21 @@
               updateUI();
 
               const attackMessages = [
-                 "الجميع إلى الملاجئ! إنهم يقصفون المطار! 💥",
-                 "النيران تلتهم مستودع الذخيرة الاحتياطي! نحتاج فرق الإطفاء فوراً! 🔥",
-                 "لقد دمروا المدرج الشرقي! أرسلوا فرق الإنقاذ حالا! 🚨"
+                "الجميع إلى الملاجئ! إنهم يقصفون المطار! 💥",
+                "النيران تلتهم مستودع الذخيرة الاحتياطي! نحتاج فرق الإطفاء فوراً! 🔥",
+                "لقد دمروا المدرج الشرقي! أرسلوا فرق الإنقاذ حالا! 🚨"
               ];
               const dramaMsg = attackMessages[Math.floor(Math.random() * attackMessages.length)];
 
               const proceedTurn = () => {
-                 hideNotification();
-                 if (newlyDiscoveredByEnemy) {
-                   showDiscoveryModal('enemy_blind_hit', () => {
-                     startTurn();
-                   });
-                 } else {
-                   startTurn();
-                 }
+                hideNotification();
+                if (newlyDiscoveredByEnemy) {
+                  showDiscoveryModal('enemy_blind_hit', () => {
+                    startTurn();
+                  });
+                } else {
+                  startTurn();
+                }
               };
 
               showNotification('هجوم معادٍ! 🚨', dramaMsg + resourceLossMsg, [{ text: 'تم القراءة', action: proceedTurn }]);
@@ -4925,30 +5097,24 @@
     function toggleCodexModal() {
       const m = document.getElementById('codex-modal');
       const grid = document.getElementById('codex-grid');
-      
+
       if (!m.classList.contains('active')) {
         grid.innerHTML = '';
         CODEX_CARDS.forEach((card, i) => {
           const el = document.createElement('div');
-          el.className = 'general-card';
-          el.style.transform = 'none';
-          el.style.position = 'relative';
+          el.className = 'codex-card';
           
-          
-          el.style.width = '100%';
           el.innerHTML = `
-            <div style="display: flex; gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; flex-direction: row-reverse; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-              <div class="dogtag-left" style="padding-top: 5px; flex-shrink: 0; min-width: 100px;">
-                <img src="${card.general.img}" alt="Avatar" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid var(--primary-color); box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
-                <span style="font-size: 0.85em; font-weight: bold; display: block; margin-top: 5px; color: #fff;">⭐ ${card.general.rank}</span>
-                <span style="font-size: 0.85em; display: inline-block; padding: 3px 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--gold); border-radius: 4px; margin-top: 5px; color: var(--gold);">📝 التكلفة: ${card.cost} 🛢️</span>
-              </div>
-              <div class="dogtag-right" style="flex-grow: 1; text-align: right; display: flex; flex-direction: column; justify-content: center;">
-                <h4 style="margin: 0 0 5px 0; font-size: 1.2em; color: var(--primary-color);">${card.general.name}</h4>
-                <h5 style="margin: 0 0 10px 0; font-size: 1.1em; color: var(--gold);">${card.title}</h5>
-                <div style="font-size: 1.05em; line-height: 1.6; color: #ddd; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border-right: 3px solid var(--primary-color);">
-                  ${card.advice}
-                </div>
+            <div class="codex-avatar-wrapper">
+              <img src="${card.general.img}" alt="Avatar" class="codex-avatar">
+              <span style="font-size: 0.9em; font-weight: bold; color: #fff; margin-top: 5px;">⭐ ${card.general.rank}</span>
+              <span style="font-size: 0.85em; display: inline-block; padding: 4px 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--gold); border-radius: 6px; color: var(--gold);">📝 التكلفة: ${card.cost} 🛢️</span>
+            </div>
+            <div class="codex-info">
+              <h4 class="codex-name">${card.general.name}</h4>
+              <h5 class="codex-title">${card.title}</h5>
+              <div class="codex-desc">
+                ${card.advice}
               </div>
             </div>
           `;
