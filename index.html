@@ -2233,6 +2233,10 @@
         const wasPlaying = !this.bgm.paused;
         const currentVol = this.bgm.volume;
 
+        // إيقاف المقطوعة الحالية بالكامل قبل تشغيل التالية
+        this.bgm.pause();
+        this.bgm.currentTime = 0;
+
         if (state === 'default') {
           this.bgm.src = 'March_Toward_the_Iron_Gates.mp3';
         } else if (state === 'discovery') {
@@ -2243,7 +2247,8 @@
 
         this.bgm.loop = true;
         this.bgm.volume = currentVol;
-        if (wasPlaying) {
+        // تأكيد التشغيل دائماً عند الأحداث الهامة لتجنب تعليق المتصفح
+        if (wasPlaying || state === 'discovery' || state === 'red-alarm') {
           this.bgm.play().catch(e => console.log('BGM play failed', e));
         }
       },
