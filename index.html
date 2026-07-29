@@ -796,7 +796,7 @@
       position: relative;
       overflow: hidden;
     }
-    
+
     .codex-card::before {
       content: '';
       position: absolute;
@@ -810,13 +810,13 @@
       pointer-events: none;
       transition: all 0.3s;
     }
-    
+
     .codex-card:hover {
       border-color: var(--gold);
       transform: translateY(-3px);
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 30px rgba(212, 160, 48, 0.1);
     }
-    
+
     .codex-card:hover::before {
       background: linear-gradient(145deg, #8a7a40, #3a4050, #8a7a40, #3a4050);
     }
@@ -836,7 +836,7 @@
       border-radius: 12px;
       object-fit: cover;
       border: 3px solid var(--primary-color);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
     }
 
     .codex-info {
@@ -864,7 +864,7 @@
       font-size: 1.05em;
       line-height: 1.6;
       color: #ddd;
-      background: rgba(0,0,0,0.25);
+      background: rgba(0, 0, 0, 0.25);
       padding: 12px 15px;
       border-radius: 10px;
       border-right: 3px solid var(--primary-color);
@@ -878,15 +878,18 @@
         padding: 15px;
         gap: 12px;
       }
+
       .codex-info {
         text-align: center;
       }
+
       .codex-desc {
         border-right: none;
         border-top: 3px solid var(--primary-color);
         padding: 12px;
         text-align: center;
       }
+
       .codex-avatar {
         width: 100px;
         height: 100px;
@@ -2487,7 +2490,7 @@
       { name: 'الجنرال صقر', rank: 'هجوم', type: 'strike', emoji: '🦅', img: 'assets/generals/iron_falcon.png' },
       { name: 'الجنرال ثعلب الصحراء', rank: 'معلومات', type: 'intel', emoji: '🦊', img: 'assets/generals/desert_fox.png' },
       { name: 'جنرال التحصينات', rank: 'دفاع', type: 'defense', emoji: '🛡️', img: 'assets/generals/shield_nation.png' },
-      { name: 'الجنرال عين النسر', rank: 'استطلاع', type: 'scout', emoji: '👁️', img: 'assets/generals/eagle_eye.png' },
+      { name: 'الجنرال نسر', rank: 'استطلاع', type: 'scout', emoji: '👁️', img: 'assets/generals/eagle_eye.png' },
       { name: 'الجنرال قلب الأسد', rank: 'قيادة', type: 'versatile', emoji: '🦁', img: 'assets/generals/lionheart.png' },
       { name: 'الجنرال سيف', rank: 'تكتيك', type: 'tactical', emoji: '⚔️', img: 'assets/generals/sword_justice.png' }
     ];
@@ -2964,7 +2967,7 @@
       ],
     };
 
-    
+
     function interpolateColor(c1, c2, factor) {
       if (factor > 1) factor = 1;
       if (factor < 0) factor = 0;
@@ -2983,10 +2986,138 @@
       // timeVal goes 0..4 over 4 turns
       // 0 = Dawn, 1 = Day, 2 = Sunset, 3 = Night
       let t = (timeVal % 4 + 4) % 4;
-      if (t < 1) return { top: interpolateColor('#1a2538', '#3a7bd5', t), bottom: interpolateColor('#0a0f1a', '#3a6073', t), sunY: 0.8 - t*0.6, sunColor: '#fffdf0', isMoon: false };
-      if (t < 2) return { top: interpolateColor('#3a7bd5', '#2d1b2e', t-1), bottom: interpolateColor('#3a6073', '#b04a43', t-1), sunY: 0.2 + (t-1)*0.6, sunColor: '#ffcc66', isMoon: false };
-      if (t < 3) return { top: interpolateColor('#2d1b2e', '#050a12', t-2), bottom: interpolateColor('#df9857', '#0a0f1a', t-2), sunY: 0.8 - (t-2)*0.6, sunColor: '#eef3f7', isMoon: true };
-      return { top: interpolateColor('#050a12', '#1a2538', t-3), bottom: interpolateColor('#0a0f1a', '#0a0f1a', t-3), sunY: 0.2 + (t-3)*0.6, sunColor: '#eef3f7', isMoon: true };
+      if (t < 1) return { top: interpolateColor('#1a2538', '#3a7bd5', t), bottom: interpolateColor('#0a0f1a', '#3a6073', t), sunY: 0.8 - t * 0.6, sunColor: '#fffdf0', isMoon: false };
+      if (t < 2) return { top: interpolateColor('#3a7bd5', '#2d1b2e', t - 1), bottom: interpolateColor('#3a6073', '#b04a43', t - 1), sunY: 0.2 + (t - 1) * 0.6, sunColor: '#ffcc66', isMoon: false };
+      if (t < 3) return { top: interpolateColor('#2d1b2e', '#050a12', t - 2), bottom: interpolateColor('#df9857', '#0a0f1a', t - 2), sunY: 0.8 - (t - 2) * 0.6, sunColor: '#eef3f7', isMoon: true };
+      return { top: interpolateColor('#050a12', '#1a2538', t - 3), bottom: interpolateColor('#0a0f1a', '#0a0f1a', t - 3), sunY: 0.2 + (t - 3) * 0.6, sunColor: '#eef3f7', isMoon: true };
+    }
+    function drawHighResPilot(ctx, x, y, scale, state) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath(); ctx.ellipse(0, 32, 12, 3, 0, 0, Math.PI * 2); ctx.fill();
+
+      // Legs (Dark tactical pants)
+      ctx.fillStyle = '#2b2f2b';
+      ctx.beginPath(); ctx.roundRect(-6, 12, 5, 18, 2); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(1, 12, 5, 18, 2); ctx.fill();
+
+      // Boots
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.roundRect(-7, 28, 6, 4, 1); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(1, 28, 6, 4, 1); ctx.fill();
+
+      // Torso & Tactical Jacket (Olive green)
+      ctx.fillStyle = '#3a4435';
+      ctx.beginPath(); ctx.roundRect(-9, -5, 18, 20, 4); ctx.fill();
+
+      // Tactical Vest (Dark gray/black)
+      ctx.fillStyle = '#1a1c1a';
+      ctx.beginPath(); ctx.roundRect(-7, -2, 14, 16, 2); ctx.fill();
+
+      // Vest pouches/details
+      ctx.fillStyle = '#2a2c2a';
+      ctx.fillRect(-6, 8, 3, 5);
+      ctx.fillRect(-2, 8, 4, 5);
+      ctx.fillRect(3, 8, 3, 5);
+      // Chest strap
+      ctx.fillRect(-7, 2, 14, 2);
+
+      // Shoulders / Epaulettes (Dark green with gold stars)
+      ctx.fillStyle = '#2b3526';
+      ctx.beginPath(); ctx.roundRect(-12, -5, 6, 6, 2); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(6, -5, 6, 6, 2); ctx.fill();
+      ctx.fillStyle = '#ffd700'; // Gold stars
+      ctx.fillRect(-10, -3, 2, 2); ctx.fillRect(-8, -3, 2, 2);
+      ctx.fillRect(6, -3, 2, 2); ctx.fillRect(8, -3, 2, 2);
+
+      // Head / Face
+      ctx.fillStyle = '#a67b5b'; // Skin
+      ctx.beginPath(); ctx.arc(0, -12, 7, 0, Math.PI * 2); ctx.fill();
+
+      // Eyes (Stern)
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(-4, -14, 3, 2);
+      ctx.fillRect(1, -14, 3, 2);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(-3, -14, 1.5, 1.5);
+      ctx.fillRect(2, -14, 1.5, 1.5);
+      // Eyebrows (angry/stern)
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.moveTo(-5, -15); ctx.lineTo(-2, -13.5); ctx.lineTo(-2, -14.5); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(5, -15); ctx.lineTo(2, -13.5); ctx.lineTo(2, -14.5); ctx.fill();
+
+      // Tactical Mask (Covering nose and mouth)
+      ctx.fillStyle = '#151715';
+      ctx.beginPath();
+      ctx.moveTo(-6, -11); ctx.lineTo(6, -11); ctx.lineTo(4, -5); ctx.lineTo(-4, -5); ctx.fill();
+      // Mask vents
+      ctx.fillStyle = '#333';
+      ctx.fillRect(-2, -9, 4, 1.5);
+      ctx.fillRect(-1, -7, 2, 1);
+
+      // Helmet (Dark tactical)
+      ctx.fillStyle = '#1e2220';
+      ctx.beginPath();
+      ctx.arc(0, -14, 8, Math.PI, 0); // Top dome
+      ctx.lineTo(8, -10); // Right ear
+      ctx.lineTo(9, -7); ctx.lineTo(6, -7); ctx.lineTo(5, -11); // Right side
+      ctx.lineTo(-5, -11); // Forehead edge
+      ctx.lineTo(-6, -7); ctx.lineTo(-9, -7); ctx.lineTo(-8, -10); // Left ear
+      ctx.fill();
+
+      // Winged Skull Emblem on Helmet (Gold)
+      ctx.fillStyle = '#cda434';
+      ctx.fillRect(-1.5, -19.5, 3, 3); // Skull center
+      ctx.fillRect(-5, -19, 3, 1); ctx.fillRect(2, -19, 3, 1); // Inner Wings
+      ctx.fillRect(-6, -20, 4, 1); ctx.fillRect(2, -20, 4, 1); // Outer Wings
+
+      // Arms & Actions
+      ctx.fillStyle = '#3a4435'; // Sleeves
+
+      if (state === 'pilot_salute') {
+        // Left arm down
+        ctx.beginPath(); ctx.roundRect(-11, 0, 4, 12, 2); ctx.fill();
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.roundRect(-11, 10, 4, 4, 1); ctx.fill();
+
+        // Right arm saluting
+        ctx.fillStyle = '#3a4435';
+        ctx.beginPath();
+        ctx.moveTo(8, -2); ctx.lineTo(14, -6); ctx.lineTo(9, -12);
+        ctx.strokeStyle = '#3a4435'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+        // Glove at forehead
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(9, -12, 2.5, 0, Math.PI * 2); ctx.fill();
+      } else if (state === 'pilot_helmet') {
+        // Both arms up adjusting helmet
+        ctx.beginPath(); ctx.moveTo(-8, -2); ctx.lineTo(-12, -6); ctx.lineTo(-7, -10);
+        ctx.moveTo(8, -2); ctx.lineTo(12, -6); ctx.lineTo(7, -10);
+        ctx.strokeStyle = '#3a4435'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+        // Gloves on helmet
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(-7, -10, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(7, -10, 2.5, 0, Math.PI * 2); ctx.fill();
+      } else if (state === 'pilot_climb') {
+        // Arms reaching up/forward
+        ctx.beginPath(); ctx.moveTo(-8, -2); ctx.lineTo(-10, -8); ctx.lineTo(-6, -14);
+        ctx.moveTo(8, -2); ctx.lineTo(10, -8); ctx.lineTo(6, -14);
+        ctx.strokeStyle = '#3a4435'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(-6, -14, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(6, -14, 2.5, 0, Math.PI * 2); ctx.fill();
+      } else {
+        // Default (idle)
+        ctx.beginPath(); ctx.roundRect(-11, 0, 4, 12, 2); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(7, 0, 4, 12, 2); ctx.fill();
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.roundRect(-11, 10, 4, 4, 1); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(7, 10, 4, 4, 1); ctx.fill();
+      }
+
+      ctx.restore();
     }
 
     function drawHighResSoldier(ctx, x, y, scale, state) {
@@ -2997,7 +3128,7 @@
       // Shadow
       ctx.fillStyle = 'rgba(0,0,0,0.4)';
       ctx.beginPath();
-      ctx.ellipse(5, 25, 12, 3, 0, 0, Math.PI*2);
+      ctx.ellipse(5, 25, 12, 3, 0, 0, Math.PI * 2);
       ctx.fill();
 
       // Legs
@@ -3008,7 +3139,7 @@
       // Body (Torso)
       ctx.fillStyle = '#3a4a3a';
       ctx.beginPath(); ctx.roundRect(-2, -5, 14, 16, 3); ctx.fill();
-      
+
       // Vest / Harness
       ctx.fillStyle = '#222';
       ctx.fillRect(0, -3, 3, 12);
@@ -3017,13 +3148,13 @@
 
       // Head
       ctx.fillStyle = '#dfba97';
-      ctx.beginPath(); ctx.arc(5, -10, 5, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(5, -10, 5, 0, Math.PI * 2); ctx.fill();
 
       // Helmet
       ctx.fillStyle = '#3a4a3a';
       ctx.beginPath(); ctx.arc(5, -11, 6, Math.PI, 0); ctx.fill();
       ctx.fillRect(-1, -11, 12, 3);
-      
+
       // Goggles
       ctx.fillStyle = '#111';
       ctx.fillRect(2, -9, 8, 3);
@@ -3037,10 +3168,10 @@
         ctx.fillRect(-2, 0, 18, 3);
         ctx.fillRect(8, -1, 3, 4);
       } else if (state === 'pilot_idle') {
-         ctx.beginPath(); ctx.roundRect(3, -2, 4, 12, 2); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(3, -2, 4, 12, 2); ctx.fill();
       } else if (state === 'pilot_salute') {
-         ctx.beginPath(); ctx.moveTo(5, -2); ctx.lineTo(12, -8); ctx.lineTo(8, -12);
-         ctx.strokeStyle = '#4a554a'; ctx.lineWidth = 3; ctx.lineCap='round'; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(5, -2); ctx.lineTo(12, -8); ctx.lineTo(8, -12);
+        ctx.strokeStyle = '#4a554a'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.stroke();
       } else {
         // Idle arm
         ctx.beginPath(); ctx.roundRect(3, -2, 4, 12, 2); ctx.fill();
@@ -3109,91 +3240,138 @@
     // ===== AIRPORT CANVAS ANIMATION =====
 
 
-    
+
     function drawDetailedPlane(ctx, px, py, scale, frame, animState) {
       ctx.save();
       ctx.translate(px, py);
-      ctx.scale(scale, scale);
+      // Make the plane intrinsically larger for a majestic appearance
+      ctx.scale(scale * 1.8, scale * 1.8);
 
-      if (py > 200) {
-        ctx.fillStyle = 'rgba(0,0,0,0.3)';
-        ctx.beginPath();
-        ctx.ellipse(0, 30, 45, 10, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
+      // Afterburner glow during takeoff
       if (animState === 'takeoff' && frame > 100) {
-        const glowLen = 20 + Math.sin(frame * 0.5) * 15;
-        const grad = ctx.createLinearGradient(40, 0, 40 + glowLen, 0);
+        const glowLen = 30 + Math.sin(frame * 0.5) * 20;
+        const grad = ctx.createLinearGradient(45, 0, 45 + glowLen, 0);
         grad.addColorStop(0, '#fff');
         grad.addColorStop(0.2, '#0df');
         grad.addColorStop(1, 'rgba(0, 200, 255, 0)');
         ctx.fillStyle = grad;
         ctx.beginPath();
-        ctx.moveTo(40, -5); ctx.lineTo(40 + glowLen, -15); ctx.lineTo(40 + glowLen, 15); ctx.lineTo(40, 5);
+        ctx.moveTo(45, -2); ctx.lineTo(45 + glowLen, -10); ctx.lineTo(45 + glowLen, 10); ctx.lineTo(45, 2);
         ctx.fill();
       }
 
-      // Smooth modern plane body
-      const bodyGrad = ctx.createLinearGradient(0, -10, 0, 10);
-      bodyGrad.addColorStop(0, '#606a7a');
-      bodyGrad.addColorStop(1, '#3a4555');
-      
-      ctx.fillStyle = bodyGrad;
+      // === Stealth Fighter Design (3D faceted appearance) ===
+
+      // Far Wing (visible underneath/behind)
+      ctx.fillStyle = '#1c2026';
       ctx.beginPath();
-      ctx.moveTo(-50, 0); // nose
-      ctx.bezierCurveTo(-40, -12, 10, -15, 30, -8); // top curve
-      ctx.lineTo(45, -5); // tail start
-      ctx.lineTo(45, 5); // tail end
-      ctx.bezierCurveTo(20, 12, -30, 10, -50, 0); // bottom curve
+      ctx.moveTo(-10, -5); ctx.lineTo(25, -25); ctx.lineTo(35, -25); ctx.lineTo(20, -5);
       ctx.fill();
 
-      // Cockpit
-      ctx.fillStyle = '#4fc4d0';
+      // Lower Body / Belly (Shadowed facet)
+      const bellyGrad = ctx.createLinearGradient(0, 0, 0, 15);
+      bellyGrad.addColorStop(0, '#222831');
+      bellyGrad.addColorStop(1, '#11151c');
+      ctx.fillStyle = bellyGrad;
       ctx.beginPath();
-      ctx.moveTo(-40, -4);
-      ctx.bezierCurveTo(-30, -10, -20, -10, -15, -4);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(255,255,255,0.3)';
-      ctx.beginPath();
-      ctx.moveTo(-35, -4);
-      ctx.bezierCurveTo(-30, -8, -25, -8, -20, -4);
-      ctx.fill();
-
-      // Main Wing (smooth)
-      ctx.fillStyle = '#3a4050';
-      ctx.beginPath();
-      ctx.moveTo(-10, 0);
-      ctx.lineTo(15, -35);
-      ctx.lineTo(25, -35);
-      ctx.lineTo(10, 0);
+      ctx.moveTo(-70, 2); // Nose bottom
+      ctx.lineTo(-30, 12); // Intake bottom
+      ctx.lineTo(20, 10); // Belly
+      ctx.lineTo(45, 4);  // Engine bottom
+      ctx.lineTo(45, 0);
+      ctx.lineTo(-70, 0);
       ctx.fill();
 
+      // Upper Body (Light facet)
+      const upperGrad = ctx.createLinearGradient(0, -15, 0, 0);
+      upperGrad.addColorStop(0, '#4a5568');
+      upperGrad.addColorStop(1, '#2d3748');
+      ctx.fillStyle = upperGrad;
       ctx.beginPath();
-      ctx.moveTo(-10, 5);
-      ctx.lineTo(15, 35);
-      ctx.lineTo(25, 35);
-      ctx.lineTo(10, 5);
+      ctx.moveTo(-75, 0); // Nose tip
+      ctx.lineTo(-40, -8); // Nose slope
+      ctx.lineTo(-10, -10); // Canopy base
+      ctx.lineTo(25, -12); // Spine
+      ctx.lineTo(50, -5); // Tail base
+      ctx.lineTo(50, 0); // Engine top
+      ctx.lineTo(-75, 0);
       ctx.fill();
 
-      // Tail fin
-      ctx.fillStyle = '#2a3240';
-      ctx.beginPath();
-      ctx.moveTo(25, -8);
-      ctx.lineTo(38, -28);
-      ctx.lineTo(45, -28);
-      ctx.lineTo(42, -5);
-      ctx.fill();
-
-      // Engine
+      // Side Intake (Angular)
       ctx.fillStyle = '#111';
       ctx.beginPath();
-      ctx.roundRect(-30, 0, 18, 4, 2);
+      ctx.moveTo(-35, 2); ctx.lineTo(-25, 8); ctx.lineTo(5, 8); ctx.lineTo(-5, 2);
       ctx.fill();
-      
-      // Anti-collision light
-      ctx.fillStyle = '#ff3333';
-      ctx.beginPath(); ctx.arc(-40, 0, 2, 0, Math.PI*2); ctx.fill();
+      // Intake lip highlight
+      ctx.strokeStyle = '#5a667a'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(-35, 2); ctx.lineTo(-25, 8); ctx.stroke();
+
+      // Canopy (Golden/orange stealth coating)
+      const canopyGrad = ctx.createLinearGradient(-35, -15, -10, -5);
+      canopyGrad.addColorStop(0, '#f6ad55'); // Bright gold
+      canopyGrad.addColorStop(0.5, '#dd6b20');
+      canopyGrad.addColorStop(1, '#7b341e');
+      ctx.fillStyle = canopyGrad;
+      ctx.beginPath();
+      ctx.moveTo(-35, -6);
+      ctx.lineTo(-25, -14); // High point
+      ctx.lineTo(-5, -10); // Rear slope
+      ctx.lineTo(-10, -5); // Base
+      ctx.fill();
+      // Canopy highlight
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.beginPath(); ctx.moveTo(-30, -12); ctx.lineTo(-15, -10); ctx.stroke();
+
+      // Near Wing (Angular 3D)
+      const wingGrad = ctx.createLinearGradient(0, 0, 0, 25);
+      wingGrad.addColorStop(0, '#3a4454');
+      wingGrad.addColorStop(1, '#1a202c');
+      ctx.fillStyle = wingGrad;
+      ctx.beginPath();
+      ctx.moveTo(-20, 5); // Wing root front
+      ctx.lineTo(-5, 25); // Wing tip front
+      ctx.lineTo(25, 25); // Wing tip rear
+      ctx.lineTo(15, 5); // Wing root rear
+      ctx.fill();
+      // Wing edge highlight
+      ctx.strokeStyle = '#5a667a';
+      ctx.beginPath(); ctx.moveTo(-20, 5); ctx.lineTo(-5, 25); ctx.stroke();
+
+      // Twin Tail Fins (V-shape, near fin)
+      const tailGrad = ctx.createLinearGradient(35, -25, 45, -5);
+      tailGrad.addColorStop(0, '#4a5568');
+      tailGrad.addColorStop(1, '#1a202c');
+      ctx.fillStyle = tailGrad;
+      ctx.beginPath();
+      ctx.moveTo(25, -10);
+      ctx.lineTo(40, -30);
+      ctx.lineTo(52, -30);
+      ctx.lineTo(45, -5);
+      ctx.fill();
+      // Tail edge highlight
+      ctx.strokeStyle = '#6a788e';
+      ctx.beginPath(); ctx.moveTo(25, -10); ctx.lineTo(40, -30); ctx.stroke();
+
+      // Engine Nozzle
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.moveTo(45, -4); ctx.lineTo(55, -2); ctx.lineTo(55, 2); ctx.lineTo(45, 4);
+      ctx.fill();
+      // Nozzle interior glow (ambient)
+      ctx.fillStyle = '#0bf';
+      ctx.beginPath(); ctx.ellipse(54, 0, 1, 2, 0, 0, Math.PI * 2); ctx.fill();
+
+      // Tactical Decals / Panel Lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(20, -10); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-60, -2); ctx.lineTo(-40, 2); ctx.stroke();
+
+      // Anti-collision lights (Blinking)
+      if (Math.floor(frame / 10) % 2 === 0) {
+        ctx.fillStyle = '#ff3333';
+        ctx.beginPath(); ctx.arc(-15, 8, 2, 0, Math.PI * 2); ctx.fill(); // bottom light
+        ctx.beginPath(); ctx.arc(35, -12, 1.5, 0, Math.PI * 2); ctx.fill(); // top light
+      }
 
       ctx.restore();
     }
@@ -3218,7 +3396,7 @@
         else if (G.selectedGeneral >= 0 && G.currentAdvice[G.selectedGeneral] && ['strike', 'blind_strike', 'stealth_strike', 'full_assault', 'diversion'].includes(G.currentAdvice[G.selectedGeneral].action)) animState = 'takeoff';
       }
 
-      if (animState === 'takeoff') totalFrames = 200;
+      if (animState === 'takeoff') totalFrames = 220;
       if (animState === 'resource_gain') totalFrames = 90;
       if (animState === 'enemy_attack') totalFrames = 80;
       if (animState === 'aa_intercept') totalFrames = 80;
@@ -3272,7 +3450,7 @@
         ctx.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
       }
 
-      
+
       function drawFrame() {
         frame++;
         const globalTime = performance.now() * 0.05;
@@ -3284,7 +3462,7 @@
           canvas.width = canvas.parentElement.clientWidth;
           canvas.height = canvas.parentElement.clientHeight;
         }
-        
+
         const W = canvas.width || 800;
         const H = canvas.height || 400;
 
@@ -3293,30 +3471,30 @@
         grd.addColorStop(0, skyData.top);
         grd.addColorStop(1, skyData.bottom);
         ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-        
+
         ctx.fillStyle = skyData.sunColor;
         ctx.beginPath();
         ctx.arc(W * 0.7, H * skyData.sunY, 40, 0, Math.PI * 2);
         if (skyData.isMoon) {
-           ctx.fill();
-           ctx.fillStyle = grd;
-           ctx.beginPath(); ctx.arc(W * 0.7 - 10, H * skyData.sunY - 5, 35, 0, Math.PI * 2); ctx.fill();
+          ctx.fill();
+          ctx.fillStyle = grd;
+          ctx.beginPath(); ctx.arc(W * 0.7 - 10, H * skyData.sunY - 5, 35, 0, Math.PI * 2); ctx.fill();
         } else {
-           ctx.shadowColor = skyData.sunColor;
-           ctx.shadowBlur = 30;
-           ctx.fill();
-           ctx.shadowBlur = 0;
+          ctx.shadowColor = skyData.sunColor;
+          ctx.shadowBlur = 30;
+          ctx.fill();
+          ctx.shadowBlur = 0;
         }
 
         // Stars
         for (let i = 0; i < 40; i++) {
-            const sx = (i * 97 + globalTime * 0.1) % W;
-            const sy = (i * 53) % (H * 0.4);
-            const starAlpha = Math.max(0, Math.sin(globalTime * 0.05 + i)) * (skyData.isMoon ? 1 : 0);
-            if (starAlpha > 0) {
-              ctx.fillStyle = `rgba(200, 220, 255, ${starAlpha})`;
-              ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI*2); ctx.fill();
-            }
+          const sx = (i * 97 + globalTime * 0.1) % W;
+          const sy = (i * 53) % (H * 0.4);
+          const starAlpha = Math.max(0, Math.sin(globalTime * 0.05 + i)) * (skyData.isMoon ? 1 : 0);
+          if (starAlpha > 0) {
+            ctx.fillStyle = `rgba(200, 220, 255, ${starAlpha})`;
+            ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI * 2); ctx.fill();
+          }
         }
 
         ctx.fillStyle = isDay ? '#2b3b4a' : (isSunset ? '#36222b' : '#0f141e');
@@ -3395,14 +3573,14 @@
           for (let s = 0; s < hangarW - 30; s += 15) {
             ctx.fillStyle = '#ffcc00';
             ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 10;
-            ctx.beginPath(); ctx.arc(bx + 15 + s + 5, by + 25, 3, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(bx + 15 + s + 5, by + 25, 3, 0, Math.PI * 2); ctx.fill();
             ctx.shadowBlur = 0;
           }
 
           if (G.visualTurn % 4 > 1.5 && G.visualTurn % 4 < 3.5) {
-             // Night interior glow
-             ctx.fillStyle = 'rgba(255,255,100,0.15)'; 
-             ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 40, 40, 0, Math.PI * 2); ctx.fill();
+            // Night interior glow
+            ctx.fillStyle = 'rgba(255,255,100,0.15)';
+            ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 40, 40, 0, Math.PI * 2); ctx.fill();
           }
         }
 
@@ -3542,15 +3720,15 @@
           rainDrops.forEach(r => {
             ctx.moveTo(r.x, r.y); ctx.lineTo(r.x - r.s * 0.4, r.y + r.s * 1.5);
             r.y += r.s * 1.5; r.x -= r.s * 0.4;
-            if (r.y > H) { 
-              r.y = -10; r.x = Math.random() * W + 100; 
+            if (r.y > H) {
+              r.y = -10; r.x = Math.random() * W + 100;
               // splash
               ctx.moveTo(r.x, H); ctx.lineTo(r.x - 3, H - 3);
               ctx.moveTo(r.x, H); ctx.lineTo(r.x + 3, H - 3);
             }
           });
           ctx.stroke();
-        }        if (animState === 'enemy_attack') {
+        } if (animState === 'enemy_attack') {
           const mx = W * 0.4 + Math.sin(globalTime * 0.1) * 10;
           const my = -100 + Math.min(frame / 60, 1) * (H * 0.55 + 100);
           if (frame < 60) {
@@ -3609,7 +3787,7 @@
         let planeVisible = true;
         let pilotVisible = true;
         let pilotState = 'pilot_idle';
-        let pilotX = px - 90, pilotY = py - 30;
+        let pilotX = px - 220, pilotY = py - 30;
 
         if (animState === 'takeoff') {
           if (frame < 30) {
@@ -3618,13 +3796,13 @@
             pilotState = 'pilot_salute';
           } else if (frame < 80) {
             pilotState = 'pilot_helmet';
-          } else if (frame < 100) {
+          } else if (frame < 120) {
             pilotState = 'pilot_climb';
-            pilotX += (frame - 80) * 2;
-            pilotY -= (frame - 80) * 0.8;
+            pilotX += (frame - 80) * 4.5;
+            pilotY -= (frame - 80) * 0.4;
           } else {
             pilotVisible = false;
-            const pFrame = frame - 100;
+            const pFrame = frame - 120;
             const takeoffDur = 100;
             const planeProgress = Math.min(pFrame / takeoffDur, 1);
             if (planeProgress < 0.4) {
@@ -3641,10 +3819,54 @@
 
         let pilotYOffset = (animState === 'idle') ? Math.sin(globalTime * 0.05 + 1) * 2 : 0;
         if (pilotVisible && animState !== 'enemy_attack') {
-          drawHighResSoldier(ctx, pilotX, pilotY + pilotYOffset, 4.5, pilotState);
+          drawHighResPilot(ctx, pilotX, pilotY + pilotYOffset, 2.2, pilotState);
         }
 
         if (planeVisible && animState !== 'enemy_attack') {
+          let altitude = (runwayY + 30) - py;
+          if (altitude < 150) {
+            let shadowAlpha = 0.4 * (1 - altitude / 150);
+            let shadowScale = 1 - (altitude / 300);
+
+            ctx.save();
+            let groundY = runwayY + 30 + (35 * 1.8 * planeScale);
+            // Translate to shadow center, shifting slightly based on altitude
+            ctx.translate(px + altitude * 0.3, groundY);
+
+            // Scale and skew the shadow
+            // Use -scale to match the plane's right-facing orientation in this scene
+            // Squash the Y axis to simulate perspective on the ground
+            ctx.scale(-planeScale * 1.8 * shadowScale, planeScale * 1.8 * shadowScale * 0.25);
+            ctx.transform(1, 0, -0.6, 1, 0, 0); // Isometric shear
+
+            ctx.fillStyle = `rgba(0,0,0,${shadowAlpha})`;
+            ctx.beginPath();
+            // Stealth Fighter Silhouette (Top-down)
+            ctx.moveTo(-75, 0); // Nose tip
+            ctx.lineTo(-40, -10); // Nose widen
+            ctx.lineTo(-20, -15); // Wing root front
+            ctx.lineTo(-5, -45); // Wing tip front
+            ctx.lineTo(15, -45); // Wing tip rear
+            ctx.lineTo(15, -15); // Wing root rear
+            ctx.lineTo(35, -10); // Tail root front
+            ctx.lineTo(45, -25); // Tail tip front
+            ctx.lineTo(55, -25); // Tail tip rear
+            ctx.lineTo(50, -5); // Tail root rear
+            ctx.lineTo(50, 5); // Engine rear
+            ctx.lineTo(55, 25); // Near Tail tip rear
+            ctx.lineTo(45, 25); // Near Tail tip front
+            ctx.lineTo(35, 10); // Near Tail root front
+            ctx.lineTo(15, 15); // Near Wing root rear
+            ctx.lineTo(15, 45); // Near Wing tip rear
+            ctx.lineTo(-5, 45); // Near Wing tip front
+            ctx.lineTo(-20, 15); // Near Wing root front
+            ctx.lineTo(-40, 10); // Nose widen
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+          }
+
           ctx.save();
           ctx.translate(px, py);
           ctx.scale(-1, 1);
@@ -3754,7 +3976,7 @@
 
         // Attack option 3: Full assault (devastating but very costly)
         pool.push({
-          general: { name: 'الجنرال عاصفة الحديد', rank: 'سلاح جو', type: 'airforce', emoji: '✈️', img: 'assets/generals/iron_storm.png' },
+          general: { name: 'الجنرال العاصفة', rank: 'سلاح جو', type: 'airforce', emoji: '✈️', img: 'assets/generals/iron_storm.png' },
           action: 'full_assault',
           target: G.enemyPos,
           title: 'هجوم شامل بالسلاح الجوي',
@@ -3807,7 +4029,7 @@
 
         // Resource raid 
         pool.push({
-          general: GENERALS[4], // قلب الأسد
+          general: GENERALS[5], // سيف
           action: 'resource_raid',
           title: 'غارة على إمدادات العدو',
           advice: 'بدلاً من ضرب القاعدة مباشرة، أقترح قطع إمدادات العدو لإضعافه قبل الضربة القاضية.',
@@ -4674,30 +4896,30 @@
           grd.addColorStop(0, skyData.top);
           grd.addColorStop(1, skyData.bottom);
           ctx.fillStyle = grd; ctx.fillRect(0, 0, width, height);
-          
+
           ctx.fillStyle = skyData.sunColor;
           ctx.beginPath();
           ctx.arc(width * 0.7, height * skyData.sunY, 40, 0, Math.PI * 2);
           if (skyData.isMoon) {
-             ctx.fill();
-             ctx.fillStyle = grd;
-             ctx.beginPath(); ctx.arc(width * 0.7 - 10, height * skyData.sunY - 5, 35, 0, Math.PI * 2); ctx.fill();
+            ctx.fill();
+            ctx.fillStyle = grd;
+            ctx.beginPath(); ctx.arc(width * 0.7 - 10, height * skyData.sunY - 5, 35, 0, Math.PI * 2); ctx.fill();
           } else {
-             ctx.shadowColor = skyData.sunColor;
-             ctx.shadowBlur = 30;
-             ctx.fill();
-             ctx.shadowBlur = 0;
+            ctx.shadowColor = skyData.sunColor;
+            ctx.shadowBlur = 30;
+            ctx.fill();
+            ctx.shadowBlur = 0;
           }
 
           // Stars
           for (let i = 0; i < 40; i++) {
-              const sx = (i * 97 + frame * 0.1) % width;
-              const sy = (i * 53) % height;
-              const starAlpha = Math.max(0, Math.sin(frame * 0.05 + i)) * (skyData.isMoon ? 1 : 0);
-              if (starAlpha > 0) {
-                ctx.fillStyle = `rgba(200, 220, 255, ${starAlpha})`;
-                ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI*2); ctx.fill();
-              }
+            const sx = (i * 97 + frame * 0.1) % width;
+            const sy = (i * 53) % height;
+            const starAlpha = Math.max(0, Math.sin(frame * 0.05 + i)) * (skyData.isMoon ? 1 : 0);
+            if (starAlpha > 0) {
+              ctx.fillStyle = `rgba(200, 220, 255, ${starAlpha})`;
+              ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI * 2); ctx.fill();
+            }
           }
         }
 
@@ -5232,7 +5454,7 @@
                       </li>
                 `;
               }
-              
+
               htmlReport += `
                     </ul>
                   </div>
@@ -5280,12 +5502,12 @@
     const CODEX_CARDS = [
       { general: GENERALS[0], actionLabel: 'توجيه الضربة', title: 'هجوم موجه مباشر', cost: 3, advice: 'قصف مباشر على قاعدة العدو. الوسيلة الأساسية لحسم المعركة لكنها ستكشف موقعنا للعدو!' },
       { general: { name: 'الجنرال ظل الليل', rank: 'عمليات خاصة', emoji: '🌙', img: 'assets/generals/night_shadow.png' }, actionLabel: 'قصف خفي', title: 'هجوم جوي خفي', cost: 4, advice: 'قصف موقع العدو باستخدام طائرات الشبح. موقعنا سيبقى آمناً تماماً وتكلفتها أعلى.' },
-      { general: { name: 'الجنرال عاصفة الحديد', rank: 'سلاح جو', emoji: '✈️', img: 'assets/generals/iron_storm.png' }, actionLabel: 'هجوم شامل', title: 'قصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف تماماً. أضرار جسيمة وتكشف موقعنا للعدو.' },
+      { general: { name: 'الجنرال العاصفة ', rank: 'سلاح جو', emoji: '✈️', img: 'assets/generals/iron_storm.png' }, actionLabel: 'هجوم شامل', title: 'قصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف تماماً. أضرار جسيمة وتكشف موقعنا للعدو.' },
       { general: GENERALS[3], actionLabel: 'استطلاع', title: 'استطلاع جوي', cost: 1, advice: 'إرسال طائرة استطلاع لمسح منطقة محددة في الخريطة لتأكيد وجود العدو أو خلوها، وتزيد نقاط المعلومات.' },
       { general: GENERALS[1], actionLabel: 'جمع المعلومات', title: 'تحليل استخباراتي', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف قطاعات في الخريطة. (عند وصول المعلومات إلى 10 يكشف موقع قاعدة العدو تلقائياً).' },
       { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة بنسبة كبيرة هذا الدور.' },
       { general: GENERALS[2], actionLabel: 'صيانة', title: 'ترميم المطار', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة وتجنب الهزيمة المؤكدة.' },
-      { general: GENERALS[4], actionLabel: 'غارة', title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة، وإذا نجحت تضعف هجماته القادمة.' },
+      { general: GENERALS[5], actionLabel: 'غارة', title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة، وإذا نجحت تضعف هجماته القادمة.' },
       { general: GENERALS[5], actionLabel: 'تمويه', title: 'شن هجوم وهمي', cost: 3, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته وفرصة إصابته لنا في الدور القادم.' },
       { general: GENERALS[4], actionLabel: 'توازن', title: 'تكتيك متوازن', cost: 2, advice: 'تأمين الموارد وكشف مناطق جديدة بشكل متوازن ومنهجي.' },
       { general: GENERALS[0], actionLabel: 'إطلاق النار', title: 'قصف عشوائي', cost: 2, advice: 'قصف منطقة مجهولة بشكل عشوائي بحثاً عن هدف. خيار يائس عند نفاد خيارات الاستطلاع.' },
@@ -5298,15 +5520,21 @@
 
       if (!m.classList.contains('active')) {
         grid.innerHTML = '';
-        CODEX_CARDS.forEach((card, i) => {
+
+        // Sort cards by the General's order in the GENERALS array
+        const sortedCards = [...CODEX_CARDS].sort((a, b) => {
+          return GENERALS.indexOf(a.general) - GENERALS.indexOf(b.general);
+        });
+
+        sortedCards.forEach((card, i) => {
           const el = document.createElement('div');
           el.className = 'codex-card';
-          
+
           el.innerHTML = `
             <div class="codex-avatar-wrapper">
-              <img src="${card.general.img}" alt="Avatar" class="codex-avatar">
+              <img src="${card.general.img}" alt="Avatar" class="codex-avatar" style="cursor:pointer;" onclick="showImagePreview('${card.general.img}')">
               <span style="font-size: 0.9em; font-weight: bold; color: #fff; margin-top: 5px;">⭐ ${card.general.rank}</span>
-              <span style="font-size: 0.85em; display: inline-block; padding: 4px 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--gold); border-radius: 6px; color: var(--gold);">📝 التكلفة: ${card.cost} 🛢️</span>
+              <span style="font-size: 0.85em; display: inline-block; padding: 4px 10px; background: rgba(0,0,0,0.5); border: 1px solid var(--gold); border-radius: 6px; color: var(--gold);">التكلفة: ${card.cost} 🛢️</span>
             </div>
             <div class="codex-info">
               <h4 class="codex-name">${card.general.name}</h4>
