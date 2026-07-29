@@ -2048,31 +2048,31 @@
         }
       },
 
-      playRedAlarm() {
-        if (this.bgm && !this.redAlarmActive) {
-          this.redAlarmActive = true;
-          const wasPlaying = !this.bgm.paused;
-          const currentVol = this.bgm.volume;
-          this.bgm.src = 'Chronicles_of_the_Ascendant.mp3';
-          this.bgm.loop = true;
-          this.bgm.volume = currentVol;
-          if (wasPlaying) {
-            this.bgm.play().catch(e => console.log('BGM play failed', e));
-          }
+      currentTrack: 'default',
+      setBGMState(state) {
+        if (!this.bgm) return;
+        // Priority logic: If discovery is playing, do not switch to red-alarm
+        if (this.currentTrack === 'discovery' && state === 'red-alarm') {
+            return;
         }
-      },
+        if (this.currentTrack === state) return;
 
-      stopRedAlarm() {
-        if (this.bgm && this.redAlarmActive) {
-          this.redAlarmActive = false;
-          const wasPlaying = !this.bgm.paused;
-          const currentVol = this.bgm.volume;
+        this.currentTrack = state;
+        const wasPlaying = !this.bgm.paused;
+        const currentVol = this.bgm.volume;
+
+        if (state === 'default') {
           this.bgm.src = 'March_Toward_the_Iron_Gates.mp3';
-          this.bgm.loop = true;
-          this.bgm.volume = currentVol;
-          if (wasPlaying) {
-            this.bgm.play().catch(e => console.log('BGM play failed', e));
-          }
+        } else if (state === 'discovery') {
+          this.bgm.src = 'Chronicles_of_the_Ascendant.mp3';
+        } else if (state === 'red-alarm') {
+          this.bgm.src = 'Red-Alarm.mp3';
+        }
+        
+        this.bgm.loop = true;
+        this.bgm.volume = currentVol;
+        if (wasPlaying) {
+          this.bgm.play().catch(e => console.log('BGM play failed', e));
         }
       },
 
@@ -2333,9 +2333,7 @@
       G.alarmActive = false;
       G.redAlarmTriggered = false;
       G.aaCooldown = 0;
-      if (typeof SFX !== 'undefined' && SFX.stopRedAlarm) {
-        SFX.stopRedAlarm();
-      }
+
       G.enemyAggressionBoost = 0;
       G.consecutiveWarTurns = 0;
       G.warTurnsStreak = 0;
@@ -2424,9 +2422,7 @@
     function triggerRedAlarm() {
       if (!G.redAlarmTriggered) {
         G.redAlarmTriggered = true;
-        if (typeof SFX !== 'undefined' && SFX.playRedAlarm) {
-          SFX.playRedAlarm();
-        }
+
       }
     }
 
@@ -2543,6 +2539,27 @@
       }
 
       // Upgrade display
+      // Reroll button check
+      const rerollBtn = document.getElementById('btn-reroll');
+      if (rerollBtn) {
+        if (G.intel < 3) {
+          rerollBtn.setAttribute('disabled', 'true');
+        } else {
+          rerollBtn.removeAttribute('disabled');
+        }
+      }
+
+      // Music State Logic based on game state
+      if (typeof SFX !== 'undefined' && SFX.setBGMState) {
+        if (G.isEnemyFound) {
+          SFX.setBGMState('discovery');
+        } else if (G.redAlarmTriggered) {
+          SFX.setBGMState('red-alarm');
+        } else {
+          SFX.setBGMState('default');
+        }
+      }
+
       const ud = document.getElementById('upgrade-display');
       ud.innerHTML = '<span style="font-size:12px;color:var(--text-dim)">التطويرات:</span>';
       ['radar', 'walls', 'aa', 'stealth', 'eng', 'ammo'].forEach(key => {
@@ -3710,6 +3727,7 @@
       execDiv.innerHTML = `
     <button class="btn btn-gold" id="btn-execute" onclick="executeChoice()" disabled style="font-size:14px;padding:12px 30px;opacity:0.5">تنفيذ الأمر</button>
     <button class="btn" id="btn-skip" onclick="skipTurn()" style="font-size:13px;padding:10px 20px;opacity:0.8;border-color:#4a5565;">⏭️ تخطّي الدور (+1 🛢️)</button>
+    <button class="btn" id="btn-reroll" onclick="rerollCards()" style="font-size:13px;padding:10px 20px;opacity:0.8;border-color:#4a5565; position:relative;" >👁️ تغيير الخطط (-3 📡)</button>
   `;
 
       initMobileCarousel();
@@ -4915,18 +4933,21 @@
           el.style.position = 'relative';
           
           
+          el.style.width = '100%';
           el.innerHTML = `
-            <div class="card-header" style="background: var(--primary-bg); padding: 10px;">
-              <img src="${card.general.img}" alt="Avatar" style="width: 50px; height: 50px; border-radius: 6px; object-fit: cover; border: 1px solid #4a5565;">
-              <div class="general-info" style="margin-right: 15px; text-align: right; display: flex; flex-direction: column; justify-content: center;">
-                <div class="general-name" style="font-size: 15px;">${card.general.name}</div>
-                <div class="general-rank" style="font-size: 12px;">${card.general.rank}</div>
+            <div style="display: flex; gap: 15px; padding: 15px; width: 100%; box-sizing: border-box; flex-direction: row-reverse; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+              <div class="dogtag-left" style="padding-top: 5px; flex-shrink: 0; min-width: 100px;">
+                <img src="${card.general.img}" alt="Avatar" style="width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid var(--primary-color); box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+                <span style="font-size: 0.85em; font-weight: bold; display: block; margin-top: 5px; color: #fff;">⭐ ${card.general.rank}</span>
+                <span style="font-size: 0.85em; display: inline-block; padding: 3px 8px; background: rgba(0,0,0,0.5); border: 1px solid var(--gold); border-radius: 4px; margin-top: 5px; color: var(--gold);">📝 التكلفة: ${card.cost} 🛢️</span>
               </div>
-            </div>
-            <div class="card-body">
-              <div class="action-title">${card.title}</div>
-              <div class="action-desc">${card.advice}</div>
-              <div class="cost-badge" style="position: static; margin-top: 15px; display: inline-block;">🛢️ ${card.cost} موارد</div>
+              <div class="dogtag-right" style="flex-grow: 1; text-align: right; display: flex; flex-direction: column; justify-content: center;">
+                <h4 style="margin: 0 0 5px 0; font-size: 1.2em; color: var(--primary-color);">${card.general.name}</h4>
+                <h5 style="margin: 0 0 10px 0; font-size: 1.1em; color: var(--gold);">${card.title}</h5>
+                <div style="font-size: 1.05em; line-height: 1.6; color: #ddd; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; border-right: 3px solid var(--primary-color);">
+                  ${card.advice}
+                </div>
+              </div>
             </div>
           `;
           grid.appendChild(el);
