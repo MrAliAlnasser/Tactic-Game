@@ -4663,24 +4663,24 @@
     // ===== ENEMY TURN =====
     
     function buildBanterHTML(img1, name1, color1, msg1, img2, name2, color2, msg2) {
-      return 
+      return `
         <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 5px; direction: rtl;">
-          <div style="display: flex; align-items: flex-start; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border-right: 3px solid ; text-align: right;">
-             <img src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid ; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+          <div style="display: flex; align-items: flex-start; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border-right: 3px solid ${color1}; text-align: right;">
+             <img src="${img1}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid ${color1}; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
              <div>
-               <b style="color:; font-size: 1.05em; display: block; margin-bottom: 3px;"></b>
-               <span style="font-size: 0.9em; line-height: 1.4; color: #ddd;">""</span>
+               <b style="color:${color1}; font-size: 1.05em; display: block; margin-bottom: 3px;">${name1}</b>
+               <span style="font-size: 0.9em; line-height: 1.4; color: #ddd;">"${msg1}"</span>
              </div>
           </div>
-          <div style="display: flex; align-items: flex-start; flex-direction: row-reverse; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border-left: 3px solid ; text-align: left;">
-             <img src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid ; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+          <div style="display: flex; align-items: flex-start; flex-direction: row-reverse; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border-left: 3px solid ${color2}; text-align: left;">
+             <img src="${img2}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid ${color2}; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
              <div style="width: 100%;">
-               <b style="color:; font-size: 1.05em; display: block; margin-bottom: 3px;"></b>
-               <span style="font-size: 0.9em; line-height: 1.4; color: #ddd; display: block;" dir="rtl">""</span>
+               <b style="color:${color2}; font-size: 1.05em; display: block; margin-bottom: 3px;">${name2}</b>
+               <span style="font-size: 0.9em; line-height: 1.4; color: #ddd; display: block;" dir="rtl">"${msg2}"</span>
              </div>
           </div>
         </div>
-      ;
+      `;;
     }
 
     function checkBanterAndEndTurn(actionType, success) {
