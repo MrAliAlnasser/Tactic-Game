@@ -2368,26 +2368,7 @@
       initGame();
       showScreen('screen-story');
       const el = document.getElementById('story-text');
-      el.style.width = '100%';
-          el.style.maxWidth = '400px';
-          el.style.margin = '0 auto';
-          el.style.cursor = 'default';
-          
-          el.innerHTML = 
-            <div class="dogtag-left" style="padding-top: 15px;">
-              <img src="" class="general-avatar" alt="Avatar" style="width: 70px; height: 70px; cursor: pointer;" onclick="showImagePreview('')">
-              <div class="dogtag-cost" style="font-size: 14px; margin-top: 5px;">- موارد</div>
-            </div>
-            <div class="dogtag-right" style="padding-top: 15px;">
-              <div class="general-name">
-                <span></span>
-                <span></span>
-              </div>
-              <span class="general-rank"></span>
-              <div class="dogtag-title" style="margin-top: 5px;"> - </div>
-              <div class="general-advice" style="font-size: 0.95em; opacity: 0.9; margin-top: 6px;"></div>
-            </div>
-          ;
+      el.innerHTML = STORY[0];
       el.style.animation = 'none';
       void el.offsetWidth;
       el.style.animation = 'storyFade 1.5s ease forwards';
