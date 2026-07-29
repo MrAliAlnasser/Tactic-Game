@@ -2439,6 +2439,7 @@
     // ===== GAME STATE =====
     const G = {
       turn: 1,
+      visualTurn: 1,
       health: 3,
       maxHealth: 3,
       resources: 5,
@@ -2963,6 +2964,91 @@
       ],
     };
 
+    
+    function interpolateColor(c1, c2, factor) {
+      if (factor > 1) factor = 1;
+      if (factor < 0) factor = 0;
+      let result = "#";
+      for (let i = 1; i <= 5; i += 2) {
+        let v1 = parseInt(c1.substr(i, 2), 16);
+        let v2 = parseInt(c2.substr(i, 2), 16);
+        let v = Math.round(v1 + factor * (v2 - v1)).toString(16);
+        if (v.length === 1) v = "0" + v;
+        result += v;
+      }
+      return result;
+    }
+
+    function getSkyColors(timeVal) {
+      // timeVal goes 0..4 over 4 turns
+      // 0 = Dawn, 1 = Day, 2 = Sunset, 3 = Night
+      let t = (timeVal % 4 + 4) % 4;
+      if (t < 1) return { top: interpolateColor('#1a2538', '#3a7bd5', t), bottom: interpolateColor('#0a0f1a', '#3a6073', t), sunY: 0.8 - t*0.6, sunColor: '#fffdf0', isMoon: false };
+      if (t < 2) return { top: interpolateColor('#3a7bd5', '#2d1b2e', t-1), bottom: interpolateColor('#3a6073', '#b04a43', t-1), sunY: 0.2 + (t-1)*0.6, sunColor: '#ffcc66', isMoon: false };
+      if (t < 3) return { top: interpolateColor('#2d1b2e', '#050a12', t-2), bottom: interpolateColor('#df9857', '#0a0f1a', t-2), sunY: 0.8 - (t-2)*0.6, sunColor: '#eef3f7', isMoon: true };
+      return { top: interpolateColor('#050a12', '#1a2538', t-3), bottom: interpolateColor('#0a0f1a', '#0a0f1a', t-3), sunY: 0.2 + (t-3)*0.6, sunColor: '#eef3f7', isMoon: true };
+    }
+
+    function drawHighResSoldier(ctx, x, y, scale, state) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+
+      // Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.beginPath();
+      ctx.ellipse(5, 25, 12, 3, 0, 0, Math.PI*2);
+      ctx.fill();
+
+      // Legs
+      ctx.fillStyle = '#4a554a';
+      ctx.beginPath(); ctx.roundRect(0, 10, 4, 15, 2); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(6, 10, 4, 15, 2); ctx.fill();
+
+      // Body (Torso)
+      ctx.fillStyle = '#3a4a3a';
+      ctx.beginPath(); ctx.roundRect(-2, -5, 14, 16, 3); ctx.fill();
+      
+      // Vest / Harness
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0, -3, 3, 12);
+      ctx.fillRect(7, -3, 3, 12);
+      ctx.fillRect(-2, 2, 14, 3);
+
+      // Head
+      ctx.fillStyle = '#dfba97';
+      ctx.beginPath(); ctx.arc(5, -10, 5, 0, Math.PI*2); ctx.fill();
+
+      // Helmet
+      ctx.fillStyle = '#3a4a3a';
+      ctx.beginPath(); ctx.arc(5, -11, 6, Math.PI, 0); ctx.fill();
+      ctx.fillRect(-1, -11, 12, 3);
+      
+      // Goggles
+      ctx.fillStyle = '#111';
+      ctx.fillRect(2, -9, 8, 3);
+
+      // Arms & Weapon
+      ctx.fillStyle = '#4a554a';
+      if (state === 'soldier_guard' || state === 'guard') {
+        // Holding rifle forward
+        ctx.beginPath(); ctx.roundRect(-4, -2, 12, 4, 2); ctx.fill();
+        ctx.fillStyle = '#111'; // Rifle
+        ctx.fillRect(-2, 0, 18, 3);
+        ctx.fillRect(8, -1, 3, 4);
+      } else if (state === 'pilot_idle') {
+         ctx.beginPath(); ctx.roundRect(3, -2, 4, 12, 2); ctx.fill();
+      } else if (state === 'pilot_salute') {
+         ctx.beginPath(); ctx.moveTo(5, -2); ctx.lineTo(12, -8); ctx.lineTo(8, -12);
+         ctx.strokeStyle = '#4a554a'; ctx.lineWidth = 3; ctx.lineCap='round'; ctx.stroke();
+      } else {
+        // Idle arm
+        ctx.beginPath(); ctx.roundRect(3, -2, 4, 12, 2); ctx.fill();
+      }
+
+      ctx.restore();
+    }
+
     function drawPixelArt(ctx, x, y, scale, spriteName) {
       const sprite = SPRITES[spriteName];
       if (!sprite) return;
@@ -3023,6 +3109,7 @@
     // ===== AIRPORT CANVAS ANIMATION =====
 
 
+    
     function drawDetailedPlane(ctx, px, py, scale, frame, animState) {
       ctx.save();
       ctx.translate(px, py);
@@ -3047,26 +3134,66 @@
         ctx.fill();
       }
 
-      ctx.fillStyle = '#4a5565';
+      // Smooth modern plane body
+      const bodyGrad = ctx.createLinearGradient(0, -10, 0, 10);
+      bodyGrad.addColorStop(0, '#606a7a');
+      bodyGrad.addColorStop(1, '#3a4555');
+      
+      ctx.fillStyle = bodyGrad;
       ctx.beginPath();
-      ctx.moveTo(-50, 0); ctx.lineTo(-40, -8); ctx.lineTo(20, -10); ctx.lineTo(40, -5);
-      ctx.lineTo(40, 5); ctx.lineTo(20, 10); ctx.lineTo(-40, 8); ctx.closePath();
+      ctx.moveTo(-50, 0); // nose
+      ctx.bezierCurveTo(-40, -12, 10, -15, 30, -8); // top curve
+      ctx.lineTo(45, -5); // tail start
+      ctx.lineTo(45, 5); // tail end
+      ctx.bezierCurveTo(20, 12, -30, 10, -50, 0); // bottom curve
       ctx.fill();
 
-      ctx.fillStyle = '#1c2533';
-      ctx.beginPath(); ctx.moveTo(-50, 0); ctx.lineTo(-40, -8); ctx.lineTo(-20, -8); ctx.lineTo(-30, 0); ctx.fill();
+      // Cockpit
       ctx.fillStyle = '#4fc4d0';
-      ctx.beginPath(); ctx.moveTo(-45, -2); ctx.lineTo(-35, -7); ctx.lineTo(-25, -7); ctx.lineTo(-35, -2); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-40, -4);
+      ctx.bezierCurveTo(-30, -10, -20, -10, -15, -4);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.beginPath();
+      ctx.moveTo(-35, -4);
+      ctx.bezierCurveTo(-30, -8, -25, -8, -20, -4);
+      ctx.fill();
 
+      // Main Wing (smooth)
       ctx.fillStyle = '#3a4050';
-      ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.lineTo(30, -30); ctx.lineTo(15, -30); ctx.closePath(); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(-10, 5); ctx.lineTo(10, 5); ctx.lineTo(30, 35); ctx.lineTo(15, 35); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(15, -35);
+      ctx.lineTo(25, -35);
+      ctx.lineTo(10, 0);
+      ctx.fill();
 
+      ctx.beginPath();
+      ctx.moveTo(-10, 5);
+      ctx.lineTo(15, 35);
+      ctx.lineTo(25, 35);
+      ctx.lineTo(10, 5);
+      ctx.fill();
+
+      // Tail fin
       ctx.fillStyle = '#2a3240';
-      ctx.beginPath(); ctx.moveTo(25, -8); ctx.lineTo(35, -25); ctx.lineTo(40, -25); ctx.lineTo(40, -5); ctx.closePath(); ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(25, -8);
+      ctx.lineTo(38, -28);
+      ctx.lineTo(45, -28);
+      ctx.lineTo(42, -5);
+      ctx.fill();
 
-      ctx.fillStyle = '#111'; ctx.fillRect(-30, 0, 15, 2);
-      ctx.fillStyle = '#ff3333'; ctx.fillRect(-40, 0, 4, 2);
+      // Engine
+      ctx.fillStyle = '#111';
+      ctx.beginPath();
+      ctx.roundRect(-30, 0, 18, 4, 2);
+      ctx.fill();
+      
+      // Anti-collision light
+      ctx.fillStyle = '#ff3333';
+      ctx.beginPath(); ctx.arc(-40, 0, 2, 0, Math.PI*2); ctx.fill();
 
       ctx.restore();
     }
@@ -3145,41 +3272,51 @@
         ctx.fillRect(Math.floor(x), Math.floor(y), Math.floor(w), Math.floor(h));
       }
 
+      
       function drawFrame() {
         frame++;
         const globalTime = performance.now() * 0.05;
+        if (!G.visualTurn) G.visualTurn = G.turn;
+        G.visualTurn += (G.turn - G.visualTurn) * 0.05;
+
         if (canvas.parentElement && canvas.parentElement.clientWidth > 0 &&
           (canvas.width !== canvas.parentElement.clientWidth || canvas.height !== canvas.parentElement.clientHeight)) {
           canvas.width = canvas.parentElement.clientWidth;
           canvas.height = canvas.parentElement.clientHeight;
         }
+        
         const W = canvas.width || 800;
         const H = canvas.height || 400;
 
-        if (isSunset) {
-          const grd = ctx.createLinearGradient(0, 0, 0, H * 0.55);
-          grd.addColorStop(0, '#2d1b2e'); grd.addColorStop(0.5, '#b04a43'); grd.addColorStop(1, '#df9857');
-          ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-          ctx.fillStyle = '#ffcc66'; ctx.beginPath(); ctx.arc(W * 0.7, H * 0.35, 50, 0, Math.PI * 2); ctx.fill();
-        } else if (!isDay) {
-          const grd = ctx.createLinearGradient(0, 0, 0, H * 0.55);
-          grd.addColorStop(0, '#0a0f1a'); grd.addColorStop(1, '#1a2538');
-          ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-          ctx.fillStyle = '#eef3f7'; ctx.beginPath(); ctx.arc(W * 0.8, H * 0.2, 30, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = '#1a2538'; ctx.beginPath(); ctx.arc(W * 0.8 - 10, H * 0.2 - 5, 25, 0, Math.PI * 2); ctx.fill();
+        const skyData = getSkyColors(G.visualTurn - 1);
+        const grd = ctx.createLinearGradient(0, 0, 0, H * 0.55);
+        grd.addColorStop(0, skyData.top);
+        grd.addColorStop(1, skyData.bottom);
+        ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
+        
+        ctx.fillStyle = skyData.sunColor;
+        ctx.beginPath();
+        ctx.arc(W * 0.7, H * skyData.sunY, 40, 0, Math.PI * 2);
+        if (skyData.isMoon) {
+           ctx.fill();
+           ctx.fillStyle = grd;
+           ctx.beginPath(); ctx.arc(W * 0.7 - 10, H * skyData.sunY - 5, 35, 0, Math.PI * 2); ctx.fill();
         } else {
-          const grd = ctx.createLinearGradient(0, 0, 0, H * 0.55);
-          grd.addColorStop(0, '#3a7bd5'); grd.addColorStop(1, '#3a6073');
-          ctx.fillStyle = grd; ctx.fillRect(0, 0, W, H);
-          ctx.fillStyle = '#fffdf0'; ctx.beginPath(); ctx.arc(W * 0.2, H * 0.2, 40, 0, Math.PI * 2); ctx.fill();
+           ctx.shadowColor = skyData.sunColor;
+           ctx.shadowBlur = 30;
+           ctx.fill();
+           ctx.shadowBlur = 0;
         }
 
-        if (!isDay && !isSunset) {
-          for (let i = 0; i < 40; i++) {
+        // Stars
+        for (let i = 0; i < 40; i++) {
             const sx = (i * 97 + globalTime * 0.1) % W;
             const sy = (i * 53) % (H * 0.4);
-            if (Math.sin(globalTime * 0.05 + i) > 0.1) drawPixelRect(sx, sy, 2, 2, '#8090a0');
-          }
+            const starAlpha = Math.max(0, Math.sin(globalTime * 0.05 + i)) * (skyData.isMoon ? 1 : 0);
+            if (starAlpha > 0) {
+              ctx.fillStyle = `rgba(200, 220, 255, ${starAlpha})`;
+              ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI*2); ctx.fill();
+            }
         }
 
         ctx.fillStyle = isDay ? '#2b3b4a' : (isSunset ? '#36222b' : '#0f141e');
@@ -3242,24 +3379,31 @@
           const bx = W * 0.1 + i * W * 0.28;
           const by = H * 0.55 - hangarH + 20;
 
-          ctx.fillStyle = '#4a5565';
+          // Hangar Dome
+          const hGrad = ctx.createLinearGradient(bx, by, bx, by + hangarH);
+          hGrad.addColorStop(0, '#5a657a');
+          hGrad.addColorStop(1, '#2a3240');
+          ctx.fillStyle = hGrad;
           ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 20, hangarW / 2, Math.PI, 0); ctx.fill();
 
           ctx.fillStyle = '#3a4050'; ctx.fillRect(bx, by + 20, hangarW, hangarH - 20);
 
+          // Hangar Interior
           ctx.fillStyle = '#10151c'; ctx.fillRect(bx + 15, by + 30, hangarW - 30, hangarH - 30);
 
-          for (let s = 0; s < hangarW - 30; s += 10) {
-            ctx.fillStyle = (s / 10) % 2 === 0 ? '#ffcc00' : '#111';
-            ctx.fillRect(bx + 15 + s, by + 20, 10, 10);
+          // Lights
+          for (let s = 0; s < hangarW - 30; s += 15) {
+            ctx.fillStyle = '#ffcc00';
+            ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 10;
+            ctx.beginPath(); ctx.arc(bx + 15 + s + 5, by + 25, 3, 0, Math.PI*2); ctx.fill();
+            ctx.shadowBlur = 0;
           }
 
-          if (!isDay && Math.sin(globalTime * 0.08 + i) > 0) {
-            ctx.fillStyle = 'rgba(255,255,100,0.5)'; ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 10, 20, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#fff999'; ctx.fillRect(bx + hangarW / 2 - 5, by + 8, 10, 4);
+          if (G.visualTurn % 4 > 1.5 && G.visualTurn % 4 < 3.5) {
+             // Night interior glow
+             ctx.fillStyle = 'rgba(255,255,100,0.15)'; 
+             ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 40, 40, 0, Math.PI * 2); ctx.fill();
           }
-
-
         }
 
         {
@@ -3393,17 +3537,20 @@
         }
 
         if (isRainy) {
-          ctx.strokeStyle = isDay ? 'rgba(150, 180, 200, 0.4)' : 'rgba(200, 220, 255, 0.2)';
+          ctx.strokeStyle = 'rgba(180, 200, 220, 0.3)';
           ctx.lineWidth = 1.5; ctx.beginPath();
           rainDrops.forEach(r => {
-            ctx.moveTo(r.x, r.y); ctx.lineTo(r.x - r.s * 0.3, r.y + r.s);
-            r.y += r.s; r.x -= r.s * 0.3;
-            if (r.y > H) { r.y = -10; r.x = Math.random() * W + 100; }
+            ctx.moveTo(r.x, r.y); ctx.lineTo(r.x - r.s * 0.4, r.y + r.s * 1.5);
+            r.y += r.s * 1.5; r.x -= r.s * 0.4;
+            if (r.y > H) { 
+              r.y = -10; r.x = Math.random() * W + 100; 
+              // splash
+              ctx.moveTo(r.x, H); ctx.lineTo(r.x - 3, H - 3);
+              ctx.moveTo(r.x, H); ctx.lineTo(r.x + 3, H - 3);
+            }
           });
           ctx.stroke();
-        }
-
-        if (animState === 'enemy_attack') {
+        }        if (animState === 'enemy_attack') {
           const mx = W * 0.4 + Math.sin(globalTime * 0.1) * 10;
           const my = -100 + Math.min(frame / 60, 1) * (H * 0.55 + 100);
           if (frame < 60) {
@@ -3494,7 +3641,7 @@
 
         let pilotYOffset = (animState === 'idle') ? Math.sin(globalTime * 0.05 + 1) * 2 : 0;
         if (pilotVisible && animState !== 'enemy_attack') {
-          drawPixelArt(ctx, pilotX, pilotY + pilotYOffset, 4.5, pilotState);
+          drawHighResSoldier(ctx, pilotX, pilotY + pilotYOffset, 4.5, pilotState);
         }
 
         if (planeVisible && animState !== 'enemy_attack') {
@@ -4513,38 +4660,44 @@
         frame++;
         ctx.clearRect(0, 0, 800, 400);
 
+        if (!G.visualTurn) G.visualTurn = G.turn;
+        G.visualTurn += (G.turn - G.visualTurn) * 0.05;
+
         let isDay = G.turn % 2 !== 0;
         let isSunset = G.turn % 4 === 3;
         let isRainy = (G.turn * 7) % 10 < 3;
         const W = 800, H = 400;
 
         function drawSky(width, height) {
-          if (isSunset) {
-            const grd = ctx.createLinearGradient(0, 0, 0, height);
-            grd.addColorStop(0, '#2d1b2e'); grd.addColorStop(0.5, '#b04a43'); grd.addColorStop(1, '#df9857');
-            ctx.fillStyle = grd; ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = '#ffcc66'; ctx.beginPath(); ctx.arc(width * 0.7, height * 0.45, 60, 0, Math.PI * 2); ctx.fill();
-          } else if (!isDay) {
-            const grd = ctx.createLinearGradient(0, 0, 0, height);
-            grd.addColorStop(0, '#0a0f1a'); grd.addColorStop(1, '#1a2538');
-            ctx.fillStyle = grd; ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = '#eef3f7'; ctx.beginPath(); ctx.arc(width * 0.8, height * 0.25, 40, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#1a2538'; ctx.beginPath(); ctx.arc(width * 0.8 - 15, height * 0.25 - 8, 35, 0, Math.PI * 2); ctx.fill();
+          const skyData = getSkyColors(G.visualTurn - 1);
+          const grd = ctx.createLinearGradient(0, 0, 0, height);
+          grd.addColorStop(0, skyData.top);
+          grd.addColorStop(1, skyData.bottom);
+          ctx.fillStyle = grd; ctx.fillRect(0, 0, width, height);
+          
+          ctx.fillStyle = skyData.sunColor;
+          ctx.beginPath();
+          ctx.arc(width * 0.7, height * skyData.sunY, 40, 0, Math.PI * 2);
+          if (skyData.isMoon) {
+             ctx.fill();
+             ctx.fillStyle = grd;
+             ctx.beginPath(); ctx.arc(width * 0.7 - 10, height * skyData.sunY - 5, 35, 0, Math.PI * 2); ctx.fill();
           } else {
-            const grd = ctx.createLinearGradient(0, 0, 0, height);
-            grd.addColorStop(0, '#3a7bd5'); grd.addColorStop(1, '#3a6073');
-            ctx.fillStyle = grd; ctx.fillRect(0, 0, width, height);
-            ctx.fillStyle = '#fffdf0'; ctx.beginPath(); ctx.arc(width * 0.2, height * 0.25, 50, 0, Math.PI * 2); ctx.fill();
+             ctx.shadowColor = skyData.sunColor;
+             ctx.shadowBlur = 30;
+             ctx.fill();
+             ctx.shadowBlur = 0;
           }
 
-          if (!isDay && !isSunset) {
-            for (let i = 0; i < 40; i++) {
+          // Stars
+          for (let i = 0; i < 40; i++) {
               const sx = (i * 97 + frame * 0.1) % width;
               const sy = (i * 53) % height;
-              if (Math.sin(frame * 0.05 + i) > 0.1) {
-                ctx.fillStyle = '#8090a0'; ctx.fillRect(sx, sy, 2, 2);
+              const starAlpha = Math.max(0, Math.sin(frame * 0.05 + i)) * (skyData.isMoon ? 1 : 0);
+              if (starAlpha > 0) {
+                ctx.fillStyle = `rgba(200, 220, 255, ${starAlpha})`;
+                ctx.beginPath(); ctx.arc(sx, sy, 1.5, 0, Math.PI*2); ctx.fill();
               }
-            }
           }
         }
 
@@ -4561,10 +4714,10 @@
 
           // Rain inside window
           if (isRainy) {
-            ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)'; ctx.lineWidth = 1; ctx.beginPath();
+            ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)'; ctx.lineWidth = 1.5; ctx.beginPath();
             for (let i = 0; i < 150; i++) {
-              let rx = (i * 37 + frame * 10) % W; let ry = (i * 73 + frame * 20) % H;
-              ctx.moveTo(rx, ry); ctx.lineTo(rx - 5, ry + 15);
+              let rx = (i * 37 + frame * 12) % W; let ry = (i * 73 + frame * 24) % H;
+              ctx.moveTo(rx, ry); ctx.lineTo(rx - 8, ry + 20);
             }
             ctx.stroke();
           }
@@ -4673,10 +4826,10 @@
           // Slight bobbing for idle, none for guard
           const idleY = yPos + Math.sin(frame * 0.1) * 2;
 
-          drawPixelArt(ctx, 350, yPos, soldierScale, 'soldier_guard');
-          drawPixelArt(ctx, 500, idleY + 5, soldierScale, 'soldier_idle');
-          drawPixelArt(ctx, 650, yPos - 10, soldierScale, 'soldier_guard');
-          drawPixelArt(ctx, 50, idleY + 10, soldierScale, 'soldier_idle');
+          drawHighResSoldier(ctx, 350, yPos, soldierScale, 'guard');
+          drawHighResSoldier(ctx, 500, idleY + 5, soldierScale, 'idle');
+          drawHighResSoldier(ctx, 650, yPos - 10, soldierScale, 'guard');
+          drawHighResSoldier(ctx, 50, idleY + 10, soldierScale, 'idle');
 
           if (isRainy) {
             ctx.strokeStyle = 'rgba(150, 180, 200, 0.4)'; ctx.lineWidth = 1; ctx.beginPath();
@@ -4990,20 +5143,24 @@
             G.health--;
             G.damageWithoutRepair++;
 
-            let resourceLossMsg = "";
+            let lostResource = false;
             if (G.resources > 0) {
               G.resources--;
-              resourceLossMsg = "<br><br><span style='color:#ff4444; font-weight:bold;'>[-1 موارد بسبب دمار المستودعات]</span>";
+              lostResource = true;
               addLog('🔥 تضرر مستودع الإمدادات (-1 موارد)', 'danger');
             }
 
             const boughtUpgrades = Object.keys(G.upgrades).filter(k => G.upgrades[k]);
             let hitUpgrade = false;
+            let destroyedUpgradeName = "";
+            let destroyedUpgradeKey = "";
             if (boughtUpgrades.length > 0 && Math.random() < 0.5) {
               const toDestroy = boughtUpgrades[Math.floor(Math.random() * boughtUpgrades.length)];
               G.upgrades[toDestroy] = false;
               const names = { radar: 'رادار الكشف المبكر', walls: 'الجدران المحصنة', aa: 'منظومة الدفاع الجوي', stealth: 'السرب الشبحي', eng: 'الوحدة الهندسية', ammo: 'الذخائر الخارقة' };
-              addLog(`⚠️ تلقينا ضربة قوية تسببت بتحطم [${names[toDestroy]}]! (-1 صحة القاعدة)`, 'danger');
+              destroyedUpgradeName = names[toDestroy];
+              destroyedUpgradeKey = toDestroy;
+              addLog(`⚠️ تلقينا ضربة قوية تسببت بتحطم [${destroyedUpgradeName}]! (-1 صحة القاعدة)`, 'danger');
               hitUpgrade = true;
               if (toDestroy === 'walls') {
                 G.maxHealth--;
@@ -5040,11 +5197,47 @@
               updateUI();
 
               const attackMessages = [
-                "الجميع إلى الملاجئ! إنهم يقصفون المطار! 💥",
-                "النيران تلتهم مستودع الذخيرة الاحتياطي! نحتاج فرق الإطفاء فوراً! 🔥",
-                "لقد دمروا المدرج الشرقي! أرسلوا فرق الإنقاذ حالا! 🚨"
+                "الجميع إلى الملاجئ! لقد ألحق القصف أضراراً جسيمة بمحيط القاعدة، النيران تلتهم المرافق الحيوية!",
+                "لقد تم استهدافنا! دوي الانفجارات يهز الأرجاء وفرق الإنقاذ تكافح للسيطرة على الحرائق الهائلة!",
+                "غارة جوية مفاجئة! الدخان يغطي السماء ورائحة الدمار تفوح في كل شبر من المطار!"
               ];
               const dramaMsg = attackMessages[Math.floor(Math.random() * attackMessages.length)];
+
+              const upgradeDramaPhrases = {
+                radar: "لقد تم إعماء أعيننا في السماء! شاشات الرادار تحولت إلى رماد ولم نعد قادرين على رصد تحركاتهم المبكرة.",
+                walls: "الجدران التي كانت درعنا الحصين تهاوت كأحجار الدومينو! القاعدة الآن مكشوفة لهجماتهم القادمة.",
+                aa: "صواريخنا الدفاعية احترقت في منصاتها! نحن الآن بلا غطاء جوي يصد غاراتهم الغادرة.",
+                stealth: "طائراتنا الشبحية الفخرية تحولت إلى خردة مشتعلة في حظائرها! ميزتنا التكتيكية الكبرى تبخرت في الهواء.",
+                eng: "معدات المهندسين تحطمت بالكامل، وباتوا عاجزين عن إجراء الإصلاحات السريعة! النزيف سيستمر دون علاج.",
+                ammo: "مخازن الذخيرة الخاصة انفجرت في عرض مرعب! قوتنا الضاربة تراجعت بشكل كارثي."
+              };
+
+              let htmlReport = `
+                <div style="text-align: right; line-height: 1.6; font-family: 'Thmanyah', sans-serif;">
+                  <div style="font-size: 1.1em; margin-bottom: 15px; color: #eee; font-style: italic;">"${dramaMsg}"</div>
+                  <div style="background: rgba(255, 0, 0, 0.1); border: 1px dashed #ff4444; padding: 10px; border-radius: 5px;">
+                    <h4 style="margin-top:0; margin-bottom: 10px; color:#ffaaaa; border-bottom: 1px solid #ff4444; padding-bottom: 5px;">🔴 الأضرار المسجلة:</h4>
+                    <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.95em;">
+                      <li style="margin-bottom: 8px;">❌ <b>البنية التحتية:</b> إصابة مباشرة في المدرج أو المرافق (-1 صحة القاعدة)</li>
+              `;
+
+              if (lostResource) {
+                htmlReport += `<li style="margin-bottom: 8px; color: #ffdddd;">❌ <b>التموين:</b> تدمير مستودع الإمدادات واحتراق مخزون الاحتياط <span style="color:#ff4444; font-weight:bold;">(-1 موارد)</span></li>`;
+              }
+              if (hitUpgrade) {
+                htmlReport += `
+                      <li style="margin-bottom: 8px; color:#ffdddd;">
+                        ❌ <b>أجهزة التطوير المستهدفة:</b> تحطم [${destroyedUpgradeName}]<br>
+                        <span style="color:#ff8888; font-size: 0.9em; display: inline-block; margin-top: 4px;">"${upgradeDramaPhrases[destroyedUpgradeKey]}"</span>
+                      </li>
+                `;
+              }
+              
+              htmlReport += `
+                    </ul>
+                  </div>
+                </div>
+              `;
 
               const proceedTurn = () => {
                 hideNotification();
@@ -5057,7 +5250,7 @@
                 }
               };
 
-              showNotification('هجوم معادٍ! 🚨', dramaMsg + resourceLossMsg, [{ text: 'تم القراءة', action: proceedTurn }]);
+              showNotification('📋 تقرير تقييم الأضرار', htmlReport, [{ text: 'استيعاب الصدمة والمتابعة', action: proceedTurn }]);
             }, 1200);
           }, 'enemy_attack');
 
