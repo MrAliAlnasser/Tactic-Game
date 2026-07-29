@@ -1280,10 +1280,10 @@
       background: var(--bg-darkest);
       border: 2px solid var(--gold);
       border-radius: 10px;
-      padding: 30px;
+      padding: 20px;
       z-index: 200;
       text-align: center;
-      max-width: 520px;
+      max-width: 450px;
       display: none;
       animation: notifPop 0.3s ease;
       box-shadow: 0 0 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 160, 48, 0.1);
@@ -1843,7 +1843,7 @@
             <div class="map-grid" id="map-grid"></div>
             <div
               style="font-size:13px;color:var(--text-dim);padding:10px;border:1px solid var(--border-color);border-radius:4px; text-align: center; background: rgba(0,0,0,0.2); margin-top: 10px;">
-              <div id="intel-hint" style="margin-bottom: 5px;">اجمع المعلومات لكشف موقع العدو</div>
+              <div id="intel-hint" style="margin-bottom: 3px;">اجمع المعلومات لكشف موقع العدو</div>
               <div id="enemy-status-container" style="text-align: center;"></div>
             </div>
           </div>
@@ -1878,7 +1878,7 @@
 
         <!-- DISCOVERY MODAL -->
         <div class="glass-modal" id="discovery-modal" style="z-index: 10500;">
-          <div class="glass-modal-content" style="max-width: 500px; text-align: center; border: 2px solid #f44; box-shadow: 0 0 40px rgba(255, 0, 0, 0.4); padding: 30px;">
+          <div class="glass-modal-content" style="max-width: 500px; text-align: center; border: 2px solid #f44; box-shadow: 0 0 40px rgba(255, 0, 0, 0.4); padding: 20px;">
             <h2 style="color: #f44; font-size: 28px; margin-top: 0; text-shadow: 0 0 10px rgba(255,0,0,0.8);">🚨 الإنذار الأحمر 🚨</h2>
             <div id="discovery-story" style="font-size: 16px; line-height: 1.6; color: #fcc; margin-bottom: 20px;"></div>
             <div id="discovery-advice" style="font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 25px;"></div>
@@ -2306,12 +2306,12 @@
 
     // ===== GENERALS =====
     const GENERALS = [
-      { name: 'الجنرال صقر الحديد', rank: 'هجوم', type: 'strike', emoji: '🦅', img: 'assets/generals/iron_falcon.png' },
+      { name: 'الجنرال صقر', rank: 'هجوم', type: 'strike', emoji: '🦅', img: 'assets/generals/iron_falcon.png' },
       { name: 'الجنرال ثعلب الصحراء', rank: 'معلومات', type: 'intel', emoji: '🦊', img: 'assets/generals/desert_fox.png' },
-      { name: 'الجنرال درع الوطن', rank: 'دفاع', type: 'defense', emoji: '🛡️', img: 'assets/generals/shield_nation.png' },
+      { name: 'جنرال التحصينات', rank: 'دفاع', type: 'defense', emoji: '🛡️', img: 'assets/generals/shield_nation.png' },
       { name: 'الجنرال عين النسر', rank: 'استطلاع', type: 'scout', emoji: '👁️', img: 'assets/generals/eagle_eye.png' },
       { name: 'الجنرال قلب الأسد', rank: 'قيادة', type: 'versatile', emoji: '🦁', img: 'assets/generals/lionheart.png' },
-      { name: 'الجنرال سيف العدالة', rank: 'تكتيك', type: 'tactical', emoji: '⚔️', img: 'assets/generals/sword_justice.png' }
+      { name: 'الجنرال سيف', rank: 'تكتيك', type: 'tactical', emoji: '⚔️', img: 'assets/generals/sword_justice.png' }
     ];
 
     // ===== STORY =====
@@ -2368,7 +2368,26 @@
       initGame();
       showScreen('screen-story');
       const el = document.getElementById('story-text');
-      el.innerHTML = STORY[0];
+      el.style.width = '100%';
+          el.style.maxWidth = '400px';
+          el.style.margin = '0 auto';
+          el.style.cursor = 'default';
+          
+          el.innerHTML = 
+            <div class="dogtag-left" style="padding-top: 15px;">
+              <img src="" class="general-avatar" alt="Avatar" style="width: 70px; height: 70px; cursor: pointer;" onclick="showImagePreview('')">
+              <div class="dogtag-cost" style="font-size: 14px; margin-top: 5px;">- موارد</div>
+            </div>
+            <div class="dogtag-right" style="padding-top: 15px;">
+              <div class="general-name">
+                <span></span>
+                <span></span>
+              </div>
+              <span class="general-rank"></span>
+              <div class="dogtag-title" style="margin-top: 5px;"> - </div>
+              <div class="general-advice" style="font-size: 0.95em; opacity: 0.9; margin-top: 6px;"></div>
+            </div>
+          ;
       el.style.animation = 'none';
       void el.offsetWidth;
       el.style.animation = 'storyFade 1.5s ease forwards';
@@ -3716,6 +3735,25 @@
     }
 
     // ===== MOBILE CAROUSEL =====
+    
+    function rerollCards() {
+      if (G.intel < 3) return;
+      G.intel -= 3;
+      eventLog('تم طلب خطط جديدة من القيادة (-3 معلومات)');
+      if (typeof SFX !== 'undefined' && SFX.playClick) SFX.playClick();
+      G.selectedGeneral = -1;
+      generateAdvice();
+      renderGenerals();
+      updateUI();
+      
+      const row = document.getElementById('generals-row');
+      if (row) {
+        row.style.animation = 'none';
+        void row.offsetWidth;
+        row.style.animation = 'notifPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      }
+    }
+
     function initMobileCarousel() {
       if (window.innerWidth > 768) return;
       const row = document.getElementById('generals-row');
@@ -4642,6 +4680,28 @@
     }
 
     // ===== ENEMY TURN =====
+    
+    function buildBanterHTML(img1, name1, color1, msg1, img2, name2, color2, msg2) {
+      return 
+        <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 5px; direction: rtl;">
+          <div style="display: flex; align-items: flex-start; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border-right: 3px solid ; text-align: right;">
+             <img src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid ; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+             <div>
+               <b style="color:; font-size: 1.05em; display: block; margin-bottom: 3px;"></b>
+               <span style="font-size: 0.9em; line-height: 1.4; color: #ddd;">""</span>
+             </div>
+          </div>
+          <div style="display: flex; align-items: flex-start; flex-direction: row-reverse; gap: 10px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border-left: 3px solid ; text-align: left;">
+             <img src="" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 2px solid ; flex-shrink: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.5);">
+             <div style="width: 100%;">
+               <b style="color:; font-size: 1.05em; display: block; margin-bottom: 3px;"></b>
+               <span style="font-size: 0.9em; line-height: 1.4; color: #ddd; display: block;" dir="rtl">""</span>
+             </div>
+          </div>
+        </div>
+      ;
+    }
+
     function checkBanterAndEndTurn(actionType, success) {
       if (!success) {
         if (actionType === 'strike') {
@@ -4659,7 +4719,7 @@
           return;
         }
         if (actionType === 'raid') {
-          const banterText = `<b style="color:#d9534f">الجنرال المهندس:</b> "هل اقتنعت الآن يا سيف العدالة؟ القوات الخاصة لا تنفع إذا لم تجد ما تسرقه! كان الأجدر ترك الموارد لتعزيز دفاعاتنا."<br><br><b style="color:#5bc0de">الجنرال سيف العدالة:</b> "التكتيكات الجريئة تحمل المخاطر. الجلوس خلف الجدران لن يحسم المعركة، بل يؤجل الهزيمة فقط."`;
+          const banterText = `<b style="color:#d9534f">الجنرال المهندس:</b> "هل اقتنعت الآن يا سيف العدالة؟ القوات الخاصة لا تنفع إذا لم تجد ما تسرقه! كان الأجدر ترك الموارد لتعزيز دفاعاتنا."<br><br><b style="color:#5bc0de">الجنرال سيف:</b> "التكتيكات الجريئة تحمل المخاطر. الجلوس خلف الجدران لن يحسم المعركة، بل يؤجل الهزيمة فقط."`;
           setTimeout(() => {
             showNotification('مناوشات القيادة 🗣️', banterText, [{ text: 'متابعة', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
           }, 100);
@@ -4847,18 +4907,18 @@
 
     // ===== MODAL TOGGLES =====
     const CODEX_CARDS = [
-      { general: { name: 'الجنرال الصارم', rank: 'جنرال الهجوم', emoji: '⚔️', img: 'assets/generals/iron_falcon.png' }, title: 'هجوم موجه مباشر', cost: 3, advice: 'قصف مباشر على قاعدة العدو. سيكشف موقعنا للعدو!', actionLabel: 'تأكيد الهجوم' },
-      { general: { name: 'الجنرال ذو الظل', rank: 'جنرال تخفي', emoji: '🥷', img: 'assets/generals/night_shadow.png' }, title: 'هجوم جوي خفي', cost: 5, advice: 'قصف موقع العدو باستخدام طائرات الشبح. موقعنا سيبقى آمناً.', actionLabel: 'تنفيذ القصف الخفي' },
-      { general: { name: 'الجنرال العاصفة الحديدية', rank: 'مشير جوي', emoji: '🌪️', img: 'assets/generals/iron_storm.png' }, title: 'هجوم شامل وقصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف تماماً. أضرار جسيمة!', actionLabel: 'إطلاق العاصفة' },
-      { general: { name: 'جنرال استطلاع', rank: 'استطلاع', emoji: '🔭', img: 'assets/generals/eagle_eye.png' }, title: 'استطلاع جوي', cost: 1, advice: 'إرسال طائرة استطلاع لمسح منطقة محددة في الخريطة.', actionLabel: 'بدء الاستطلاع' },
-      { general: { name: 'جنرال معلومات', rank: 'معلومات', emoji: '📡', img: 'assets/generals/desert_fox.png' }, title: 'جمع المعلومات', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف موقعين في الخريطة. (فائدة نقاط المعلومات: عند وصولها إلى 10 يكشف موقع قاعدة العدو تلقائياً).', actionLabel: 'تأكيد الاختراق' },
-      { general: { name: 'جنرال الدفاع', rank: 'دفاع', emoji: '🛡️', img: 'assets/generals/shield_nation.png' }, title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو.', actionLabel: 'تأكيد التعزيز' },
-      { general: { name: 'جنرال مهندس', rank: 'هندسة', emoji: '🔧', img: 'assets/generals/shield_nation.png' }, title: 'ترميم المطار', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة.', actionLabel: 'بدء الإصلاحات' },
-      { general: { name: 'الجنرال الماكر', rank: 'تكتيكات', emoji: '🦊', img: 'assets/generals/desert_fox.png' }, title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة.', actionLabel: 'شن الغارة' },
-      { general: { name: 'جنرال عمليات', rank: 'تكتيكات', emoji: '♟️', img: 'assets/generals/sword_justice.png' }, title: 'شن هجوم وهمي', cost: 1, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته.', actionLabel: 'تأكيد التمويه' },
-      { general: { name: 'جنرال متوازن', rank: 'متوازن', emoji: '⚖️', img: 'assets/generals/lionheart.png' }, title: 'خطة متوازنة', cost: 2, advice: 'تأمين الموارد وكشف مناطق جديدة بشكل متوازن ومنهجي.', actionLabel: 'بدء التأمين' },
-      { general: { name: 'جنرال هجوم', rank: 'هجوم', emoji: '⚔️', img: 'assets/generals/iron_falcon.png' }, title: 'قصف عشوائي', cost: 2, advice: 'قصف منطقة مجهولة بشكل عشوائي بحثاً عن هدف.', actionLabel: 'إطلاق النار' },
-      { general: { name: 'جميع الجنرالات', rank: 'متنوع', emoji: '💤', img: 'assets/generals/lionheart.png' }, title: 'إراحة الطاقم', cost: 0, advice: 'أعطِ الجنود قسطاً من الراحة لجمع بعض الموارد ببطء.', actionLabel: 'تأكيد الراحة' }
+      { general: GENERALS[0], actionLabel: 'توجيه الضربة', title: 'هجوم موجه مباشر', cost: 3, advice: 'قصف مباشر على قاعدة العدو. الوسيلة الأساسية لحسم المعركة لكنها ستكشف موقعنا للعدو!' },
+      { general: { name: 'الجنرال ظل الليل', rank: 'عمليات خاصة', emoji: '🌙', img: 'assets/generals/night_shadow.png' }, actionLabel: 'قصف خفي', title: 'هجوم جوي خفي', cost: 4, advice: 'قصف موقع العدو باستخدام طائرات الشبح. موقعنا سيبقى آمناً تماماً وتكلفتها أعلى.' },
+      { general: { name: 'الجنرال عاصفة الحديد', rank: 'سلاح جو', emoji: '✈️', img: 'assets/generals/iron_storm.png' }, actionLabel: 'هجوم شامل', title: 'قصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف تماماً. أضرار جسيمة وتكشف موقعنا للعدو.' },
+      { general: GENERALS[3], actionLabel: 'استطلاع', title: 'استطلاع جوي', cost: 1, advice: 'إرسال طائرة استطلاع لمسح منطقة محددة في الخريطة لتأكيد وجود العدو أو خلوها، وتزيد نقاط المعلومات.' },
+      { general: GENERALS[1], actionLabel: 'جمع المعلومات', title: 'تحليل استخباراتي', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف قطاعات في الخريطة. (عند وصول المعلومات إلى 10 يكشف موقع قاعدة العدو تلقائياً).' },
+      { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة بنسبة كبيرة هذا الدور.' },
+      { general: GENERALS[2], actionLabel: 'صيانة', title: 'ترميم المطار', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة وتجنب الهزيمة المؤكدة.' },
+      { general: GENERALS[4], actionLabel: 'غارة', title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة، وإذا نجحت تضعف هجماته القادمة.' },
+      { general: GENERALS[5], actionLabel: 'تمويه', title: 'شن هجوم وهمي', cost: 3, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته وفرصة إصابته لنا في الدور القادم.' },
+      { general: GENERALS[4], actionLabel: 'توازن', title: 'تكتيك متوازن', cost: 2, advice: 'تأمين الموارد وكشف مناطق جديدة بشكل متوازن ومنهجي.' },
+      { general: GENERALS[0], actionLabel: 'إطلاق النار', title: 'قصف عشوائي', cost: 2, advice: 'قصف منطقة مجهولة بشكل عشوائي بحثاً عن هدف. خيار يائس عند نفاد خيارات الاستطلاع.' },
+      { general: GENERALS[4], actionLabel: 'راحة', title: 'إراحة الطاقم', cost: 0, advice: 'أعطِ الجنود قسطاً من الراحة لالتقاط الأنفاس، وإصلاح القاعدة جزئياً واستعادة بعض الموارد.' }
     ];
 
     function toggleCodexModal() {
@@ -4872,10 +4932,7 @@
           el.className = 'general-card';
           el.style.transform = 'none';
           el.style.position = 'relative';
-          el.style.width = '240px';
-          el.style.margin = '0';
-          el.style.cursor = 'pointer';
-          el.onclick = () => { showImagePreview(card.general.img); };
+          
           
           el.innerHTML = `
             <div class="card-header" style="background: var(--primary-bg); padding: 10px;">
