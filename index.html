@@ -8,7 +8,7 @@
   <meta name="description" content="قم بقيادة مطارك الحربي واستشر جنرالاتك في لعبة القرار الأخير الاستراتيجية.">
   <meta property="og:title" content="القرار الأخير - لعبة استراتيجية عسكرية">
   <meta property="og:description"
-    content="قم بقيادة مطارك الحربي، استشر جنرالاتك، وكثف العمليات الاستخباراتية لكشف وتدمير قاعدة العدو في هذه اللعبة الاستراتيجية المشوقة.">
+    content="قم بقيادة مطارك الحربي، استشر جنرالاتك، وكثف عمليات جمع المعلومات لكشف وتدمير قاعدة العدو في هذه اللعبة الاستراتيجية المشوقة.">
   <meta property="og:image" content="https://mralialnasser.github.io/Tactic-Game/assets/og-image.jpg">
   <meta property="og:url" content="https://mralialnasser.github.io/Tactic-Game/index.html">
   <meta property="og:type" content="website">
@@ -1843,7 +1843,7 @@
             <div class="map-grid" id="map-grid"></div>
             <div
               style="font-size:13px;color:var(--text-dim);padding:10px;border:1px solid var(--border-color);border-radius:4px; text-align: center; background: rgba(0,0,0,0.2); margin-top: 10px;">
-              <div id="intel-hint" style="margin-bottom: 5px;">اجمع الاستخبارات لكشف موقع العدو</div>
+              <div id="intel-hint" style="margin-bottom: 5px;">اجمع المعلومات لكشف موقع العدو</div>
               <div id="enemy-status-container" style="text-align: center;"></div>
             </div>
           </div>
@@ -2054,6 +2054,20 @@
           const wasPlaying = !this.bgm.paused;
           const currentVol = this.bgm.volume;
           this.bgm.src = 'Red-Alarm.mp3';
+          this.bgm.loop = true;
+          this.bgm.volume = currentVol;
+          if (wasPlaying) {
+            this.bgm.play().catch(e => console.log('BGM play failed', e));
+          }
+        }
+      },
+
+      stopRedAlarm() {
+        if (this.bgm && this.redAlarmActive) {
+          this.redAlarmActive = false;
+          const wasPlaying = !this.bgm.paused;
+          const currentVol = this.bgm.volume;
+          this.bgm.src = 'March_Toward_the_Iron_Gates.mp3';
           this.bgm.loop = true;
           this.bgm.volume = currentVol;
           if (wasPlaying) {
@@ -2293,7 +2307,7 @@
     // ===== GENERALS =====
     const GENERALS = [
       { name: 'الجنرال صقر الحديد', rank: 'هجوم', type: 'strike', emoji: '🦅', img: 'assets/generals/iron_falcon.png' },
-      { name: 'الجنرال ثعلب الصحراء', rank: 'استخبارات', type: 'intel', emoji: '🦊', img: 'assets/generals/desert_fox.png' },
+      { name: 'الجنرال ثعلب الصحراء', rank: 'معلومات', type: 'intel', emoji: '🦊', img: 'assets/generals/desert_fox.png' },
       { name: 'الجنرال درع الوطن', rank: 'دفاع', type: 'defense', emoji: '🛡️', img: 'assets/generals/shield_nation.png' },
       { name: 'الجنرال عين النسر', rank: 'استطلاع', type: 'scout', emoji: '👁️', img: 'assets/generals/eagle_eye.png' },
       { name: 'الجنرال قلب الأسد', rank: 'قيادة', type: 'versatile', emoji: '🦁', img: 'assets/generals/lionheart.png' },
@@ -2302,7 +2316,7 @@
 
     // ===== STORY =====
     const STORY = [
-      'وصلت تقارير استخباراتية مقلقة...\nعدو مجهول يهدد أمن المنطقة بأكملها.\nمطارك العسكري هو خط الدفاع الأخير.\n\n<span>مهمتك: اكتشف موقع العدو ودمر قاعدته قبل أن يدمر قاعدتك.</span>',
+      'وصلت تقارير معلوماتية مقلقة...\nعدو مجهول يهدد أمن المنطقة بأكملها.\nمطارك العسكري هو خط الدفاع الأخير.\n\n<span>مهمتك: اكتشف موقع العدو ودمر قاعدته قبل أن يدمر قاعدتك.</span>',
     ];
 
     // ===== INIT =====
@@ -2317,6 +2331,11 @@
       G.isEnemyFound = false;
       G.enemyKnowsUs = false;
       G.alarmActive = false;
+      G.redAlarmTriggered = false;
+      G.aaCooldown = 0;
+      if (typeof SFX !== 'undefined' && SFX.stopRedAlarm) {
+        SFX.stopRedAlarm();
+      }
       G.enemyAggressionBoost = 0;
       G.consecutiveWarTurns = 0;
       G.warTurnsStreak = 0;
@@ -2538,10 +2557,10 @@
         hint.textContent = '🎯 تم تحديد موقع العدو! نفذ الضربات!';
         hint.style.color = '#e08060';
       } else if (G.intel >= 8) {
-        hint.textContent = '🔥 استخبارات عالية! قريب من الكشف';
+        hint.textContent = '🔥 معلومات عالية! قريب من الكشف';
         hint.style.color = 'var(--gold)';
       } else {
-        hint.textContent = 'اجمع الاستخبارات لكشف موقع العدو (' + G.intel + '/10)';
+        hint.textContent = 'اجمع المعلومات لكشف موقع العدو (' + G.intel + '/10)';
         hint.style.color = 'var(--text-dim)';
       }
 
@@ -2766,10 +2785,34 @@
 
     // ===== TURN SYSTEM =====
     function startTurn() {
+      if (G.aaCooldown > 0) G.aaCooldown--;
+      if (G.aaDebrisTurns > 0) G.aaDebrisTurns--;
       setWaitState(false);
       G.animating = true;
       G.selectedGeneral = -1;
 
+      if (G.intel >= 10 && !G.isEnemyFound) {
+          G.isEnemyFound = true;
+          G.map[G.enemyPos] = 2;
+          awardTrophy('eagle_eye');
+          
+          showNotification('اكتشاف حاسم! 🎯', 'بفضل تراكم 10 نقاط معلومات، استخباراتنا تمكنت أخيراً من فك شفرة موقع قاعدة العدو الرئيسية!\n\n<span style="color:#f0ad4e; font-weight:bold;">طائراتنا الهجومية بانتظار أوامرك لتدميرهم.</span>', [{ 
+            text: 'ممتاز! استعدوا للهجوم', 
+            gold: true, 
+            action: () => {
+              hideNotification();
+              setTimeout(() => {
+                continueStartTurn();
+              }, 100);
+            }
+          }]);
+          return;
+      }
+
+      continueStartTurn();
+    }
+
+    function continueStartTurn() {
       playAirportAnimation(() => {
         G.animating = false;
         generateAdvice();
@@ -2857,14 +2900,35 @@
       if (animState === 'takeoff') totalFrames = 200;
       if (animState === 'resource_gain') totalFrames = 90;
       if (animState === 'enemy_attack') totalFrames = 80;
+      if (animState === 'aa_intercept') totalFrames = 80;
 
+      let fireOrigins = [];
       let fires = [];
+      let smokes = [];
       if (G.health < G.maxHealth) {
-        for (let i = 0; i < (G.maxHealth - G.health) * 10; i++) {
+        const missing = G.maxHealth - G.health;
+        for(let i=0; i<missing; i++) {
+           fireOrigins.push({
+             x: 0.2 + Math.random() * 0.6,
+             y: 0.6 + Math.random() * 0.2
+           });
+        }
+        for (let i = 0; i < missing * 40; i++) {
           fires.push({
-            x: Math.random() * 800, y: Math.random() * 400,
-            vx: (Math.random() - 0.5) * 2, vy: -Math.random() * 3 - 1,
-            life: Math.random() * 40 + 20, maxLife: 60
+            originIndex: i % missing,
+            rx: (Math.random() - 0.5) * 40, ry: (Math.random() - 0.5) * 10,
+            vx: (Math.random() - 0.5) * 1, vy: -Math.random() * 2 - 1.5,
+            life: Math.random() * 40, maxLife: 40,
+            size: Math.random() * 15 + 10
+          });
+        }
+        for (let i = 0; i < missing * 30; i++) {
+          smokes.push({
+            originIndex: i % missing,
+            rx: (Math.random() - 0.5) * 60, ry: (Math.random() - 0.5) * 20 - 20,
+            vx: (Math.random() - 0.5) * 2 + 1, vy: -Math.random() * 1.5 - 1.5,
+            life: Math.random() * 80, maxLife: 80,
+            size: Math.random() * 30 + 20
           });
         }
       }
@@ -3083,6 +3147,27 @@
           ctx.fillRect(-15, -12, 30, 4); ctx.fillRect(-15, -18, 30, 4);
           ctx.fillStyle = '#ff2222'; ctx.fillRect(-15, -12, 4, 4); ctx.fillRect(-15, -18, 4, 4);
           ctx.restore();
+          
+          if (G.aaCooldown && G.aaCooldown > 0) {
+            ctx.fillStyle = 'rgba(30, 30, 30, 0.8)';
+            ctx.beginPath(); ctx.ellipse(aax, aay - 45, 24, 14, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = '13px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('⏳ ' + G.aaCooldown, aax, aay - 44);
+          }
+        }
+
+        if (G.aaDebrisTurns && G.aaDebrisTurns > 0) {
+          const dx = W * 0.4; const dy = H * 0.55 + 20;
+          ctx.fillStyle = '#333'; ctx.fillRect(dx - 15, dy - 5, 30, 10);
+          ctx.fillStyle = '#222'; ctx.fillRect(dx + 10, dy - 12, 15, 12);
+          ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(dx - 5, dy, 12, 0, Math.PI*2); ctx.fill();
+          if (Math.random() < 0.5) {
+              ctx.fillStyle = 'rgba(100,100,100,0.5)';
+              ctx.beginPath(); ctx.arc(dx + (Math.random()-0.5)*20, dy - 10 - Math.random()*20, 10+Math.random()*10, 0, Math.PI*2); ctx.fill();
+          }
         }
 
         if (G.upgrades && G.upgrades.eng) {
@@ -3142,6 +3227,43 @@
           }
         }
 
+        if (animState === 'aa_intercept') {
+          const mx = W * 0.4 + Math.sin(globalTime * 0.1) * 10;
+          let my = -100 + Math.min(frame / 40, 1) * (H * 0.4 + 100);
+          
+          if (frame < 40) {
+            ctx.fillStyle = 'rgba(255, 50, 0, 0.1)'; ctx.fillRect(0, 0, W, H);
+            ctx.fillStyle = '#ddd'; ctx.fillRect(mx - 4, my - 20, 8, 30);
+            const fireSize = 10 + Math.random() * 10;
+            ctx.fillStyle = '#f90'; ctx.beginPath(); ctx.arc(mx, my - 30 - fireSize / 2, fireSize, 0, Math.PI * 2); ctx.fill();
+            
+            if (frame > 20) {
+              const aax = W * 0.72; const aay = H * 0.55 + 20;
+              const prog = (frame - 20) / 20;
+              const aamX = aax + (mx - aax) * prog;
+              const aamY = aay + (my - aay) * prog;
+              ctx.fillStyle = '#ff8800'; ctx.fillRect(aamX - 2, aamY, 4, 15);
+              ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(aamX, aamY + 15, 6, 0, Math.PI * 2); ctx.fill();
+            }
+          } else {
+            if (frame === 40 && typeof SFX !== 'undefined') SFX.play("explosion");
+            const expProgress = Math.min((frame - 40) / 40, 1);
+            
+            if (expProgress < 0.5) {
+                const alpha = 1 - (expProgress * 2);
+                const expSize = expProgress * 300;
+                ctx.fillStyle = `rgba(255, 150, 0, ${alpha})`; ctx.beginPath(); ctx.arc(mx, H * 0.4, expSize, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`; ctx.beginPath(); ctx.arc(mx, H * 0.4, expSize * 0.3, 0, Math.PI * 2); ctx.fill();
+            }
+
+            const debrisY = H * 0.4 + expProgress * (H * 0.15 + 20);
+            const debrisX = mx + Math.sin(frame * 0.2) * 20;
+            ctx.fillStyle = '#444'; ctx.fillRect(debrisX - 10, debrisY, 20, 10);
+            ctx.fillStyle = '#222'; ctx.fillRect(debrisX + 15, debrisY - 10, 10, 15);
+            ctx.fillStyle = '#f60'; ctx.beginPath(); ctx.arc(debrisX, debrisY - 5, 8, 0, Math.PI * 2); ctx.fill();
+          }
+        }
+
         let px = W * 0.2, py = runwayY + 30, planeScale = 1;
         let planeVisible = true;
         let pilotVisible = true;
@@ -3190,17 +3312,51 @@
           ctx.restore();
         }
 
-        if (fires.length > 0) {
+        if (fires.length > 0 || smokes.length > 0) {
+          ctx.globalCompositeOperation = 'lighter';
           fires.forEach(f => {
-            f.x += f.vx; f.y += f.vy; f.life--;
+            f.rx += f.vx; f.ry += f.vy; f.life--;
             if (f.life <= 0) {
-              f.x = W * 0.1 + Math.random() * (W * 0.8);
-              f.y = H * 0.55 - Math.random() * Math.max(70, H * 0.35);
+              f.rx = (Math.random() - 0.5) * 40;
+              f.ry = (Math.random() - 0.5) * 10;
               f.life = f.maxLife;
             }
+            const origin = fireOrigins[f.originIndex];
+            const px = W * origin.x + f.rx;
+            const py = H * origin.y + f.ry;
             const alpha = Math.max(0, f.life / f.maxLife);
-            ctx.fillStyle = f.life > f.maxLife * 0.6 ? `rgba(255, ${Math.floor(Math.random() * 150)}, 0, ${alpha})` : `rgba(100, 100, 100, ${alpha * 0.5})`;
-            ctx.beginPath(); ctx.arc(f.x, f.y, 3 + Math.random() * 4, 0, Math.PI * 2); ctx.fill();
+            const radius = f.size * (0.5 + 0.5 * (1 - alpha));
+            
+            const grad = ctx.createRadialGradient(px, py, 0, px, py, radius);
+            const r = 255;
+            const g = Math.floor(200 * alpha);
+            grad.addColorStop(0, `rgba(${r}, ${g}, 0, ${alpha})`);
+            grad.addColorStop(1, `rgba(${r}, 0, 0, 0)`);
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(px, py, radius, 0, Math.PI * 2); ctx.fill();
+          });
+          
+          ctx.globalCompositeOperation = 'source-over';
+          smokes.forEach(f => {
+            f.rx += f.vx; f.ry += f.vy; f.life--;
+            if (f.life <= 0) {
+              f.rx = (Math.random() - 0.5) * 60;
+              f.ry = (Math.random() - 0.5) * 20 - 20;
+              f.life = f.maxLife;
+            }
+            const origin = fireOrigins[f.originIndex];
+            const px = W * origin.x + f.rx;
+            const py = H * origin.y + f.ry;
+            const alpha = Math.max(0, f.life / f.maxLife);
+            const radius = f.size * (1 + (1 - alpha));
+            
+            const grad = ctx.createRadialGradient(px, py, 0, px, py, radius);
+            grad.addColorStop(0, `rgba(30, 30, 30, ${alpha * 0.7})`);
+            grad.addColorStop(1, `rgba(30, 30, 30, 0)`);
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath(); ctx.arc(px, py, radius, 0, Math.PI * 2); ctx.fill();
           });
         }
 
@@ -3320,20 +3476,19 @@
           consequenceType: 'weaken_enemy'
         });
 
-        if (G.resources <= 1) {
+        if (G.resources <= 1 || G.health <= 2) {
           pool.push({
             general: pickGeneral('versatile'),
             action: 'rest',
-            title: 'إعادة تنظيم القوات',
-            advice: 'ذخيرتنا نفدت تقريبًا! يجب أن نركز هذا الدور على الراحة وتجهيز الموارد.',
-            actionLabel: '💤 راحة وجمع موارد (+2)',
+            title: 'التقاط الأنفاس وأعمال الصيانة',
+            advice: 'إعطاء الجنود قسطاً من الراحة، وإصلاح ما يمكن إصلاحه وفرز الأدوات المدمّرة.',
+            actionLabel: '💤 تأكيد الراحة (+2 موارد، +1 صحة)',
             cost: 0,
             consequence: null,
             consequenceType: null
           });
         }
 
-        // Shuffle everything EXCEPT the first attack option
         const firstAttack = pool.shift();
         shuffle(pool);
         // Pick 2 unique generals from remaining, then always include the direct strike
@@ -3347,6 +3502,11 @@
           if (remaining.length === 2) break;
         }
         G.currentAdvice = [firstAttack, ...remaining];
+
+        if (G.health <= 2 && !G.currentAdvice.some(a => a.action === 'repair')) {
+          const repairOption = pool.find(a => a.action === 'repair');
+          if (repairOption) G.currentAdvice[1] = repairOption;
+        }
 
         if (G.resources <= 1 && !G.currentAdvice.some(a => a.cost === 0)) {
           const restOption = pool.find(a => a.action === 'rest');
@@ -3448,13 +3608,13 @@
           consequenceType: 'raid_risk'
         });
 
-        if (G.resources <= 1) {
+        if (G.resources <= 1 || G.health <= 2) {
           pool.push({
             general: pickGeneral('versatile'),
             action: 'rest',
-            title: 'إعادة تنظيم القوات',
-            advice: 'ذخيرتنا نفدت تقريبًا! يجب أن نركز هذا الدور على الراحة وتجهيز الموارد.',
-            actionLabel: '💤 راحة وجمع موارد (+2)',
+            title: 'التقاط الأنفاس وأعمال الصيانة',
+            advice: 'إعطاء الجنود قسطاً من الراحة، وإصلاح ما يمكن إصلاحه وفرز الأدوات المدمّرة.',
+            actionLabel: '💤 تأكيد الراحة (+2 موارد، +1 صحة)',
             cost: 0,
             consequence: null,
             consequenceType: null
@@ -3472,6 +3632,11 @@
           if (uniqueAdvice.length === 3) break;
         }
         G.currentAdvice = uniqueAdvice;
+
+        if (G.health <= 2 && !G.currentAdvice.some(a => a.action === 'repair')) {
+          const repairOption = pool.find(a => a.action === 'repair');
+          if (repairOption) G.currentAdvice[1] = repairOption;
+        }
 
         if (G.resources <= 1 && !G.currentAdvice.some(a => a.cost === 0)) {
           const restOption = pool.find(a => a.action === 'rest');
@@ -3603,6 +3768,7 @@
       if (G.animating) return;
       G.animating = true;
       setWaitState(true, '⏳ جاري تخطي الدور والعدو يخطط...');
+      document.getElementById('generals-row').innerHTML = '';
       G.resources += 1;
       G.consecutiveWarTurns = 0;
       addLog('⏭️ تخطّي الدور — القوات تجمع إمدادات بسيطة (+1 🛢️)', 'ally');
@@ -3669,6 +3835,7 @@
 
       G.animating = true;
       setWaitState(true, '⏳ جاري تنفيذ الخطة...');
+      document.getElementById('generals-row').innerHTML = '';
       
       playExecutionSequence(() => {
         G.resources -= cost;
@@ -3701,10 +3868,21 @@
     }
 
     function executeRest() {
-      playActionAnimation('resource', '💤 جاري تجهيز الموارد والراحة...', () => {
+      playActionAnimation('resource', '⏳ جاري إراحة القوات وإجراء الصيانة...', () => {
         G.resources += 2;
-        addLog('+2 موارد (راحة التنظيم)', 'ally');
-        endPlayerTurn();
+        let healLog = '';
+        if (G.health < G.maxHealth) {
+          G.health++;
+          healLog = ' و +1 صحة للقاعدة';
+        }
+        let pros = ['تأمين (+2) موارد واستعادة النشاط', 'إراحة الجنود يخفف من خطر انهيار المعنويات' + (healLog ? '، وإصلاح أضرار القاعدة' : '')];
+        let cons = ['ترك الفرصة للعدو للمبادرة والحركة بحرية'];
+        let story = "خيم الهدوء على المطار لأول مرة منذ بدء العمليات. ارتاح الجنود وتلقت الطائرات صيانة شاملة، بينما وصلت إمدادات جديدة بهدوء استعداداً للجولة القادمة.";
+        showResultModal("التقاط الأنفاس ⛺", story, pros, cons, () => {
+          addLog(`+2 موارد${healLog} (التقاط الأنفاس وأعمال الصيانة)`, 'ally');
+          endPlayerTurn(); 
+        });
+        updateUI();
       });
     }
 
@@ -3754,24 +3932,27 @@
           title = "اكتشاف حاسم! 🎯";
           story = "اخترقت طائرات الاستطلاع الغيوم لتكشف عن مجمع عسكري ضخم للعدو. أرسل الطيار الإحداثيات بلهفة: 'لقد وجدناهم! القاعدة الرئيسية في متناول أيدينا!'";
           pros.push(`تحديد الموقع الدقيق للعدو في القطاع ${getCellName(target)}`);
-          pros.push('كسب +3 معلومات استخباراتية إضافية');
-          showResultModal(title, story, pros, cons, () => { endPlayerTurn(); });
+          pros.push('كسب +3 نقاط معلومات إضافية');
+          showResultModal(title, story, pros, cons, () => { checkBanterAndEndTurn('recon', true); });
         } else {
           const adj = isAdjacent(target, G.enemyPos);
           G.map[target] = 1;
           G.intel += 1;
           G.totalScouted++;
           pros.push(`مسح القطاع ${getCellName(target)} وتأكيد خلوه من القواعد الرئيسية`);
-          pros.push('كسب +1 معلومات استخباراتية');
+          pros.push('كسب +1 نقاط معلومات');
           
-          if (adj) {
+          if (G.intel >= 10) {
+            story = "رغم أن القطاع فارغ، إلا أن طائراتنا التقطت آخر إشارة ناقصة ليكتمل لغز موقع العدو تماماً!";
+            pros.push('اكتملت المعلومات الاستخباراتية بنسبة 100%!');
+          } else if (adj) {
             story = "رغم أن القطاع المستهدف كان يبدو مهجوراً، التقطت أجهزة الرصد ذبذبات لاسلكية مشفرة من مسافة قريبة. العدو ليس ببعيد، نحن نقترب من العرين!";
             pros.push('تم التقاط إشارات مشبوهة، العدو في أحد القطاعات المجاورة!');
           } else {
             story = "عادت طائراتنا بعد مسح شامل للقطاع ولم تجد سوى صمت مطبق وطبيعة قاسية. كل منطقة فارغة تقربنا خطوة نحو الهدف الحقيقي.";
             cons.push('القطاع نظيف ولا توجد آثار قريبة للعدو');
           }
-          showResultModal(title, story, pros, cons, () => { endPlayerTurn(); });
+          showResultModal(title, story, pros, cons, () => { checkBanterAndEndTurn('recon', false); });
         }
         checkScoutTrophy();
         updateUI();
@@ -3779,10 +3960,10 @@
     }
 
     function executeGatherIntel() {
-      playActionAnimation('scout', '🕵️ جمع الاستخبارات...', () => {
+      playActionAnimation('scout', '🕵️ جمع المعلومات...', () => {
         const intelGain = G.upgrades.radar ? 4 : 2;
         G.intel += intelGain;
-        let pros = [`جمع +${intelGain} معلومات استخباراتية هامة`];
+        let pros = [`جمع +${intelGain} نقاط معلومات هامة`];
         let cons = ["استهلاك للموارد والوقت دون القيام بهجوم مباشر"];
         let story = "عملت شبكة جواسيسنا وراداراتنا على مدار الساعة، لجمع الشذرات المتناثرة من البيانات لتركيب الصورة الكاملة للموقف.";
         
@@ -3801,7 +3982,7 @@
             pros.push(`تحليل البيانات كشف القطاع ${getCellName(reveal)} وأكد خلوه من العدو`);
           }
         }
-        showResultModal("جمع الاستخبارات 🕵️", story, pros, cons, () => { endPlayerTurn(); });
+        showResultModal("جمع المعلومات 🕵️", story, pros, cons, () => { endPlayerTurn(); });
         updateUI();
       });
     }
@@ -3989,11 +4170,11 @@
         
         if (newlyDiscovered) {
           showDiscoveryModal('player_strike', () => {
-            showResultModal(title, story, pros, cons, () => { endPlayerTurn(); });
+            showResultModal(title, story, pros, cons, () => { checkBanterAndEndTurn('strike', target === G.enemyPos); });
             updateUI();
           });
         } else {
-          showResultModal(title, story, pros, cons, () => { endPlayerTurn(); });
+          showResultModal(title, story, pros, cons, () => { checkBanterAndEndTurn('strike', target === G.enemyPos); });
           updateUI();
         }
       });
@@ -4026,16 +4207,24 @@
       playActionAnimation('balanced', '⚖️ تنفيذ الخطة المتوازنة...', () => {
         G.intel += 1;
         G.resources += 1;
-        let pros = ['كسب (+1) معلومات استخباراتية', 'تأمين (+1) موارد إضافية'];
+        let pros = ['كسب (+1) نقاط معلومات', 'تأمين (+1) موارد إضافية'];
         let cons = ['مكاسب بسيطة مقارنة بالعمليات المخصصة لجانب واحد'];
         let story = "قررت القيادة اتباع نهج حذر ومتوازن، حيث تم إرسال فرق كشافة صغيرة مع تأمين خطوط الإمداد المتاحة. خطوة هادئة لترتيب الأوراق استعداداً للقرارات الكبيرة.";
         
-        const unknowns = [];
-        for (let i = 0; i < 16; i++) if (G.map[i] === 0 && i !== G.enemyPos) unknowns.push(i);
-        if (unknowns.length) {
-          const reveal = unknowns[Math.floor(Math.random() * unknowns.length)];
-          G.map[reveal] = 1;
-          pros.push(`معلومات الكشافة أكدت خلو القطاع ${getCellName(reveal)} من الأعداء`);
+        if (G.intel >= 10 && !G.isEnemyFound) {
+          G.isEnemyFound = true;
+          G.map[G.enemyPos] = 2;
+          awardTrophy('eagle_eye');
+          story += "\n\nالعملية المتوازنة وفرت الجزء الناقص من اللغز. تم رصد تحركات العدو وكشف مقره السري!";
+          pros.push(`اكتشاف موقع قاعدة العدو في القطاع ${getCellName(G.enemyPos)}`);
+        } else {
+          const unknowns = [];
+          for (let i = 0; i < 16; i++) if (G.map[i] === 0 && i !== G.enemyPos) unknowns.push(i);
+          if (unknowns.length) {
+            const reveal = unknowns[Math.floor(Math.random() * unknowns.length)];
+            G.map[reveal] = 1;
+            pros.push(`معلومات الكشافة أكدت خلو القطاع ${getCellName(reveal)} من الأعداء`);
+          }
         }
         showResultModal("خطة متوازنة ⚖️", story, pros, cons, () => { endPlayerTurn(); });
         updateUI();
@@ -4060,7 +4249,7 @@
           }
         } else {
           cons.push('عادت القوات بخفي حنين، لم يتم جني أي موارد');
-          story = "القافلة التي استهدفناها كانت فارغة! مجرد فخ أو معلومات استخباراتية خاطئة. انسحبت قواتنا بصعوبة قبل أن تنقلب الأمور ضدهم.";
+          story = "القافلة التي استهدفناها كانت فارغة! مجرد فخ أو معلومات خاطئة. انسحبت قواتنا بصعوبة قبل أن تنقلب الأمور ضدهم.";
           title = "غارة فاشلة";
           if (consequenceType === 'raid_risk') {
             G.enemyAggressionBoost += 0.05;
@@ -4068,17 +4257,6 @@
           }
         }
         showResultModal(title, story, pros, cons, () => { endPlayerTurn(); });
-        updateUI();
-      });
-    }
-
-    function executeRest() {
-      playActionAnimation('resource', '⛺ راحة وتجميع القوات...', () => {
-        G.resources += 2;
-        let pros = ['تأمين (+2) موارد واستعادة النشاط', 'إراحة الجنود يخفف من خطر انهيار المعنويات'];
-        let cons = ['ترك الفرصة للعدو للمبادرة والحركة بحرية'];
-        let story = "خيم الهدوء على المطار لأول مرة منذ بدء العمليات. ارتاح الجنود وتلقت الطائرات صيانة شاملة، بينما وصلت إمدادات جديدة بهدوء استعداداً للجولة القادمة.";
-        showResultModal("راحة استراتيجية ⛺", story, pros, cons, () => { endPlayerTurn(); });
         updateUI();
       });
     }
@@ -4343,13 +4521,21 @@
 
           if (frame > 40 && frame < 90) {
              const dropProgress = (frame - 40) / 50;
-             const bombX = 100 + 40 * 3 + (frame - 40) * 2;
-             const bombY = 80 + dropProgress * 200 + Math.pow(dropProgress, 2) * 20; 
+             const startX = 100 + 40 * 3;
+             const startY = 80 + Math.sin(40 * 0.08) * 15;
+             const targetEx = type === 'raid' ? 800 - 90 * 1.5 + 30 : 610;
+             const targetEy = 280;
              
+             const bombX = startX + (targetEx - startX) * dropProgress;
+             const bombY = startY + (targetEy - startY) * Math.pow(dropProgress, 2);
+             
+             ctx.save();
+             ctx.globalCompositeOperation = 'lighter';
              for(let t=0; t<5; t++) {
                ctx.fillStyle = `rgba(255, ${150 - t*30}, 0, ${1 - t*0.2})`;
                ctx.beginPath(); ctx.arc(bombX - t*3, bombY - t*6, 3, 0, Math.PI*2); ctx.fill();
              }
+             ctx.restore();
 
              ctx.fillStyle = '#222';
              ctx.beginPath(); ctx.ellipse(bombX, bombY, 12, 6, Math.PI/3, 0, Math.PI*2); ctx.fill();
@@ -4359,24 +4545,67 @@
 
           if (frame >= 90) {
             const ef = frame - 90;
-            const ex = type === 'raid' ? Math.max(800 - 90*1.5, 500) + 25 : targetX;
+            const ex = type === 'raid' ? 800 - 90 * 1.5 + 30 : 610;
             const ey = 280;
             
-            if (ef < 24) {
-              ctx.fillStyle = `rgba(255, 255, 200, ${1 - ef * 0.04})`;
-              ctx.beginPath(); ctx.arc(ex, ey, ef * 12.5, 0, Math.PI*2); ctx.fill(); 
+            ctx.save();
+            ctx.globalCompositeOperation = 'lighter';
+            
+            // Initial Flash
+            if (ef < 10) {
+               ctx.fillStyle = `rgba(255, 255, 255, ${1 - ef/10})`;
+               ctx.beginPath(); ctx.arc(ex, ey, 100 + ef*10, 0, Math.PI*2); ctx.fill();
             }
             
-            for (let e = 0; e < Math.min(ef * 6, 200); e++) {
-              const angle = Math.random() * Math.PI * 2;
-              const dist = Math.random() * ef * 4.5;
-              const size = Math.random() * 12 + 4;
-              const colorR = Math.random();
-              ctx.fillStyle = colorR > 0.7 ? '#ffaa00' : (colorR > 0.4 ? '#ff3300' : '#111');
-              ctx.globalAlpha = Math.max(0, 1 - (ef / 90));
-              ctx.fillRect(ex + Math.cos(angle) * dist, ey - Math.abs(Math.sin(angle)) * dist, size, size);
+            // Fire Core and Sparks
+            if (ef < 50) {
+               const coreRadius = 40 + ef * 2.5;
+               const coreAlpha = 1 - ef/50;
+               const grad = ctx.createRadialGradient(ex, ey, 0, ex, ey, coreRadius);
+               grad.addColorStop(0, `rgba(255, 255, 100, ${coreAlpha})`);
+               grad.addColorStop(0.2, `rgba(255, 150, 0, ${coreAlpha * 0.8})`);
+               grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+               ctx.fillStyle = grad;
+               ctx.beginPath(); ctx.arc(ex, ey, coreRadius, 0, Math.PI*2); ctx.fill();
+               
+               for (let i = 0; i < 30; i++) {
+                 const seed = (i * 137) % 100 / 100;
+                 const angle = seed * Math.PI + Math.PI; // top half hemisphere
+                 const speed = 2 + seed * 8;
+                 const sx = ex + Math.cos(angle) * speed * ef;
+                 const sy = ey + Math.sin(angle) * speed * ef + (ef * ef * 0.05); // pseudo-gravity
+                 const sparkAlpha = Math.max(0, coreAlpha - seed * 0.2);
+                 ctx.fillStyle = `rgba(255, 200, 50, ${sparkAlpha})`;
+                 ctx.beginPath(); ctx.arc(sx, sy, 2 + seed*3, 0, Math.PI*2); ctx.fill();
+               }
             }
-            ctx.globalAlpha = 1;
+            
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Expanding Smoke Cloud
+            if (ef < 90) {
+               const smokeRadius = 40 + ef * 3;
+               const smokeAlpha = Math.max(0, (1 - Math.pow(ef/90, 2)) * 0.9);
+               const sgrad = ctx.createRadialGradient(ex, ey - ef*0.6, 0, ex, ey - ef*0.6, smokeRadius);
+               sgrad.addColorStop(0, `rgba(40, 40, 40, ${smokeAlpha})`);
+               sgrad.addColorStop(1, 'rgba(30, 30, 30, 0)');
+               ctx.fillStyle = sgrad;
+               ctx.beginPath(); ctx.arc(ex, ey - ef*0.6, smokeRadius, 0, Math.PI*2); ctx.fill();
+               
+               // Secondary smoke puffs
+               for(let i = 0; i < 7; i++) {
+                 const seed = (i * 73) % 100 / 100;
+                 const px = ex + (seed - 0.5) * smokeRadius * 1.5;
+                 const py = ey - ef*(0.4 + seed*0.5) - (seed*25);
+                 const pradius = smokeRadius * (0.4 + seed*0.6);
+                 const pgrad = ctx.createRadialGradient(px, py, 0, px, py, pradius);
+                 pgrad.addColorStop(0, `rgba(50, 50, 50, ${smokeAlpha})`);
+                 pgrad.addColorStop(1, 'rgba(50, 50, 50, 0)');
+                 ctx.fillStyle = pgrad;
+                 ctx.beginPath(); ctx.arc(px, py, pradius, 0, Math.PI*2); ctx.fill();
+               }
+            }
+            ctx.restore();
           }
           
           if (isRainy) {
@@ -4413,6 +4642,33 @@
     }
 
     // ===== ENEMY TURN =====
+    function checkBanterAndEndTurn(actionType, success) {
+      if (!success) {
+        if (actionType === 'strike') {
+          const banterText = `<b style="color:#d9534f">الجنرال المهندس:</b> "ألم أقل لك لا تستمع لجنرال الهجوم، الطائرات تحتاج للصيانة والوقود وليس للحماس الفارغ."<br><br><b style="color:#f0ad4e">جنرال الهجوم:</b> "الدفاع لن ينهي هذه الحرب يا سيدي، أعطني الإذن وسأحيل مطارهم إلى رماد!"`;
+          setTimeout(() => {
+            showNotification('مناوشات القيادة 🗣️', banterText, [{ text: 'متابعة', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
+          }, 100);
+          return;
+        }
+        if (actionType === 'recon') {
+          const banterText = `<b style="color:#f0ad4e">جنرال الهجوم:</b> "لقد أضعنا مواردنا على التقاط صور للرمال! لو أعطيتني هذه الموارد لدمرتهم."<br><br><b style="color:#5bc0de">جنرال الاستطلاع:</b> "القتال الأعمى انتحار. دعني أكشف لك ما يختبئ في الظلام أولاً."`;
+          setTimeout(() => {
+            showNotification('مناوشات القيادة 🗣️', banterText, [{ text: 'متابعة', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
+          }, 100);
+          return;
+        }
+        if (actionType === 'raid') {
+          const banterText = `<b style="color:#d9534f">الجنرال المهندس:</b> "هل اقتنعت الآن يا سيف العدالة؟ القوات الخاصة لا تنفع إذا لم تجد ما تسرقه! كان الأجدر ترك الموارد لتعزيز دفاعاتنا."<br><br><b style="color:#5bc0de">الجنرال سيف العدالة:</b> "التكتيكات الجريئة تحمل المخاطر. الجلوس خلف الجدران لن يحسم المعركة، بل يؤجل الهزيمة فقط."`;
+          setTimeout(() => {
+            showNotification('مناوشات القيادة 🗣️', banterText, [{ text: 'متابعة', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
+          }, 100);
+          return;
+        }
+      }
+      endPlayerTurn();
+    }
+
     function endPlayerTurn() {
       setWaitState(true, '⏳ العدو يخطط ويتحرك...');
       // Check rest trophy
@@ -4436,7 +4692,7 @@
 
       // If enemy knows our location, MUCH higher attack chance
       if (G.enemyKnowsUs) {
-        attackChance += 0.25;
+        attackChance = 0.95; // Relentless attack!
         addLog('⚠️ العدو يستهدف مطارك بدقة!', 'danger');
       }
 
@@ -4445,11 +4701,50 @@
       const fortified = G._fortified || false;
       G._fortified = false;
 
+      let newlyDiscoveredByEnemy = false;
+
       if (Math.random() < attackChance) {
         if (fortified && Math.random() < 0.7) {
-          addLog('🏰 التحصينات صدت هجوم العدو!', 'important');
-        } else if (G.upgrades.aa && Math.random() < 0.3) {
-          addLog('🛢️ منظومة الدفاع الجوي أسقطت هجوم العدو!', 'important');
+          addLog('🏰 التحصينات صدت هجوم العدو بالكامل!', 'important');
+          if (!G.enemyKnowsUs) {
+             G.enemyKnowsUs = true;
+             newlyDiscoveredByEnemy = true;
+             triggerRedAlarm();
+             addLog('🚨 العدو رصد موقع انطلاق دفاعاتنا! تم كشف القاعدة!', 'danger');
+          }
+        } else if (G.upgrades.aa && (G.aaCooldown || 0) <= 0) {
+          G.animating = true;
+          playAirportAnimation(() => {
+            G.animating = false;
+            G.resources++;
+            G.intel += 2;
+            addLog('🛢️ منظومة الدفاع الجوي أسقطت هجوم العدو بنسبة 100%! (+1 موارد، +2 معلومات)', 'ally');
+            G.aaCooldown = 2;
+            G.aaDebrisTurns = 1;
+
+            if (!G.enemyKnowsUs) {
+               G.enemyKnowsUs = true;
+               newlyDiscoveredByEnemy = true;
+               triggerRedAlarm();
+               addLog('🚨 العدو رصد مسار صواريخنا الدفاعية! تم كشف القاعدة!', 'danger');
+            }
+
+            updateUI();
+            G.turn++;
+            setTimeout(() => {
+              G.selectedGeneral = -1;
+              updateUI();
+              if (newlyDiscoveredByEnemy) {
+                showDiscoveryModal('enemy_blind_hit', () => {
+                  startTurn();
+                });
+              } else {
+                startTurn();
+              }
+            }, 1200);
+          }, 'aa_intercept');
+
+          return; // Stop current function, continuation happens in callback
         } else {
           G.animating = true;
           playAirportAnimation(() => {
@@ -4457,24 +4752,32 @@
             G.health--;
             G.damageWithoutRepair++;
 
+            let resourceLossMsg = "";
+            if (G.resources > 0) {
+               G.resources--;
+               resourceLossMsg = "<br><br><span style='color:#ff4444; font-weight:bold;'>[-1 موارد بسبب دمار المستودعات]</span>";
+               addLog('🔥 تضرر مستودع الإمدادات (-1 موارد)', 'danger');
+            }
+
             const boughtUpgrades = Object.keys(G.upgrades).filter(k => G.upgrades[k]);
+            let hitUpgrade = false;
             if (boughtUpgrades.length > 0 && Math.random() < 0.5) {
               const toDestroy = boughtUpgrades[Math.floor(Math.random() * boughtUpgrades.length)];
               G.upgrades[toDestroy] = false;
               const names = { radar: 'رادار الكشف المبكر', walls: 'الجدران المحصنة', aa: 'منظومة الدفاع الجوي', stealth: 'السرب الشبحي', eng: 'الوحدة الهندسية', ammo: 'الذخائر الخارقة' };
-              addLog(`⚠️ تحطم [${names[toDestroy]}] بسبب قصف العدو!`, 'danger');
+              addLog(`⚠️ تلقينا ضربة قوية تسببت بتحطم [${names[toDestroy]}]! (-1 صحة القاعدة)`, 'danger');
+              hitUpgrade = true;
               if (toDestroy === 'walls') {
                 G.maxHealth--;
                 if (G.health > G.maxHealth) G.health = G.maxHealth;
               }
             }
 
-            let newlyDiscoveredByEnemy = false;
-            if (G.enemyKnowsUs) {
-              addLog('💥 ضربة دقيقة من العدو! قاعدتك أصيبت!', 'danger');
+            if (G.enemyKnowsUs && !newlyDiscoveredByEnemy) {
+              if (!hitUpgrade) addLog('💥 ضربة دقيقة أصابت المطار مباشرة وتسببت بأضرار بليغة! (-1 صحة القاعدة)', 'danger');
               triggerRedAlarm();
             } else {
-              addLog('💥 العدو ضرب قاعدتك! (-1 صحة)', 'danger');
+              if (!hitUpgrade) addLog('💥 قذيفة عشوائية للعدو سقطت وألحقت أضراراً مباشرة بالمطار! (-1 صحة القاعدة)', 'danger');
               G.enemyKnowsUs = true;
               newlyDiscoveredByEnemy = true;
               triggerRedAlarm();
@@ -4497,13 +4800,26 @@
             setTimeout(() => {
               G.selectedGeneral = -1;
               updateUI();
-              if (newlyDiscoveredByEnemy) {
-                showDiscoveryModal('enemy_blind_hit', () => {
-                  startTurn();
-                });
-              } else {
-                startTurn();
-              }
+
+              const attackMessages = [
+                 "الجميع إلى الملاجئ! إنهم يقصفون المطار! 💥",
+                 "النيران تلتهم مستودع الذخيرة الاحتياطي! نحتاج فرق الإطفاء فوراً! 🔥",
+                 "لقد دمروا المدرج الشرقي! أرسلوا فرق الإنقاذ حالا! 🚨"
+              ];
+              const dramaMsg = attackMessages[Math.floor(Math.random() * attackMessages.length)];
+
+              const proceedTurn = () => {
+                 hideNotification();
+                 if (newlyDiscoveredByEnemy) {
+                   showDiscoveryModal('enemy_blind_hit', () => {
+                     startTurn();
+                   });
+                 } else {
+                   startTurn();
+                 }
+              };
+
+              showNotification('هجوم معادٍ! 🚨', dramaMsg + resourceLossMsg, [{ text: 'تم القراءة', action: proceedTurn }]);
             }, 1200);
           }, 'enemy_attack');
 
@@ -4519,7 +4835,13 @@
       setTimeout(() => {
         G.selectedGeneral = -1;
         updateUI();
-        startTurn();
+        if (newlyDiscoveredByEnemy) {
+          showDiscoveryModal('enemy_blind_hit', () => {
+            startTurn();
+          });
+        } else {
+          startTurn();
+        }
       }, 1200);
     }
 
@@ -4529,7 +4851,7 @@
       { general: { name: 'الجنرال ذو الظل', rank: 'جنرال تخفي', emoji: '🥷', img: 'assets/generals/night_shadow.png' }, title: 'هجوم جوي خفي', cost: 5, advice: 'قصف موقع العدو باستخدام طائرات الشبح. موقعنا سيبقى آمناً.', actionLabel: 'تنفيذ القصف الخفي' },
       { general: { name: 'الجنرال العاصفة الحديدية', rank: 'مشير جوي', emoji: '🌪️', img: 'assets/generals/iron_storm.png' }, title: 'هجوم شامل وقصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف تماماً. أضرار جسيمة!', actionLabel: 'إطلاق العاصفة' },
       { general: { name: 'جنرال استطلاع', rank: 'استطلاع', emoji: '🔭', img: 'assets/generals/eagle_eye.png' }, title: 'استطلاع جوي', cost: 1, advice: 'إرسال طائرة استطلاع لمسح منطقة محددة في الخريطة.', actionLabel: 'بدء الاستطلاع' },
-      { general: { name: 'جنرال معلومات', rank: 'استخبارات', emoji: '📡', img: 'assets/generals/desert_fox.png' }, title: 'جمع الاستخبارات', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف موقعين في الخريطة.', actionLabel: 'تأكيد الاختراق' },
+      { general: { name: 'جنرال معلومات', rank: 'معلومات', emoji: '📡', img: 'assets/generals/desert_fox.png' }, title: 'جمع المعلومات', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف موقعين في الخريطة. (فائدة نقاط المعلومات: عند وصولها إلى 10 يكشف موقع قاعدة العدو تلقائياً).', actionLabel: 'تأكيد الاختراق' },
       { general: { name: 'جنرال الدفاع', rank: 'دفاع', emoji: '🛡️', img: 'assets/generals/shield_nation.png' }, title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو.', actionLabel: 'تأكيد التعزيز' },
       { general: { name: 'جنرال مهندس', rank: 'هندسة', emoji: '🔧', img: 'assets/generals/shield_nation.png' }, title: 'ترميم المطار', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة.', actionLabel: 'بدء الإصلاحات' },
       { general: { name: 'الجنرال الماكر', rank: 'تكتيكات', emoji: '🦊', img: 'assets/generals/desert_fox.png' }, title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة.', actionLabel: 'شن الغارة' },
@@ -4605,9 +4927,9 @@
       grid.innerHTML = '';
 
       const options = [
-        { id: 'radar', icon: '📡', label: 'رادار كشف مبكر', desc: 'يزيد كفاءة جمع الاستخبارات', cost: 3 },
+        { id: 'radar', icon: '📡', label: 'رادار كشف مبكر', desc: 'يزيد كفاءة جمع المعلومات', cost: 3 },
         { id: 'walls', icon: '🛡️', label: 'جدران محصنة', desc: 'يزيد صحة القاعدة بمقدار 1', cost: 3 },
-        { id: 'aa', icon: '🚀', label: 'دفاع جوي', desc: 'فرصة 30% لصد ضربات العدو', cost: 3 },
+        { id: 'aa', icon: '🚀', label: 'دفاع جوي', desc: 'يصد هجوم بنسبة 100% (يحتاج لدور كامل لإعادة التذخير)', cost: 3 },
         { id: 'stealth', icon: '🛩️', label: 'سرب شبحي', desc: 'نجاح الضربة التسللية مضمون', cost: 3 },
         { id: 'eng', icon: '🏗️', label: 'وحدة هندسية', desc: 'إصلاح القاعدة أصبح مجانياً (0)', cost: 3 },
         { id: 'ammo', icon: '🛢️', label: 'ذخائر خارقة', desc: 'الضربة المباشرة تنقص 2 صحة', cost: 3 }
@@ -4660,7 +4982,7 @@
       if (G.allyHelps >= 3) return;
       const offers = [
         { type: 'repair', text: 'حلفاؤك يعرضون إصلاح القاعدة (+1 صحة)', btn: 'قبول الإصلاح' },
-        { type: 'intel', text: 'حلفاؤك يشاركون معلومات استخباراتية (+3 استخبارات)', btn: 'قبول المعلومات' },
+        { type: 'intel', text: 'حلفاؤك يشاركون معلومات هامة (+3 نقاط معلومات)', btn: 'قبول المعلومات' },
         { type: 'resources', text: 'حلفاؤك يقدمون دعماً بالموارد (+4 موارد)', btn: 'قبول الموارد' },
         { type: 'shield', text: 'حلفاؤك يقدمون درعًا واقيًا (حماية من الضربة القادمة)', btn: 'قبول الدرع' }
       ];
@@ -4687,7 +5009,7 @@
           break;
         case 'intel':
           G.intel += 3;
-          addLog('🤝 الحلفاء قدموا معلومات استخباراتية!', 'ally');
+          addLog('🤝 الحلفاء قدموا نقاط معلومات!', 'ally');
           if (G.intel >= 10 && !G.isEnemyFound) {
             G.isEnemyFound = true;
             G.map[G.enemyPos] = 2;
