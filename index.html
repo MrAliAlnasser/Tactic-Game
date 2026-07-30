@@ -603,6 +603,21 @@
       border-color: #333;
     }
 
+    .health-pip.shielded {
+      background: linear-gradient(135deg, #b0c4de 0%, #778899 100%) !important;
+      border-color: #a9a9a9 !important;
+      box-shadow: inset 0 0 5px rgba(255,255,255,0.8), 0 0 5px rgba(176,196,222,0.8) !important;
+      position: relative;
+    }
+    .health-pip.shielded::after {
+      content: '🛡️';
+      font-size: 10px;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
     @keyframes damagePulse {
 
       0%,
@@ -2468,7 +2483,8 @@
       selectedGeneral: -1,
       currentAdvice: [],
       allyOffer: null,
-      damageWithoutRepair: 0
+      damageWithoutRepair: 0,
+      repairTimer: 0
     };
 
     // ===== TROPHY DEFINITIONS =====
@@ -2476,7 +2492,7 @@
       first_strike: { name: 'الضربة الأولى', icon: '💥', desc: 'نفذ أول ضربة ناجحة على العدو' },
       eagle_eye: { name: 'عين النسر', icon: '🦅', desc: 'اكتشف موقع قاعدة العدو' },
       survivor: { name: 'الناجي', icon: '🛡️', desc: 'نجا من الهزيمة بنقطة واحدة' },
-      alliance: { name: 'المحالف', icon: '🤝', desc: 'اقبل مساعدة الحلفاء 3 مرات' },
+      alliance: { name: 'المحالف', icon: '🤝', desc: 'اقبل مساعدة الحلفاء مرتين' },
       warrior_rest: { name: 'استراحة محارب', icon: '☕', desc: 'خذ استراحة بعد 3 أدوار حرب متتالية' },
       supreme: { name: 'القائد الأعلى', icon: '👑', desc: 'اربح اللعبة' },
       resourceful: { name: 'سيد الموارد', icon: '🛢️', desc: 'اجمع 15 نقطة موارد' },
@@ -2529,6 +2545,7 @@
       G.currentAdvice = [];
       G.allyOffer = null;
       G.damageWithoutRepair = 0;
+      G.repairTimer = 0;
       G.upgrades = { radar: false, walls: false, aa: false, stealth: false, eng: false, ammo: false };
       loadTrophies();
     }
@@ -2714,8 +2731,15 @@
       for (let i = 0; i < G.maxHealth; i++) {
         const pip = document.createElement('div');
         pip.className = 'health-pip';
-        if (i >= G.health) pip.classList.add('destroyed');
-        else if (i === G.health - 1 && G.damageWithoutRepair > 0) pip.classList.add('damaged');
+        if (i >= G.health) {
+          pip.classList.add('destroyed');
+          if (i === G.health && G.repairTimer > 0) {
+            pip.innerHTML = `<span style="font-size: 11px; display: flex; align-items: center; justify-content: center; height: 100%; color: #d4a030; text-shadow: 0 0 2px #000;">🔧${G.repairTimer}</span>`;
+          }
+        } else {
+          if (i === G.health - 1 && G.damageWithoutRepair > 0) pip.classList.add('damaged');
+          if (G._fortified) pip.classList.add('shielded');
+        }
         hd.appendChild(pip);
       }
 
@@ -3206,6 +3230,7 @@
         G.isEnemyFound = true;
         G.map[G.enemyPos] = 2;
         awardTrophy('eagle_eye');
+        updateUI(); // Trigger discovery music immediately
 
         showNotification('اكتشاف حاسم! 🎯', 'بفضل تراكم 10 نقاط معلومات، استخباراتنا تمكنت أخيراً من فك شفرة موقع قاعدة العدو الرئيسية!\n\n<span style="color:#f0ad4e; font-weight:bold;">طائراتنا الهجومية بانتظار أوامرك لتدميرهم.</span>', [{
           text: 'ممتاز! استعدوا للهجوم',
@@ -4009,7 +4034,7 @@
             title: 'إصلاح القاعدة المتضررة',
             advice: `قاعدتنا متضررة (${G.health}/${G.maxHealth}). كل دور بدون إصلاح يعني اقترابنا من الهزيمة!`,
             actionLabel: '🔧 إصلاح القاعدة',
-            cost: G.upgrades.eng ? 0 : 2,
+            cost: 2,
             consequence: null,
             consequenceType: null
           });
@@ -4023,7 +4048,7 @@
           advice: 'أقترح إرسال طائرات مسيّرة وهمية لإلهاء العدو ثم ضرب قاعدته من الجهة المعاكسة.',
           actionLabel: '🎭 تنفيذ خطة التمويه',
           cost: 3,
-          consequence: 'نجاح الضربة غير مضمون لكن إذا نجح سيربك العدو ويقلل هجماته',
+          consequence: 'نجاح الضربة غير مضمون لكن إذا نجحت ستجعل العدو لا يهاجم لدور واحد',
           consequenceType: 'diversion'
         });
 
@@ -4129,7 +4154,7 @@
             title: 'إصلاح القاعدة',
             advice: 'قاعدتنا متضررة! يجب إصلاحها فورًا قبل أن يضرب العدو مجددًا',
             actionLabel: '🔧 إصلاح القاعدة',
-            cost: G.upgrades.eng ? 0 : 2,
+            cost: 2,
             consequence: null,
             consequenceType: null
           });
@@ -4456,6 +4481,7 @@
         let healLog = '';
         if (G.health < G.maxHealth) {
           G.health++;
+          G.damageWithoutRepair = Math.max(0, G.damageWithoutRepair - 1);
           healLog = ' و +1 صحة للقاعدة';
         }
         let pros = ['تأمين (+2) موارد واستعادة النشاط', 'إراحة الجنود يخفف من خطر انهيار المعنويات' + (healLog ? '، وإصلاح أضرار القاعدة' : '')];
@@ -4551,9 +4577,6 @@
         let story = "عملت شبكة جواسيسنا وراداراتنا على مدار الساعة، لجمع الشذرات المتناثرة من البيانات لتركيب الصورة الكاملة للموقف.";
 
         if (G.intel >= 10 && !G.isEnemyFound) {
-          G.isEnemyFound = true;
-          G.map[G.enemyPos] = 2;
-          awardTrophy('eagle_eye');
           story = "أخيراً! تقاطعت خيوط المعلومات واكتملت الصورة في غرفة العمليات. لقد قمنا بتحديد مكان اختباء الجنرال المعادي بشكل قاطع!";
           pros.push(`اكتشاف موقع قاعدة العدو في القطاع ${getCellName(G.enemyPos)}`);
         } else {
@@ -4698,9 +4721,11 @@
           G.enemyHp -= dmg;
           G.map[G.enemyPos] = 3;
           G.enemyAggressionBoost = Math.max(0, G.enemyAggressionBoost - 0.2);
+          G.enemySkipNextTurn = true;
 
           pros.push(`ضربة التفافية ناجحة من الخلف (-${dmg} صحة)`);
           pros.push('العدو في حالة ارتباك مما قلل من عدوانيته وتماسكه');
+          pros.push('ارتباك العدو سيمنعه من الهجوم في الدور القادم');
           story = "ابتلعت قوات العدو الطعم، متجهة بكل قوتها نحو طائراتنا الوهمية. في هذه الأثناء، انقضت قواتنا الحقيقية من الخلف كشبح قاتل، محققة إصابة مدمرة دون مقاومة تذكر.";
           title = "خطة التمويه نجحت! 🎭";
           if (G.totalStrikes === 1) awardTrophy('first_strike');
@@ -4713,7 +4738,7 @@
           title = "فشل التمويه 😔";
         }
 
-        showResultModal(title, story, pros, cons, () => { endPlayerTurn(); });
+        showResultModal(title, story, pros, cons, () => { checkBanterAndEndTurn('diversion', success); });
         updateUI();
       });
     }
@@ -5258,7 +5283,7 @@
     function checkBanterAndEndTurn(actionType, success) {
       if (!success) {
         if (actionType === 'strike') {
-          const banterText = buildBanterHTML(GENERALS[2].img, 'جنرال التحصينات', '#d9534f', 'ألم أقل لك لا تستمع لجنرال الهجوم، الطائرات تحتاج للصيانة والوقود وليس للحماس الفارغ.', GENERALS[0].img, 'جنرال الهجوم', '#f0ad4e', 'الدفاع لن ينهي هذه الحرب يا سيدي، أعطني الإذن وسأحيل مطارهم إلى رماد!');
+          const banterText = buildBanterHTML(GENERALS[2].img, 'جنرال التحصينات', '#d9534f', 'ألم أقل لك لا تستمع لجنرال الهجوم، كان الأجدر صرف الموارد على التطوير والأبحاث وليس إلى الإندفاع خلف حدسٍ وشكوكٍ لا تستند إلى دليل.', GENERALS[0].img, 'جنرال الهجوم', '#f0ad4e', 'الدفاع لن ينهي هذه الحرب يا سيدي، أعطني الإذن وسأحيل مطارهم إلى رماد!');
           setTimeout(() => {
             showNotification('مناوشات القيادة 🗣️', banterText, [{ text: 'متابعة', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
           }, 100);
@@ -5272,9 +5297,16 @@
           return;
         }
         if (actionType === 'raid') {
-          const banterText = buildBanterHTML(GENERALS[2].img, 'جنرال التحصينات', '#d9534f', 'هل اقتنعت الآن يا سيف العدالة؟ القوات الخاصة لا تنفع إذا لم تجد ما تسرقه! كان الأجدر ترك الموارد لتعزيز دفاعاتنا.', GENERALS[4].img, 'الجنرال سيف', '#5bc0de', 'التكتيكات الجريئة تحمل المخاطر. الجلوس خلف الجدران لن يحسم المعركة، بل يؤجل الهزيمة فقط.');
+          const banterText = buildBanterHTML(GENERALS[2].img, 'جنرال التحصينات', '#d9534f', 'هل اقتنعت الآن يا سيف؟ القوات الخاصة لا تنفع إذا لم تجد ما تسرقه! كان الأجدر ترك الموارد لتعزيز دفاعاتنا.', GENERALS[5].img, 'الجنرال سيف', '#5bc0de', 'التكتيكات الجريئة تحمل المخاطر. الجلوس خلف الجدران لن يحسم المعركة، بل يؤجل الهزيمة فقط.');
           setTimeout(() => {
             showNotification('مناوشات القيادة 🗣️', banterText, [{ text: 'متابعة', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
+          }, 100);
+          return;
+        }
+        if (actionType === 'diversion') {
+          const banterText = buildBanterHTML(GENERALS[0].img, 'الجنرال صقر', '#f0ad4e', 'أي سذاجة هذه؟! نضيع الوقت والموارد في ألاعيب التمويه الفاشلة بناءً على خطط الجنرال نسر الجبانة! كان الأجدر بنا توجيه ضربة قاصمة ومباشرة لقلب العدو بدلاً من هذا العبث الصبياني!', GENERALS[3].img, 'الجنرال نسر', '#5bc0de', 'اختر ألفاظك بعناية يا صقر! استطلاعي وفر فرصة ذهبية، لكن تعطشك الأعمى للهجوم المباشر يجعلك عاجزاً عن فهم التكتيكات المعقدة.');
+          setTimeout(() => {
+            showNotification('احتدام النقاش 💬', banterText, [{ text: 'تجاوز', gold: true, action: () => { hideNotification(); endPlayerTurn(); } }]);
           }, 100);
           return;
         }
@@ -5284,6 +5316,19 @@
 
     function endPlayerTurn() {
       setWaitState(true, '⏳ العدو يخطط ويتحرك...');
+      // Engineering unit realistic repair
+      if (G.repairTimer > 0) {
+        G.repairTimer--;
+        if (G.repairTimer === 0) {
+          G.health = Math.min(G.maxHealth, G.health + 1);
+          G.damageWithoutRepair = Math.max(0, G.damageWithoutRepair - 1);
+          addLog('🔧 الوحدة الهندسية أتمت إصلاح جزء من القاعدة (+1 صحة)', 'ally');
+        }
+      } else if (G.upgrades.eng && G.health < G.maxHealth) {
+        G.repairTimer = 1;
+        addLog('🏗️ الوحدة الهندسية بدأت بأعمال الإصلاح (يستغرق 1 دور)', 'ally');
+      }
+
       // Check rest trophy
       if (G.warTurnsStreak >= 3 && !['strike', 'blind_strike', 'stealth_strike', 'full_assault', 'diversion'].includes(G.currentAdvice[G.selectedGeneral]?.action)) {
         G.tookRest = true;
@@ -5299,6 +5344,19 @@
 
     function enemyTurn() {
       addLog('— دور العدو —', 'danger');
+
+      if (G.enemySkipNextTurn) {
+        G.enemySkipNextTurn = false;
+        addLog('🎭 العدو في حالة ارتباك من التمويه ولن يهاجم هذا الدور!', '');
+        updateUI();
+        G.turn++;
+        setTimeout(() => {
+          G.selectedGeneral = -1;
+          updateUI();
+          startTurn();
+        }, 800);
+        return;
+      }
 
       // Base attack chance + aggression boost from consequences
       let attackChance = 0.35 + G.turn * 0.02 + G.enemyAggressionBoost;
@@ -5362,6 +5420,8 @@
           G.animating = true;
           playAirportAnimation(() => {
             G.animating = false;
+            let healthBefore = G.health;
+            let maxHealthBefore = G.maxHealth;
             G.health--;
             G.damageWithoutRepair++;
 
@@ -5434,29 +5494,61 @@
                 ammo: "مخازن الذخيرة الخاصة انفجرت في عرض مرعب! قوتنا الضاربة تراجعت بشكل كارثي."
               };
 
+              let damageWithoutRepairBefore = Math.max(0, G.damageWithoutRepair - 1);
+              let healthBeforeHtml = '';
+              for (let i = 0; i < maxHealthBefore; i++) {
+                if (i >= healthBefore) healthBeforeHtml += '⬛';
+                else if (i === healthBefore - 1 && damageWithoutRepairBefore > 0) healthBeforeHtml += '🟥';
+                else healthBeforeHtml += '🟩';
+              }
+              let healthAfterHtml = '';
+              for (let i = 0; i < G.maxHealth; i++) {
+                if (i >= G.health) healthAfterHtml += '⬛';
+                else if (i === G.health - 1 && G.damageWithoutRepair > 0) healthAfterHtml += '🟥';
+                else healthAfterHtml += '🟩';
+              }
+
               let htmlReport = `
-                <div style="text-align: right; line-height: 1.6; font-family: 'Thmanyah', sans-serif;">
-                  <div style="font-size: 1.1em; margin-bottom: 15px; color: #eee; font-style: italic;">"${dramaMsg}"</div>
-                  <div style="background: rgba(255, 0, 0, 0.1); border: 1px dashed #ff4444; padding: 10px; border-radius: 5px;">
-                    <h4 style="margin-top:0; margin-bottom: 10px; color:#ffaaaa; border-bottom: 1px solid #ff4444; padding-bottom: 5px;">🔴 الأضرار المسجلة:</h4>
-                    <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.95em;">
-                      <li style="margin-bottom: 8px;">❌ <b>البنية التحتية:</b> إصابة مباشرة في المدرج أو المرافق (-1 صحة القاعدة)</li>
+                <div style="text-align: center; line-height: 1.4; font-family: 'Thmanyah', sans-serif;" dir="rtl">
+                  <div style="font-size: 0.9em; margin-bottom: 10px; color: #eee; font-style: italic;">"${dramaMsg}"</div>
+                  <div style="background: rgba(255, 0, 0, 0.1); border: 1px dashed #ff4444; padding: 10px; border-radius: 5px; display: flex; flex-direction: column; gap: 8px;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
+                      <span style="color: #ffaaaa; font-size: 1em; font-weight: bold;">صحة القاعدة</span>
+                      <span style="font-size: 1em; letter-spacing: 1px; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; display: flex; flex-direction: row; align-items: center; justify-content: center;">
+                        <span>${healthBeforeHtml}</span>
+                        <span style="font-size:1em; margin:0 8px;">⬅️</span>
+                        <span>${healthAfterHtml}</span>
+                      </span>
+                    </div>
               `;
 
               if (lostResource) {
-                htmlReport += `<li style="margin-bottom: 8px; color: #ffdddd;">❌ <b>التموين:</b> تدمير مستودع الإمدادات واحتراق مخزون الاحتياط <span style="color:#ff4444; font-weight:bold;">(-1 موارد)</span></li>`;
+                htmlReport += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,68,68,0.3); padding-top: 8px;">
+                      <span style="color: #ffdddd; font-size: 1em; font-weight: bold;">مستودع الإمدادات</span>
+                      <span style="font-size: 1.1em; direction: ltr; background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px;">-1 🛢️</span>
+                    </div>
+                `;
               }
               if (hitUpgrade) {
+                const iconMap = { radar: '📡', walls: '🛡️', aa: '🚀', stealth: '🛩️', eng: '🏗️', ammo: '🛢️' };
+                const upgradeIcon = iconMap[destroyedUpgradeKey] || '🏢';
                 htmlReport += `
-                      <li style="margin-bottom: 8px; color:#ffdddd;">
-                        ❌ <b>أجهزة التطوير المستهدفة:</b> تحطم [${destroyedUpgradeName}]<br>
-                        <span style="color:#ff8888; font-size: 0.9em; display: inline-block; margin-top: 4px;">"${upgradeDramaPhrases[destroyedUpgradeKey]}"</span>
-                      </li>
+                    <div style="border-top: 1px solid rgba(255,68,68,0.3); padding-top: 8px;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <span style="color: #ffdddd; font-size: 1em; font-weight: bold;">وحدة محطمة</span>
+                        <span style="background: rgba(0,0,0,0.3); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px;">
+                          <span style="font-size: 1.2em;">${upgradeIcon}</span>
+                          <span style="font-weight: bold; font-size: 0.9em;">[${destroyedUpgradeName}]</span>
+                        </span>
+                      </div>
+                      <div style="color:#ff8888; font-size: 0.85em; text-align: right;">"${upgradeDramaPhrases[destroyedUpgradeKey]}"</div>
+                    </div>
                 `;
               }
 
               htmlReport += `
-                    </ul>
                   </div>
                 </div>
               `;
@@ -5508,7 +5600,7 @@
       { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة بنسبة كبيرة هذا الدور.' },
       { general: GENERALS[2], actionLabel: 'صيانة', title: 'ترميم المطار', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة وتجنب الهزيمة المؤكدة.' },
       { general: GENERALS[5], actionLabel: 'غارة', title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة، وإذا نجحت تضعف هجماته القادمة.' },
-      { general: GENERALS[5], actionLabel: 'تمويه', title: 'شن هجوم وهمي', cost: 3, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته وفرصة إصابته لنا في الدور القادم.' },
+      { general: GENERALS[5], actionLabel: 'تمويه', title: 'شن هجوم وهمي', cost: 3, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته وفي حال نجاحها تجعل العدو لا يهاجم لدور واحد.' },
       { general: GENERALS[4], actionLabel: 'توازن', title: 'تكتيك متوازن', cost: 2, advice: 'تأمين الموارد وكشف مناطق جديدة بشكل متوازن ومنهجي.' },
       { general: GENERALS[0], actionLabel: 'إطلاق النار', title: 'قصف عشوائي', cost: 2, advice: 'قصف منطقة مجهولة بشكل عشوائي بحثاً عن هدف. خيار يائس عند نفاد خيارات الاستطلاع.' },
       { general: GENERALS[4], actionLabel: 'راحة', title: 'إراحة الطاقم', cost: 0, advice: 'أعطِ الجنود قسطاً من الراحة لالتقاط الأنفاس، وإصلاح القاعدة جزئياً واستعادة بعض الموارد.' }
@@ -5584,7 +5676,7 @@
         { id: 'walls', icon: '🛡️', label: 'جدران محصنة', desc: 'يزيد صحة القاعدة بمقدار 1', cost: 3 },
         { id: 'aa', icon: '🚀', label: 'دفاع جوي', desc: 'يصد هجوم بنسبة 100% (يحتاج لدور كامل لإعادة التذخير)', cost: 3 },
         { id: 'stealth', icon: '🛩️', label: 'سرب شبحي', desc: 'نجاح الضربة التسللية مضمون', cost: 3 },
-        { id: 'eng', icon: '🏗️', label: 'وحدة هندسية', desc: 'إصلاح القاعدة أصبح مجانياً (0)', cost: 3 },
+        { id: 'eng', icon: '🏗️', label: 'وحدة هندسية', desc: 'تقوم بإصلاح القاعدة تلقائياً (تستغرق دور واحد لكل نقطة صحة)', cost: 3 },
         { id: 'ammo', icon: '🛢️', label: 'ذخائر خارقة', desc: 'الضربة المباشرة تنقص 2 صحة', cost: 3 }
       ];
 
@@ -5632,7 +5724,7 @@
 
     // ===== ALLY SUPPORT =====
     function offerAllySupport() {
-      if (G.allyHelps >= 3) return;
+      if (G.allyHelps >= 2) return;
       const offers = [
         { type: 'repair', text: 'حلفاؤك يعرضون إصلاح القاعدة (+1 صحة)', btn: 'قبول الإصلاح' },
         { type: 'intel', text: 'حلفاؤك يشاركون معلومات هامة (+3 نقاط معلومات)', btn: 'قبول المعلومات' },
@@ -5645,7 +5737,7 @@
 
       const banner = document.getElementById('ally-banner');
       document.getElementById('ally-text').textContent = offer.text;
-      document.getElementById('ally-warning-text').textContent = `(تبقى ${3 - (G.allyHelps || 0)} محاولات مساعدة قبل كشف موقع الحلفاء للعدو)`;
+      document.getElementById('ally-warning-text').textContent = `(تبقى ${2 - (G.allyHelps || 0)} محاولات مساعدة قبل كشف موقع الحلفاء للعدو)`;
       document.getElementById('btn-ally').textContent = offer.btn;
       banner.classList.add('active');
       addLog('🤝 وصل حلفاؤك لتقديم الدعم!', 'ally');
@@ -5682,7 +5774,7 @@
       }
 
       G.allyHelps++;
-      if (G.allyHelps >= 3) awardTrophy('alliance');
+      if (G.allyHelps >= 2) awardTrophy('alliance');
 
       document.getElementById('ally-banner').classList.remove('active');
       G.allyOffer = null;
