@@ -606,9 +606,10 @@
     .health-pip.shielded {
       background: linear-gradient(135deg, #b0c4de 0%, #778899 100%) !important;
       border-color: #a9a9a9 !important;
-      box-shadow: inset 0 0 5px rgba(255,255,255,0.8), 0 0 5px rgba(176,196,222,0.8) !important;
+      box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.8), 0 0 5px rgba(176, 196, 222, 0.8) !important;
       position: relative;
     }
+
     .health-pip.shielded::after {
       content: '🛡️';
       font-size: 10px;
@@ -4012,19 +4013,7 @@
           consequenceType: 'full_assault'
         });
 
-        // Defense after being exposed
-        if (G.enemyKnowsUs) {
-          pool.push({
-            general: GENERALS[2], // درع الوطن
-            action: 'fortify',
-            title: 'تحصين الدفاعات فورًا',
-            advice: 'العدو يعرف موقعنا! يجب تحصين قاعدتنا فورًا أو ستكون العواقب وخيمة.',
-            actionLabel: '🏰 تحصين عاجل',
-            cost: 2,
-            consequence: 'يقلل احتمال الإصابة هذا الدور بنسبة 70%',
-            consequenceType: 'fortify'
-          });
-        }
+
 
         // Repair if damaged
         if (G.health < G.maxHealth) {
@@ -4033,7 +4022,7 @@
             action: 'repair',
             title: 'إصلاح القاعدة المتضررة',
             advice: `قاعدتنا متضررة (${G.health}/${G.maxHealth}). كل دور بدون إصلاح يعني اقترابنا من الهزيمة!`,
-            actionLabel: '🔧 إصلاح القاعدة',
+            actionLabel: '🔧',
             cost: 2,
             consequence: null,
             consequenceType: null
@@ -4070,7 +4059,7 @@
             action: 'rest',
             title: 'التقاط الأنفاس وأعمال الصيانة',
             advice: 'إعطاء الجنود قسطاً من الراحة، وإصلاح ما يمكن إصلاحه وفرز الأدوات المدمّرة.',
-            actionLabel: '💤 تأكيد الراحة (+2 موارد، +1 صحة)',
+            actionLabel: '💤 تأكيد الراحة (+1 موارد، +1 صحة)',
             cost: 0,
             consequence: null,
             consequenceType: null
@@ -4162,14 +4151,14 @@
 
         // Fortify
         pool.push({
-          general: pickGeneral('defense'),
+          general: GENERALS[2],
           action: 'fortify',
           title: 'تحصين الدفاعات',
           advice: 'نحتاج لتعزيز دفاعاتنا لصد هجمات العدو المحتملة',
           actionLabel: '🏰',
           cost: 2,
-          consequence: null,
-          consequenceType: null
+          consequence: 'يقلل احتمال الإصابة لدور واحد بنسبة 100%',
+          consequenceType: 'fortify'
         });
 
         // Balanced
@@ -4202,7 +4191,7 @@
             action: 'rest',
             title: 'التقاط الأنفاس وأعمال الصيانة',
             advice: 'إعطاء الجنود قسطاً من الراحة، وإصلاح ما يمكن إصلاحه وفرز الأدوات المدمّرة.',
-            actionLabel: '💤 تأكيد الراحة (+2 موارد، +1 صحة)',
+            actionLabel: '💤 تأكيد الراحة (+1 موارد، +1 صحة)',
             cost: 0,
             consequence: null,
             consequenceType: null
@@ -4477,18 +4466,18 @@
 
     function executeRest() {
       playActionAnimation('resource', '⏳ جاري إراحة القوات وإجراء الصيانة...', () => {
-        G.resources += 2;
+        G.resources += 1;
         let healLog = '';
         if (G.health < G.maxHealth) {
           G.health++;
           G.damageWithoutRepair = Math.max(0, G.damageWithoutRepair - 1);
           healLog = ' و +1 صحة للقاعدة';
         }
-        let pros = ['تأمين (+2) موارد واستعادة النشاط', 'إراحة الجنود يخفف من خطر انهيار المعنويات' + (healLog ? '، وإصلاح أضرار القاعدة' : '')];
+        let pros = ['تأمين (+1) موارد واستعادة النشاط', 'إراحة الجنود يخفف من خطر انهيار المعنويات' + (healLog ? '، وإصلاح أضرار القاعدة' : '')];
         let cons = ['ترك الفرصة للعدو للمبادرة والحركة بحرية'];
         let story = "خيم الهدوء على المطار لأول مرة منذ بدء العمليات. ارتاح الجنود وتلقت الطائرات صيانة شاملة، بينما وصلت إمدادات جديدة بهدوء استعداداً للجولة القادمة.";
         showResultModal("التقاط الأنفاس ⛺", story, pros, cons, () => {
-          addLog(`+2 موارد${healLog} (التقاط الأنفاس وأعمال الصيانة)`, 'ally');
+          addLog(`+1 موارد${healLog} (التقاط الأنفاس وأعمال الصيانة)`, 'ally');
           endPlayerTurn();
         });
         updateUI();
@@ -4643,14 +4632,18 @@
           G.enemyHp -= dmg;
           G.map[adv.target] = 3;
           pros.push(`نجاح التسلل! إصابة قاعدة العدو (-${dmg} صحة)`);
-          pros.push('موقع مطارنا لا يزال قيد الكتمان التام');
+          if (!G.enemyKnowsUs) {
+            pros.push('موقع مطارنا لا يزال قيد الكتمان التام');
+          }
           story = "تحت جنح الظلام وتخفي الرادارات، تسللت طائرات الشبح لضرب الهدف بدقة جراحية ثم الانسحاب كالسراب، تاركة العدو في حيرة من أمره حول مصدر الضربة.";
           title = "ضربة تسللية ناجحة! 🌙";
           if (G.totalStrikes === 1) awardTrophy('first_strike');
           if (G.enemyHp <= 0) { victory(); return; }
         } else {
           cons.push('العدو اكتشف طائراتنا وتصدى لها قبل تحقيق إصابة مباشرة');
-          pros.push('رغم الفشل، لم يتمكن العدو من تحديد موقع مطارنا');
+          if (!G.enemyKnowsUs) {
+            pros.push('رغم الفشل، لم يتمكن العدو من تحديد موقع مطارنا');
+          }
           story = "لسوء الحظ، التقطت مستشعرات العدو المتقدمة ذبذبات المحركات في اللحظة الأخيرة، مما أجبر طائراتنا على الانسحاب لتجنب فخ محقق دون إتمام المهمة.";
           title = "الضربة فشلت 😔";
         }
@@ -4787,6 +4780,8 @@
         }
       });
     }
+
+
 
     function executeRepair() {
       playActionAnimation('resource', '🔧 جاري إصلاح القاعدة...', () => {
@@ -5375,8 +5370,8 @@
       let newlyDiscoveredByEnemy = false;
 
       if (Math.random() < attackChance) {
-        if (fortified && Math.random() < 0.7) {
-          addLog('🏰 التحصينات صدت هجوم العدو بالكامل!', 'important');
+        if (fortified) {
+          addLog('🏰 التحصينات صدت هجوم العدو بنسبة 100%!', 'important');
           if (!G.enemyKnowsUs) {
             G.enemyKnowsUs = true;
             newlyDiscoveredByEnemy = true;
@@ -5597,8 +5592,8 @@
       { general: { name: 'الجنرال العاصفة ', rank: 'سلاح جو', emoji: '✈️', img: 'assets/generals/iron_storm.png' }, actionLabel: 'هجوم شامل', title: 'قصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف تماماً. أضرار جسيمة وتكشف موقعنا للعدو.' },
       { general: GENERALS[3], actionLabel: 'استطلاع', title: 'استطلاع جوي', cost: 1, advice: 'إرسال طائرة استطلاع لمسح منطقة محددة في الخريطة لتأكيد وجود العدو أو خلوها، وتزيد نقاط المعلومات.' },
       { general: GENERALS[1], actionLabel: 'جمع المعلومات', title: 'تحليل استخباراتي', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف قطاعات في الخريطة. (عند وصول المعلومات إلى 10 يكشف موقع قاعدة العدو تلقائياً).' },
-      { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة بنسبة كبيرة هذا الدور.' },
-      { general: GENERALS[2], actionLabel: 'صيانة', title: 'ترميم المطار', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة وتجنب الهزيمة المؤكدة.' },
+      { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة لدور واحد بنسبة 100%.' },
+      { general: GENERALS[2], actionLabel: 'صيانة', title: 'إصلاح القاعدة', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة وتجنب الهزيمة المؤكدة.' },
       { general: GENERALS[5], actionLabel: 'غارة', title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة، وإذا نجحت تضعف هجماته القادمة.' },
       { general: GENERALS[5], actionLabel: 'تمويه', title: 'شن هجوم وهمي', cost: 3, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته وفي حال نجاحها تجعل العدو لا يهاجم لدور واحد.' },
       { general: GENERALS[4], actionLabel: 'توازن', title: 'تكتيك متوازن', cost: 2, advice: 'تأمين الموارد وكشف مناطق جديدة بشكل متوازن ومنهجي.' },
