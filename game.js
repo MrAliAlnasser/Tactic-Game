@@ -1671,7 +1671,8 @@ function toggleSoundSettings() {
           }
         }
 
-        let px = W * 0.2, py = runwayY + 30, planeScale = 1;
+        let basePx = Math.max(W * 0.2, 280);
+        let px = basePx, py = runwayY + 30, planeScale = 1;
         let planeVisible = true;
         let pilotVisible = true;
         let pilotState = 'pilot_idle';
@@ -1694,13 +1695,15 @@ function toggleSoundSettings() {
             const takeoffDur = 100;
             const planeProgress = Math.min(pFrame / takeoffDur, 1);
             if (planeProgress < 0.4) {
-              px = W * 0.2 + planeProgress * W * 0.8; py = runwayY + 30; planeScale = 1;
+              px = basePx + planeProgress * W * 0.8; py = runwayY + 30; planeScale = 1;
             } else if (planeProgress < 0.7) {
               const t = (planeProgress - 0.4) / 0.3;
-              px = W * 0.52 + t * W * 0.5; py = runwayY + 30 - t * 40; planeScale = 1 - t * 0.2;
+              const startX = basePx + 0.4 * W * 0.8;
+              px = startX + t * W * 0.5; py = runwayY + 30 - t * 40; planeScale = 1 - t * 0.2;
             } else {
               const t = (planeProgress - 0.7) / 0.3;
-              px = W * 1.02 + t * W * 0.3; py = runwayY - 10 - t * 100; planeScale = 0.8 - t * 0.3;
+              const startX = basePx + 0.4 * W * 0.8 + W * 0.5;
+              px = startX + t * W * 0.3; py = runwayY - 10 - t * 100; planeScale = 0.8 - t * 0.3;
             }
           }
         }
