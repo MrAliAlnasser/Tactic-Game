@@ -325,7 +325,9 @@ function toggleSoundSettings() {
     // ===== INIT =====
     function initGame() {
       G.turn = 1;
+      G.visualTurn = 1;
       G.health = 3;
+      G.maxHealth = 3;
       G.resources = 5;
       G.intel = 0;
       G.enemyHp = 3;
@@ -336,6 +338,7 @@ function toggleSoundSettings() {
       G.alarmActive = false;
       G.redAlarmTriggered = false;
       G.aaCooldown = 0;
+      G.aaDebrisTurns = 0;
 
       G.enemyAggressionBoost = 0;
       G.consecutiveWarTurns = 0;
