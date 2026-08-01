@@ -2088,12 +2088,12 @@ function toggleSoundSettings() {
           }
         }
 
-        let basePx = Math.max(W * 0.2, 280);
+        let basePx = Math.max(W * 0.16, 210);
         let px = basePx, py = runwayY + 30, planeScale = 1;
         let planeVisible = true;
         let pilotVisible = true;
         let pilotState = 'pilot_idle';
-        let pilotX = px - 220, pilotY = py - 30;
+        let pilotX = px - 180, pilotY = py - 30;
 
         if (animState === 'takeoff') {
           if (frame < 30) {
@@ -2132,22 +2132,28 @@ function toggleSoundSettings() {
 
         if (planeVisible && animState !== 'enemy_attack') {
           let altitude = (runwayY + 30) - py;
-          if (altitude < 150) {
-            let shadowAlpha = 0.4 * (1 - altitude / 150);
-            let shadowScale = 1 - (altitude / 300);
+          if (altitude < 180) {
+            let shadowAlpha = Math.max(0, 0.45 * (1 - altitude / 180));
+            let shadowScale = 1 - (altitude / 350);
 
             ctx.save();
-            let groundY = runwayY + 30 + (35 * 1.8 * planeScale);
-            // Translate to shadow center, shifting slightly based on altitude
-            ctx.translate(px + altitude * 0.3, groundY);
+            // Ground Y position for shadow directly underneath the plane fuselage/wheels
+            let groundY = py + 18 + altitude * 0.55;
+            ctx.translate(px + altitude * 0.25, groundY);
 
-            // Scale and skew the shadow
-            // Use -scale to match the plane's right-facing orientation in this scene
-            // Squash the Y axis to simulate perspective on the ground
-            ctx.scale(-planeScale * 1.8 * shadowScale, planeScale * 1.8 * shadowScale * 0.25);
-            ctx.transform(1, 0, -0.6, 1, 0, 0); // Isometric shear
+            // Contact shadow directly beneath wheels when landed
+            if (altitude < 20) {
+              ctx.fillStyle = `rgba(0, 0, 0, ${(1 - altitude / 20) * 0.5})`;
+              ctx.beginPath();
+              ctx.ellipse(0, 2, 70 * planeScale, 6 * planeScale, 0, 0, Math.PI * 2);
+              ctx.fill();
+            }
 
-            ctx.fillStyle = `rgba(0,0,0,${shadowAlpha})`;
+            // Scale and skew the aircraft directional shadow
+            ctx.scale(-planeScale * 1.6 * shadowScale, planeScale * 1.6 * shadowScale * 0.25);
+            ctx.transform(1, 0, -0.35, 1, 0, 0); // Natural perspective shear
+
+            ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha * 0.75})`;
             ctx.beginPath();
             // Stealth Fighter Silhouette (Top-down)
             ctx.moveTo(-75, 0); // Nose tip
