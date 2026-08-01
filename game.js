@@ -2030,7 +2030,7 @@ function toggleSoundSettings() {
       }
     }
 
-    function drawProcedural3DFortifiedWalls(ctx, W, H, globalTime) {
+    function drawProcedural3DFortifiedWalls(ctx, W, H, globalTime, drawHazardBar = true) {
       const wallY = H * 0.55 + 16;
       const wallH = 22;
 
@@ -2362,7 +2362,11 @@ function toggleSoundSettings() {
 
         // Fortified Wall Background Perimeter (BEHIND hangars & tower)
         if (G.upgrades && G.upgrades.walls) {
-          drawProcedural3DFortifiedWalls(ctx, W, H, globalTime, true);
+          try {
+            drawProcedural3DFortifiedWalls(ctx, W, H, globalTime, true);
+          } catch (err) {
+            console.error("Fortified walls draw error:", err);
+          }
         }
 
         const isNight = !isDay;
