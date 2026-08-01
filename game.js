@@ -2100,7 +2100,8 @@ function toggleSoundSettings() {
         ctx.font = 'bold 12px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('⏳ ' + G.aaCooldown, aax, aay - 48);
+        const remainingTurns = Math.max(1, 2 - (G.turn - (G.aaLastInterceptTurn || 0)));
+        ctx.fillText('⏳ ' + remainingTurns, aax, aay - 48);
       }
     }
 
