@@ -2185,30 +2185,32 @@ function toggleSoundSettings() {
       });
 
       // 6. Bottom Security Hazard Stripe Line
-      const hazardY = H - 20;
-      ctx.fillStyle = '#182028';
-      ctx.fillRect(0, hazardY, W, 20);
-      for (let hx = 0; hx < W; hx += 30) {
-        ctx.fillStyle = '#ffcc00';
-        ctx.beginPath();
-        ctx.moveTo(hx, hazardY);
-        ctx.lineTo(hx + 15, hazardY);
-        ctx.lineTo(hx + 5, hazardY + 20);
-        ctx.lineTo(hx - 10, hazardY + 20);
-        ctx.closePath();
-        ctx.fill();
+      if (drawHazardBar) {
+        const hazardY = H - 20;
+        ctx.fillStyle = '#182028';
+        ctx.fillRect(0, hazardY, W, 20);
+        for (let hx = 0; hx < W; hx += 30) {
+          ctx.fillStyle = '#ffcc00';
+          ctx.beginPath();
+          ctx.moveTo(hx, hazardY);
+          ctx.lineTo(hx + 15, hazardY);
+          ctx.lineTo(hx + 5, hazardY + 20);
+          ctx.lineTo(hx - 10, hazardY + 20);
+          ctx.closePath();
+          ctx.fill();
 
-        ctx.fillStyle = '#111';
-        ctx.beginPath();
-        ctx.moveTo(hx + 15, hazardY);
-        ctx.lineTo(hx + 30, hazardY);
-        ctx.lineTo(hx + 20, hazardY + 20);
-        ctx.lineTo(hx + 5, hazardY + 20);
-        ctx.closePath();
-        ctx.fill();
+          ctx.fillStyle = '#111';
+          ctx.beginPath();
+          ctx.moveTo(hx + 15, hazardY);
+          ctx.lineTo(hx + 30, hazardY);
+          ctx.lineTo(hx + 20, hazardY + 20);
+          ctx.lineTo(hx + 5, hazardY + 20);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, hazardY, W, 2);
       }
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-      ctx.fillRect(0, hazardY, W, 2);
     }
 
     function playAirportAnimation(callback, forceAnimState = null) {
@@ -2351,14 +2353,21 @@ function toggleSoundSettings() {
           }
         });
 
+        drawProcedural3DMountains(ctx, W, H, isDay, isSunset);
+
         const groundGrad = ctx.createLinearGradient(0, H * 0.55, 0, H);
         groundGrad.addColorStop(0, isDay ? '#2c402c' : '#1a261a');
         groundGrad.addColorStop(1, isDay ? '#1b291b' : '#0d140d');
         ctx.fillStyle = groundGrad; ctx.fillRect(0, H * 0.55, W, H * 0.45);
 
+        // Fortified Wall Background Perimeter (BEHIND hangars & tower)
+        if (G.upgrades && G.upgrades.walls) {
+          drawProcedural3DFortifiedWalls(ctx, W, H, globalTime, false);
+        }
+
+        const isNight = !isDay;
         const runwayY = H * 0.68;
         const runwayH = 100;
-
         const rwGrad = ctx.createLinearGradient(0, runwayY, 0, runwayY + runwayH);
         rwGrad.addColorStop(0, '#2a2d33'); rwGrad.addColorStop(0.5, '#30353c'); rwGrad.addColorStop(1, '#2a2d33');
         ctx.fillStyle = rwGrad; ctx.fillRect(0, runwayY, W, runwayH);
@@ -2382,6 +2391,7 @@ function toggleSoundSettings() {
           }
         }
 
+        // Airport Buildings (Hangars & Control Tower IN FRONT of wall)
         const hangarW = 120;
         const hangarH = 80;
         for (let i = 0; i < 3; i++) {
