@@ -3732,16 +3732,26 @@ function toggleSoundSettings() {
 
         const counterHit = Math.random() < 0.7;
         if (counterHit) {
-          triggerRedAlarm();
-          G.health--;
-          G.damageWithoutRepair++;
-          cons.push('تعرضنا لهجوم مضاد فوري وموجع (-1 صحة للقاعدة)');
-          story += " ولم نكد نحتفل حتى انهالت علينا صواريخ العدو الانتقامية في هجوم مضاد سريع ألحق بنا أضراراً بالغة!";
-          if (G.health <= 0) {
-            defeat();
-            return;
+          if (G.upgrades && G.upgrades.aa && (G.aaCooldown || 0) <= 0) {
+            G.aaCooldown = 1;
+            G.aaDebrisTurns = 1;
+            pros.push('منظومة الدفاع الجوي ثاد تصدت للهجوم المضاد بنجاح وصانت المطار!');
+            story += " وحاول العدو الرد بهجوم مضاد، لكن منظومة الدفاع الجوي ثاد اعترضت صواريخهم ودمرتها في الجو قبل وصولها للمطار!";
+          } else if (G._fortified) {
+            pros.push('التحصينات المنشورة خففت الضرر الناجم عن الهجوم المضاد!');
+            story += " وحاول العدو الرد بهجوم مضاد، لكن التحصينات العسكرية حمت المطار من الأضرار!";
+          } else {
+            triggerRedAlarm();
+            G.health--;
+            G.damageWithoutRepair++;
+            cons.push('تعرضنا لهجوم مضاد فوري وموجع (-1 صحة للقاعدة)');
+            story += " ولم نكد نحتفل حتى انهالت علينا صواريخ العدو الانتقامية في هجوم مضاد سريع ألحق بنا أضراراً بالغة!";
+            if (G.health <= 0) {
+              defeat();
+              return;
+            }
+            if (G.health === 1) awardTrophy('survivor');
           }
-          if (G.health === 1) awardTrophy('survivor');
         } else {
           pros.push('لحسن الحظ لم يتمكن العدو من الرد فوراً رغم شراسة الهجوم');
         }
@@ -4380,6 +4390,10 @@ function toggleSoundSettings() {
         addLog('🏗️ الوحدة الهندسية بدأت بأعمال الإصلاح (يستغرق 1 دور)', 'ally');
       }
 
+      // Air Defense AA Cooldown decrement
+      if (G.aaCooldown && G.aaCooldown > 0) G.aaCooldown--;
+      if (G.aaDebrisTurns && G.aaDebrisTurns > 0) G.aaDebrisTurns--;
+
       // Check rest trophy
       if (G.warTurnsStreak >= 3 && !['strike', 'blind_strike', 'stealth_strike', 'full_assault', 'diversion'].includes(G.currentAdvice[G.selectedGeneral]?.action)) {
         G.tookRest = true;
@@ -4442,7 +4456,7 @@ function toggleSoundSettings() {
             G.resources++;
             G.intel += 2;
             addLog('🛢️ منظومة الدفاع الجوي أسقطت هجوم العدو بنسبة 100%! (+1 موارد، +2 معلومات)', 'ally');
-            G.aaCooldown = 2;
+            G.aaCooldown = 1;
             G.aaDebrisTurns = 1;
 
             if (!G.enemyKnowsUs) {
