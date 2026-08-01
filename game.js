@@ -2459,48 +2459,8 @@ function toggleSoundSettings() {
       const isNight = !isDay;
       const runwayY = H * 0.67;
       const runwayH = 95;
-      const apronTopY = H * 0.55 + 16;
 
-      // --- 1. 3D CONCRETE APRON CONNECTORS (From Hangar Doors to Runway) ---
-      const hangarW = 120;
-      for (let i = 0; i < 3; i++) {
-        const bx = W * 0.1 + i * W * 0.28;
-        const doorX1 = bx + 15;
-        const doorX2 = bx + hangarW - 15;
-
-        // Apron Tarmac Ramp Trapezoid
-        const apronGrad = ctx.createLinearGradient(0, apronTopY, 0, runwayY);
-        apronGrad.addColorStop(0, isDay ? '#2a333d' : '#161c24');
-        apronGrad.addColorStop(1, isDay ? '#323c48' : '#1d2530');
-        ctx.fillStyle = apronGrad;
-
-        ctx.beginPath();
-        ctx.moveTo(doorX1 - 5, apronTopY);
-        ctx.lineTo(doorX2 + 5, apronTopY);
-        ctx.lineTo(doorX2 + 25, runwayY);
-        ctx.lineTo(doorX1 - 25, runwayY);
-        ctx.closePath();
-        ctx.fill();
-
-        // Concrete Apron Side Bevel Highlights
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(doorX1 - 5, apronTopY); ctx.lineTo(doorX1 - 25, runwayY);
-        ctx.moveTo(doorX2 + 5, apronTopY); ctx.lineTo(doorX2 + 25, runwayY);
-        ctx.stroke();
-
-        // Yellow Guidance Centerline to Runway
-        ctx.strokeStyle = '#f5b800';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(bx + hangarW / 2, apronTopY + 14);
-        ctx.quadraticCurveTo(bx + hangarW / 2, runwayY - 10, bx + hangarW / 2 + 25, runwayY + 20);
-        ctx.stroke();
-      }
-
-      // --- 2. 3D MAIN RUNWAY SLAB & PERSPECTIVE EXTENSION ---
-      // Concrete Shoulder Pads
+      // 1. Concrete Shoulder Pads
       ctx.fillStyle = isDay ? '#1b241c' : '#0d140d';
       ctx.beginPath();
       ctx.moveTo(-15, runwayY - 10);
@@ -2510,11 +2470,11 @@ function toggleSoundSettings() {
       ctx.closePath();
       ctx.fill();
 
-      // Top & Bottom Shoulder Bevel Stripes
+      // Top & Bottom Shoulder Bevel Rims
       ctx.fillStyle = '#2d382e';
       ctx.fillRect(-15, runwayY - 10, W + 30, 10);
 
-      // Main 3D Heavy Military Asphalt Runway Slab
+      // 2. Main 3D Heavy Military Asphalt Runway Slab
       const rwGrad = ctx.createLinearGradient(0, runwayY, 0, runwayY + runwayH);
       rwGrad.addColorStop(0, '#1c222a');
       rwGrad.addColorStop(0.2, '#28313d');
@@ -2764,6 +2724,9 @@ function toggleSoundSettings() {
             console.error("Fortified walls draw error:", err);
           }
         }
+
+        const isNight = !isDay;
+        const runwayY = H * 0.67;
 
         // Master-Level Procedural 3D Runway & Airfield
         try {
