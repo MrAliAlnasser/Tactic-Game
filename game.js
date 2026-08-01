@@ -1847,36 +1847,35 @@ function toggleSoundSettings() {
 
       const isReloading = G.aaCooldown && G.aaCooldown > 0;
 
-      // 1. Ground Outrigger Hydraulic Stabilizers (Extended onto tarmac)
-      ctx.fillStyle = '#1b221b';
-      ctx.fillRect(-52, 0, 8, 6);
-      ctx.fillRect(44, 0, 8, 6);
+      // 1. Ground Outrigger Hydraulic Stabilizers
+      ctx.fillStyle = '#182018';
+      ctx.fillRect(-52, -2, 8, 4);
+      ctx.fillRect(44, -2, 8, 4);
       ctx.fillStyle = '#4a5848';
-      ctx.fillRect(-50, -6, 4, 6);
-      ctx.fillRect(46, -6, 4, 6);
+      ctx.fillRect(-50, -8, 4, 8);
+      ctx.fillRect(46, -8, 4, 8);
 
       // 2. Heavy 8x8 Tactical Truck Chassis Frame
       const truckW = 100;
-      const truckH = 22;
       const truckX = -50;
-      const truckY = -22;
+      const truckY = -20;
 
       // Lower Chassis Frame
       ctx.fillStyle = '#151b14';
-      ctx.fillRect(truckX, truckY + 12, truckW, 10);
+      ctx.fillRect(truckX, truckY + 10, truckW, 10);
 
       // 3. Heavy 8-Wheel System (4 Dual Axles)
       const wheelXs = [-40, -24, 18, 36];
       wheelXs.forEach(wx => {
         // Outer Tire Rubber
         ctx.fillStyle = '#111711';
-        ctx.beginPath(); ctx.arc(wx, 2, 7.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(wx, 0, 7, 0, Math.PI * 2); ctx.fill();
         // Inner Steel Rim
         ctx.fillStyle = '#323d31';
-        ctx.beginPath(); ctx.arc(wx, 2, 4.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(wx, 0, 4, 0, Math.PI * 2); ctx.fill();
         // Axle Cap
         ctx.fillStyle = '#6a7869';
-        ctx.beginPath(); ctx.arc(wx, 2, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(wx, 0, 1.8, 0, Math.PI * 2); ctx.fill();
       });
 
       // 4. Armored Driver Cabin (Front Left of TEL Truck)
@@ -1887,11 +1886,11 @@ function toggleSoundSettings() {
       ctx.fillStyle = cabGrad;
 
       ctx.beginPath();
-      ctx.moveTo(truckX, truckY + 14);
+      ctx.moveTo(truckX, truckY + 12);
       ctx.lineTo(truckX, truckY + 4);
       ctx.lineTo(truckX + 8, truckY - 4); // Slanted windshield
       ctx.lineTo(truckX + 26, truckY - 4);
-      ctx.lineTo(truckX + 28, truckY + 14);
+      ctx.lineTo(truckX + 28, truckY + 12);
       ctx.closePath();
       ctx.fill();
 
@@ -1915,43 +1914,49 @@ function toggleSoundSettings() {
       // Headlight Fixtures
       ctx.fillStyle = '#ffea88';
       ctx.shadowColor = '#ffea88'; ctx.shadowBlur = 4;
-      ctx.fillRect(truckX, truckY + 7, 2, 4);
+      ctx.fillRect(truckX, truckY + 6, 2, 4);
       ctx.shadowBlur = 0;
 
       // Main Truck Flatbed Deck
       ctx.fillStyle = '#2b362a';
-      ctx.fillRect(truckX + 26, truckY + 4, 74, 10);
+      ctx.fillRect(truckX + 26, truckY + 2, 74, 10);
 
-      // 5. THAAD Hydraulic Lift Actuator Arm & Pivot Mount
-      const pivotX = 35;
-      const pivotY = truckY + 4;
+      // 5. THAAD Hydraulic Lift Actuator Arm & Rear Pivot Mount
+      // Pivot is at rear of truck flatbed deck: (-15, truckY + 2)
+      const pivotX = -15;
+      const pivotY = truckY + 2;
 
       ctx.fillStyle = '#1c241b';
-      ctx.beginPath(); ctx.arc(pivotX, pivotY, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(pivotX, pivotY, 4.5, 0, Math.PI * 2); ctx.fill();
 
-      // Hydraulic Lift Arm Angle
-      const elevationAngle = isReloading ? -0.1 : (-0.75 + Math.sin(globalTime * 0.02) * 0.04);
+      // Elevation Angle (Stowed horizontal when reloading, elevated ~45° when ready)
+      const elevationAngle = isReloading ? 0 : (-0.7 + Math.sin(globalTime * 0.02) * 0.03);
+
+      // Hydraulic Cylinder Piston on Truck Deck
+      if (!isReloading) {
+        ctx.strokeStyle = '#9aa898';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(truckX + 50, truckY + 4);
+        ctx.lineTo(pivotX + Math.cos(elevationAngle) * 30, pivotY + Math.sin(elevationAngle) * 30);
+        ctx.stroke();
+      }
 
       ctx.save();
       ctx.translate(pivotX, pivotY);
       ctx.rotate(elevationAngle);
 
-      // Hydraulic Cylinder Piston
-      ctx.fillStyle = '#9aa898';
-      ctx.fillRect(-35, -5, 30, 4);
-      ctx.fillStyle = '#3a4839';
-      ctx.fillRect(-45, -7, 15, 8);
-
       // 6. THAAD 8-Cell Missile Launcher Container Pack
-      const packW = 68;
-      const packH = 28;
-      const packX = -58;
-      const packY = -packH / 2 - 2;
+      // Container extends FORWARD from the pivot hinge!
+      const packW = 64;
+      const packH = 24;
+      const packX = -4; // Starts just behind pivot and extends forward 64px
+      const packY = -packH;
 
       // Main Container Body Gradient
       const packGrad = ctx.createLinearGradient(packX, packY, packX + packW, packY + packH);
       packGrad.addColorStop(0, '#2d3b2b');
-      packGrad.addColorStop(0.3, '#425440');
+      packGrad.addColorStop(0.35, '#425440');
       packGrad.addColorStop(0.7, '#314030');
       packGrad.addColorStop(1, '#1b241a');
       ctx.fillStyle = packGrad;
@@ -1963,7 +1968,7 @@ function toggleSoundSettings() {
       // Container Structural Ribs / Armor Plates
       ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
       ctx.lineWidth = 1.5;
-      for (let rx = packX + 12; rx < packX + packW - 10; rx += 14) {
+      for (let rx = packX + 12; rx < packX + packW - 8; rx += 13) {
         ctx.beginPath(); ctx.moveTo(rx, packY); ctx.lineTo(rx, packY + packH); ctx.stroke();
       }
 
@@ -1972,33 +1977,33 @@ function toggleSoundSettings() {
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(packX, packY); ctx.lineTo(packX + packW, packY); ctx.stroke();
 
-      // Rear Exhaust Deflector Cap
+      // Rear Hinge Support & Deflector Cap
       ctx.fillStyle = '#141a14';
-      ctx.fillRect(packX - 4, packY + 2, 4, packH - 4);
+      ctx.fillRect(packX - 3, packY + 2, 4, packH - 4);
 
       // 7. THAAD Launch Canister Tubes (Front Face)
       const capX = packX + packW;
-      const capY = packY + 3;
+      const capY = packY + 2;
 
       ctx.fillStyle = '#111711';
-      ctx.fillRect(capX, capY, 5, packH - 6);
+      ctx.fillRect(capX, capY, 5, packH - 4);
 
       // 8 Canister Tube Front Caps (2 Rows of 4 Tubes)
       for (let r = 0; r < 2; r++) {
         for (let c = 0; c < 4; c++) {
           const tx = capX + 2;
-          const ty = capY + 3 + r * 11 + c * 2.5;
+          const ty = capY + 3 + r * 10 + c * 2.2;
 
           // Tube Ring
           ctx.fillStyle = '#d0dad0';
-          ctx.beginPath(); ctx.arc(tx, ty, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(tx, ty, 2.5, 0, Math.PI * 2); ctx.fill();
 
           // Red Missile Tip Light / Sensor
           ctx.fillStyle = isReloading ? '#555' : '#ff2222';
           if (!isReloading && Math.floor(globalTime * 0.1 + c) % 2 === 0) {
             ctx.shadowColor = '#ff2222'; ctx.shadowBlur = 4;
           }
-          ctx.beginPath(); ctx.arc(tx, ty, 1.5, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(tx, ty, 1.2, 0, Math.PI * 2); ctx.fill();
           ctx.shadowBlur = 0;
         }
       }
@@ -2013,7 +2018,7 @@ function toggleSoundSettings() {
         ctx.strokeStyle = '#d4a030';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.roundRect(aax - 32, aay - 65, 64, 24, 6);
+        ctx.roundRect(aax - 32, aay - 60, 64, 24, 6);
         ctx.fill();
         ctx.stroke();
 
@@ -2021,7 +2026,7 @@ function toggleSoundSettings() {
         ctx.font = 'bold 12px "Segoe UI Emoji", "Apple Color Emoji", sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('⏳ ' + G.aaCooldown, aax, aay - 53);
+        ctx.fillText('⏳ ' + G.aaCooldown, aax, aay - 48);
       }
     }
 
