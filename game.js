@@ -1919,7 +1919,7 @@ function toggleSoundSettings() {
       ctx.save();
       ctx.translate(aax, aay);
 
-      const isReloading = G.aaCooldown && G.aaCooldown > 0;
+      const isReloading = G.aaLastInterceptTurn && (G.turn - G.aaLastInterceptTurn) < 2;
 
       // 1. Ground Outrigger Hydraulic Stabilizers
       ctx.fillStyle = '#182018';
@@ -3847,8 +3847,8 @@ function toggleSoundSettings() {
 
         const counterHit = Math.random() < 0.7;
         if (counterHit) {
-          if (G.upgrades && G.upgrades.aa) {
-            G.aaCooldown = 0;
+          if (G.upgrades && G.upgrades.aa && (!G.aaLastInterceptTurn || (G.turn - G.aaLastInterceptTurn) >= 2)) {
+            G.aaLastInterceptTurn = G.turn;
             G.aaDebrisTurns = 1;
             pros.push('منظومة الدفاع الجوي ثاد تصدت للهجوم المضاد بنجاح وصانت المطار!');
             story += " وحاول العدو الرد بهجوم مضاد، لكن منظومة الدفاع الجوي ثاد اعترضت صواريخهم ودمرتها في الجو قبل وصولها للمطار!";
@@ -4564,14 +4564,14 @@ function toggleSoundSettings() {
             triggerRedAlarm();
             addLog('🚨 العدو رصد موقع انطلاق دفاعاتنا! تم كشف القاعدة!', 'danger');
           }
-        } else if (G.upgrades.aa) {
+        } else if (G.upgrades.aa && (!G.aaLastInterceptTurn || (G.turn - G.aaLastInterceptTurn) >= 2)) {
           G.animating = true;
           playAirportAnimation(() => {
             G.animating = false;
             G.resources++;
             G.intel += 2;
             addLog('🛢️ منظومة الدفاع الجوي ثاد أسقطت هجوم العدو بنسبة 100%! (+1 موارد، +2 معلومات)', 'ally');
-            G.aaCooldown = 0;
+            G.aaLastInterceptTurn = G.turn;
             G.aaDebrisTurns = 1;
 
             if (!G.enemyKnowsUs) {
