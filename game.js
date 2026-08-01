@@ -2627,10 +2627,53 @@ function toggleSoundSettings() {
 
       let isDay = G.turn % 2 !== 0;
       let isSunset = G.turn % 4 === 3;
-      let isRainy = Math.random() < 0.3;
+      let isRainy = (G.turn * 7) % 10 < 3;
       let rainDrops = [];
       if (isRainy) {
         for (let i = 0; i < 150; i++) rainDrops.push({ x: Math.random() * 1200, y: Math.random() * 600, s: Math.random() * 15 + 10 });
+      }
+
+      // --- ATMOSPHERIC LIGHTNING STATE & GENERATOR ---
+      let lightningState = {
+        active: false,
+        timer: Math.floor(Math.random() * 90 + 60),
+        flashAlpha: 0,
+        boltPath: [],
+        branches: []
+      };
+
+      function generateLightningBolt(startX, startY, endX, endY) {
+        let path = [{ x: startX, y: startY }];
+        let branches = [];
+        let curX = startX;
+        let curY = startY;
+        let steps = 10 + Math.floor(Math.random() * 6);
+
+        for (let i = 1; i <= steps; i++) {
+          let progress = i / steps;
+          let targetX = startX + (endX - startX) * progress;
+          let targetY = startY + (endY - startY) * progress;
+
+          let nextX = targetX + (Math.random() - 0.5) * 24;
+          let nextY = targetY;
+
+          path.push({ x: nextX, y: nextY });
+
+          if (Math.random() < 0.3 && i > 2 && i < steps - 1) {
+            let branchLen = 25 + Math.random() * 35;
+            let branchAngle = (Math.random() - 0.5) * 1.2 + (endX > startX ? 0.3 : -0.3);
+            let bStartX = nextX;
+            let bStartY = nextY;
+            let branchPath = [{ x: bStartX, y: bStartY }];
+            for (let b = 1; b <= 4; b++) {
+              bStartX += Math.sin(branchAngle) * (branchLen / 4) + (Math.random() - 0.5) * 6;
+              bStartY += Math.cos(branchAngle) * (branchLen / 4);
+              branchPath.push({ x: bStartX, y: bStartY });
+            }
+            branches.push(branchPath);
+          }
+        }
+        return { main: path, branches: branches };
       }
 
       let clouds = [
@@ -2710,6 +2753,78 @@ function toggleSoundSettings() {
         });
 
         drawProcedural3DMountains(ctx, W, H, isDay, isSunset);
+
+        // --- ATMOSPHERIC LIGHTNING & ELEGANT SKY FLASH EFFECTS ---
+        if (isRainy) {
+          lightningState.timer--;
+          if (lightningState.timer <= 0) {
+            lightningState.active = true;
+            lightningState.flashAlpha = 0.35 + Math.random() * 0.25; // Subtle, elegant flash
+            lightningState.timer = 120 + Math.floor(Math.random() * 200);
+
+            const startX = W * 0.2 + Math.random() * (W * 0.6);
+            const startY = 10 + Math.random() * 25;
+            const endX = startX + (Math.random() - 0.5) * 160;
+            const endY = H * 0.45 + Math.random() * (H * 0.1);
+
+            const boltData = generateLightningBolt(startX, startY, endX, endY);
+            lightningState.boltPath = boltData.main;
+            lightningState.branches = boltData.branches;
+          }
+
+          if (lightningState.active && lightningState.flashAlpha > 0.01) {
+            // 1. Gentle & Elegant Ambient Sky Flash Overlay
+            ctx.fillStyle = `rgba(180, 225, 255, ${lightningState.flashAlpha * 0.35})`;
+            ctx.fillRect(0, 0, W, H * 0.55);
+
+            // 2. Sub-branches (Electric Cyan Lines)
+            ctx.strokeStyle = `rgba(160, 230, 255, ${lightningState.flashAlpha * 0.75})`;
+            ctx.lineWidth = 1.2;
+            lightningState.branches.forEach(bPath => {
+              ctx.beginPath();
+              bPath.forEach((pt, idx) => {
+                if (idx === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+              });
+              ctx.stroke();
+            });
+
+            // 3. Main Core Lightning Bolt (Glowing Aura + White Center Core)
+            if (lightningState.boltPath.length > 0) {
+              ctx.strokeStyle = `rgba(80, 210, 255, ${lightningState.flashAlpha})`;
+              ctx.shadowColor = '#00dcff';
+              ctx.shadowBlur = 10;
+              ctx.lineWidth = 3.5;
+              ctx.beginPath();
+              lightningState.boltPath.forEach((pt, idx) => {
+                if (idx === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+              });
+              ctx.stroke();
+
+              ctx.strokeStyle = `rgba(255, 255, 255, ${lightningState.flashAlpha * 1.1})`;
+              ctx.lineWidth = 1.8;
+              ctx.beginPath();
+              lightningState.boltPath.forEach((pt, idx) => {
+                if (idx === 0) ctx.moveTo(pt.x, pt.y);
+                else ctx.lineTo(pt.x, pt.y);
+              });
+              ctx.stroke();
+              ctx.shadowBlur = 0;
+            }
+
+            // Smooth Atmospheric Strobe & Fade Decay
+            if (Math.random() < 0.15 && lightningState.flashAlpha > 0.2) {
+              lightningState.flashAlpha *= 0.6;
+            } else {
+              lightningState.flashAlpha *= 0.86;
+            }
+
+            if (lightningState.flashAlpha <= 0.01) {
+              lightningState.active = false;
+            }
+          }
+        }
 
         const groundGrad = ctx.createLinearGradient(0, H * 0.55, 0, H);
         groundGrad.addColorStop(0, isDay ? '#2c402c' : '#1a261a');
