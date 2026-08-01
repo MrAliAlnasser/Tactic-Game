@@ -2455,6 +2455,144 @@ function toggleSoundSettings() {
       ctx.restore(); // End Translation
     }
 
+    function drawProcedural3DRunway(ctx, W, H, isDay, isSunset, globalTime) {
+      const isNight = !isDay;
+      const runwayY = H * 0.68;
+      const runwayH = 105;
+
+      // 1. Concrete Shoulder Pads & Recessed Drainage Channels
+      ctx.fillStyle = isDay ? '#1a221a' : '#0e140e';
+      ctx.fillRect(-20, runwayY - 12, W + 40, runwayH + 24);
+
+      // Concrete Shoulder Bevel Rims
+      const shoulderGradTop = ctx.createLinearGradient(0, runwayY - 12, 0, runwayY);
+      shoulderGradTop.addColorStop(0, '#3a443a');
+      shoulderGradTop.addColorStop(1, '#1e261e');
+      ctx.fillStyle = shoulderGradTop;
+      ctx.fillRect(-20, runwayY - 12, W + 40, 12);
+
+      const shoulderGradBot = ctx.createLinearGradient(0, runwayY + runwayH, 0, runwayY + runwayH + 12);
+      shoulderGradBot.addColorStop(0, '#1e261e');
+      shoulderGradBot.addColorStop(1, '#101610');
+      ctx.fillStyle = shoulderGradBot;
+      ctx.fillRect(-20, runwayY + runwayH, W + 40, 12);
+
+      // Expansion Joint Seams along Shoulders
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+      for (let sx = -10; sx <= W + 20; sx += 80) {
+        ctx.fillRect(sx, runwayY - 12, 2.5, 12);
+        ctx.fillRect(sx + 40, runwayY + runwayH, 2.5, 12);
+      }
+
+      // 2. Main 3D Military Heavy Asphalt Runway Slab
+      const rwGrad = ctx.createLinearGradient(0, runwayY, 0, runwayY + runwayH);
+      rwGrad.addColorStop(0, '#1d2229');
+      rwGrad.addColorStop(0.15, '#29303b');
+      rwGrad.addColorStop(0.5, isDay ? '#363f4c' : (isSunset ? '#2c2833' : '#222933')); // Specular center
+      rwGrad.addColorStop(0.85, '#262d37');
+      rwGrad.addColorStop(1, '#181d24');
+      ctx.fillStyle = rwGrad;
+      ctx.fillRect(-20, runwayY, W + 40, runwayH);
+
+      // Asphalt Seam Texture & Tire Skid Marks (Rubber Weathering)
+      ctx.fillStyle = 'rgba(10, 14, 20, 0.45)';
+      for (let rx = 30; rx < W; rx += 160) {
+        // Main Landing Skid Marks
+        ctx.fillRect(rx, runwayY + 38, 70, 7);
+        ctx.fillRect(rx + 30, runwayY + 58, 85, 6);
+        ctx.fillRect(rx - 40, runwayY + 48, 50, 5);
+      }
+
+      // 3. ICAO Standard Military Markings
+      // Continuous Yellow Boundary Lines
+      ctx.fillStyle = '#f5b800';
+      ctx.fillRect(-20, runwayY + 3, W + 40, 3.5);
+      ctx.fillRect(-20, runwayY + runwayH - 6.5, W + 40, 3.5);
+
+      // Threshold Piano Key Markings (Runway Entrance/Exit Ends)
+      ctx.fillStyle = '#e8f0f8';
+      const keyW = 6;
+      const keyH = 26;
+      for (let k = 0; k < 8; k++) {
+        const ky = runwayY + 14 + k * 9;
+        ctx.fillRect(12, ky, keyH, keyW); // Left Threshold
+        ctx.fillRect(W - 12 - keyH, ky, keyH, keyW); // Right Threshold
+      }
+
+      // Aiming Point Touchdown Zone Blocks (TDZ Double Rectangles)
+      ctx.fillRect(W * 0.22, runwayY + 22, 45, 12);
+      ctx.fillRect(W * 0.22, runwayY + runwayH - 34, 45, 12);
+      ctx.fillRect(W * 0.75, runwayY + 22, 45, 12);
+      ctx.fillRect(W * 0.75, runwayY + runwayH - 34, 45, 12);
+
+      // Centerline Dashed White Line with 3D Shadow
+      const dashW = 40;
+      const dashGap = 35;
+      const centerY = runwayY + runwayH / 2 - 3.5;
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'; // Shadow
+      for (let dx = -10; dx <= W + 40; dx += dashW + dashGap) {
+        ctx.fillRect(dx + 2, centerY + 2, dashW, 7);
+      }
+      ctx.fillStyle = '#f0f6ff'; // White Stripe
+      for (let dx = -10; dx <= W + 40; dx += dashW + dashGap) {
+        ctx.fillRect(dx, centerY, dashW, 7);
+      }
+
+      // Taxiway Guidance Curved Lines (Cyan/Yellow Turnouts to Hangars)
+      ctx.strokeStyle = '#f5b800';
+      ctx.lineWidth = 2.5;
+      for (let i = 0; i < 3; i++) {
+        const hx = W * 0.16 + i * W * 0.28;
+        ctx.beginPath();
+        ctx.moveTo(hx, runwayY - 12);
+        ctx.quadraticCurveTo(hx, runwayY + 20, hx + 35, runwayY + 20);
+        ctx.stroke();
+      }
+
+      // 4. High-Intensity Flush Inset Runway Edge Lights & Beacons
+      const lightSpacing = 55;
+      for (let lx = -10; lx <= W + 20; lx += lightSpacing) {
+        const isBlinking = Math.sin(globalTime * 0.08 + lx * 0.05) > 0;
+
+        // Top Edge Lights
+        drawRunwayFixtureLight(ctx, lx, runwayY - 4, isNight, isBlinking, 'rgba(0, 229, 255, 0.8)', '#ffffff');
+        // Bottom Edge Lights
+        drawRunwayFixtureLight(ctx, lx, runwayY + runwayH + 4, isNight, isBlinking, 'rgba(0, 229, 255, 0.8)', '#ffffff');
+      }
+
+      // Threshold Green Entry / Red Exit Edge Beacons
+      drawRunwayFixtureLight(ctx, 12, runwayY - 4, isNight, true, 'rgba(0, 255, 102, 0.9)', '#00ff66');
+      drawRunwayFixtureLight(ctx, 12, runwayY + runwayH + 4, isNight, true, 'rgba(0, 255, 102, 0.9)', '#00ff66');
+      drawRunwayFixtureLight(ctx, W - 12, runwayY - 4, isNight, true, 'rgba(255, 34, 34, 0.9)', '#ff2222');
+      drawRunwayFixtureLight(ctx, W - 12, runwayY + runwayH + 4, isNight, true, 'rgba(255, 34, 34, 0.9)', '#ff2222');
+    }
+
+    function drawRunwayFixtureLight(ctx, x, y, isNight, isLit, glowColor, coreColor) {
+      // Steel Heavy Fixture Base Housing
+      ctx.fillStyle = '#1c242c';
+      ctx.beginPath(); ctx.arc(x, y, 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#3a4856';
+      ctx.beginPath(); ctx.arc(x, y, 2.5, 0, Math.PI * 2); ctx.fill();
+
+      if (isLit) {
+        if (isNight) {
+          // Radiant Light Halo Bloom
+          const haloGrad = ctx.createRadialGradient(x, y, 0, x, y, 14);
+          haloGrad.addColorStop(0, glowColor);
+          haloGrad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = haloGrad;
+          ctx.beginPath(); ctx.arc(x, y, 14, 0, Math.PI * 2); ctx.fill();
+        }
+
+        // Intense Lens Core
+        ctx.fillStyle = coreColor;
+        ctx.shadowColor = glowColor;
+        ctx.shadowBlur = isNight ? 10 : 3;
+        ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+    }
+
     function playAirportAnimation(callback, forceAnimState = null) {
       if (window.airportAnimFrame) cancelAnimationFrame(window.airportAnimFrame);
       if (G.animating) {
@@ -2611,31 +2749,8 @@ function toggleSoundSettings() {
           }
         }
 
-        const isNight = !isDay;
-        const runwayY = H * 0.68;
-        const runwayH = 100;
-        const rwGrad = ctx.createLinearGradient(0, runwayY, 0, runwayY + runwayH);
-        rwGrad.addColorStop(0, '#2a2d33'); rwGrad.addColorStop(0.5, '#30353c'); rwGrad.addColorStop(1, '#2a2d33');
-        ctx.fillStyle = rwGrad; ctx.fillRect(0, runwayY, W, runwayH);
-
-        ctx.fillStyle = 'rgba(0,0,0,0.15)';
-        for (let x = 0; x < W; x += 150) { ctx.fillRect(x, runwayY + 40, 80, 8); ctx.fillRect(x + 50, runwayY + 50, 60, 6); }
-
-        ctx.fillStyle = '#ffcc00'; ctx.fillRect(0, runwayY + 2, W, 4); ctx.fillRect(0, runwayY + runwayH - 6, W, 4);
-        ctx.fillStyle = '#eeeeee';
-        for (let i = 0; i < W; i += 80) ctx.fillRect(i, runwayY + runwayH / 2 - 3, 40, 6);
-
-        for (let i = 0; i < W; i += 60) {
-          const glow = Math.sin(globalTime * 0.1 + i * 0.05) > 0;
-          if (glow && !isDay) {
-            ctx.fillStyle = 'rgba(100, 200, 255, 0.4)'; ctx.beginPath(); ctx.arc(i + 2, runwayY - 4, 8, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#6df'; ctx.fillRect(i, runwayY - 6, 4, 4);
-            ctx.fillStyle = 'rgba(100, 200, 255, 0.4)'; ctx.beginPath(); ctx.arc(i + 2, runwayY + runwayH + 4, 8, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#6df'; ctx.fillRect(i, runwayY + runwayH + 2, 4, 4);
-          } else {
-            ctx.fillStyle = '#111'; ctx.fillRect(i, runwayY - 6, 4, 4); ctx.fillRect(i, runwayY + runwayH + 2, 4, 4);
-          }
-        }
+        // Master-Level Procedural 3D Runway & Airfield
+        drawProcedural3DRunway(ctx, W, H, isDay, isSunset, globalTime);
 
         // Airport Buildings (Hangars & Control Tower IN FRONT of wall)
         const hangarW = 120;
