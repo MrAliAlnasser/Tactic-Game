@@ -2287,6 +2287,174 @@ function toggleSoundSettings() {
       }
     }
 
+    function drawProcedural3DEngineeringUnit(ctx, ex, ey, globalTime) {
+      ctx.save();
+      ctx.translate(ex, ey);
+
+      // 1. Heavy Caterpillar Treads & Wheels
+      const treadW = 74;
+      const treadH = 14;
+      const treadX = -37;
+      const treadY = -14;
+
+      // Lower Tread Band
+      ctx.fillStyle = '#121812';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(treadX, treadY, treadW, treadH, 6); else ctx.rect(treadX, treadY, treadW, treadH);
+      ctx.fill();
+      ctx.strokeStyle = '#283428';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Dual Roller Wheels (5 Wheels)
+      for (let wx = treadX + 9; wx <= treadX + treadW - 9; wx += 14) {
+        ctx.fillStyle = '#2a3629';
+        ctx.beginPath(); ctx.arc(wx, treadY + 7, 4.5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#526650';
+        ctx.beginPath(); ctx.arc(wx, treadY + 7, 2, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // 2. Heavy Armored Vehicle Body Superstructure
+      const bodyX = -32;
+      const bodyY = -34;
+      const bodyW = 64;
+      const bodyH = 20;
+
+      const bodyGrad = ctx.createLinearGradient(bodyX, bodyY, bodyX, bodyY + bodyH);
+      bodyGrad.addColorStop(0, '#f2ab00');
+      bodyGrad.addColorStop(0.4, '#d49200');
+      bodyGrad.addColorStop(0.8, '#a67200');
+      bodyGrad.addColorStop(1, '#664600');
+      ctx.fillStyle = bodyGrad;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(bodyX, bodyY, bodyW, bodyH, 3); else ctx.rect(bodyX, bodyY, bodyW, bodyH);
+      ctx.fill();
+
+      // Body Bevel Edge Highlight
+      ctx.strokeStyle = '#ffce42';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(bodyX, bodyY); ctx.lineTo(bodyX + bodyW, bodyY);
+      ctx.stroke();
+
+      // Rear Generator & Gas Tanks (Red & Blue Cylinders)
+      ctx.fillStyle = '#cc2222'; ctx.fillRect(bodyX + 4, bodyY - 10, 6, 10); // Red Oxygen
+      ctx.fillStyle = '#2266cc'; ctx.fillRect(bodyX + 12, bodyY - 10, 6, 10); // Blue Acetylene
+
+      // Industrial Hazard Stripe Panel
+      const hazardY = bodyY + bodyH - 6;
+      ctx.fillStyle = '#111';
+      ctx.fillRect(bodyX + 20, hazardY, 36, 5);
+      ctx.fillStyle = '#ffcc00';
+      for (let sx = 20; sx < 56; sx += 8) {
+        ctx.beginPath();
+        ctx.moveTo(bodyX + sx, hazardY + 5);
+        ctx.lineTo(bodyX + sx + 4, hazardY);
+        ctx.lineTo(bodyX + sx + 7, hazardY);
+        ctx.lineTo(bodyX + sx + 3, hazardY + 5);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Operator Cabin (Right Side)
+      ctx.fillStyle = '#182418';
+      ctx.fillRect(bodyX + 38, bodyY - 14, 20, 14);
+      // Tinted Cyan Window
+      ctx.fillStyle = '#44ccff';
+      ctx.shadowColor = '#44ccff'; ctx.shadowBlur = 3;
+      ctx.fillRect(bodyX + 42, bodyY - 11, 12, 8);
+      ctx.shadowBlur = 0;
+      // Protective Cage Bars
+      ctx.strokeStyle = '#111'; ctx.lineWidth = 1;
+      ctx.strokeRect(bodyX + 42, bodyY - 11, 12, 8);
+
+      // 3. 3D Lattice Boom Crane Arm (Hydraulic Telescopic Boom)
+      const boomPivotX = bodyX + 10;
+      const boomPivotY = bodyY + 4;
+      const boomAngle = -0.7 + Math.sin(globalTime * 0.03) * 0.04;
+      const boomLen = 75;
+
+      ctx.save();
+      ctx.translate(boomPivotX, boomPivotY);
+      ctx.rotate(boomAngle);
+
+      // Lattice Boom Truss Elements
+      ctx.strokeStyle = '#e69d00';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, -3); ctx.lineTo(boomLen, -2);
+      ctx.moveTo(0, 3); ctx.lineTo(boomLen, 2);
+      ctx.stroke();
+
+      // Diagonal Cross Bracing (Lattice Structure)
+      ctx.strokeStyle = '#b87c00';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let bx = 0; bx < boomLen; bx += 10) {
+        ctx.moveTo(bx, -3); ctx.lineTo(bx + 10, 3);
+        ctx.moveTo(bx + 10, -3); ctx.lineTo(bx, 3);
+      }
+      ctx.stroke();
+
+      // Boom Apex Pulley Wheel
+      ctx.fillStyle = '#222';
+      ctx.beginPath(); ctx.arc(boomLen, 0, 4, 0, Math.PI * 2); ctx.fill();
+
+      ctx.restore(); // End Boom Rotation
+
+      // 4. Steel Cable & Heavy Lifting Hook Assembly
+      const tipX = boomPivotX + Math.cos(boomAngle) * boomLen;
+      const tipY = boomPivotY + Math.sin(boomAngle) * boomLen;
+      const hookY = tipY + 35 + Math.sin(globalTime * 0.05) * 3;
+
+      // Winch Steel Cable
+      ctx.strokeStyle = '#cccccc';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.lineTo(tipX, hookY);
+      ctx.stroke();
+
+      // Heavy Crane Hook Block
+      ctx.fillStyle = '#222';
+      ctx.fillRect(tipX - 4, hookY - 4, 8, 6);
+      ctx.strokeStyle = '#666'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(tipX, hookY + 4, 4, 0, Math.PI);
+      ctx.stroke();
+
+      // 5. Dynamic Electric Arc Welding Sparks (Bright Cyan/White Arc Flash)
+      if (Math.random() < 0.6) {
+        const sparkX = tipX + (Math.random() - 0.5) * 6;
+        const sparkY = hookY + 6 + (Math.random() - 0.5) * 4;
+
+        // Radiant Arc Glow
+        const glowGrad = ctx.createRadialGradient(sparkX, sparkY, 0, sparkX, sparkY, 25);
+        glowGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+        glowGrad.addColorStop(0.3, 'rgba(100, 220, 255, 0.7)');
+        glowGrad.addColorStop(1, 'rgba(0, 150, 255, 0)');
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath(); ctx.arc(sparkX, sparkY, 25, 0, Math.PI * 2); ctx.fill();
+
+        // Intense Arc Flash Point
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#88eeff';
+        ctx.shadowBlur = 15;
+        ctx.beginPath(); ctx.arc(sparkX, sparkY, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Flying Spark Particles
+        for (let p = 0; p < 6; p++) {
+          const px = sparkX + (Math.random() - 0.5) * 25;
+          const py = sparkY + Math.random() * 20;
+          ctx.fillStyle = Math.random() < 0.5 ? '#ffffff' : '#88e0ff';
+          ctx.beginPath(); ctx.arc(px, py, Math.random() * 2 + 0.8, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      ctx.restore(); // End Translation
+    }
+
     function playAirportAnimation(callback, forceAnimState = null) {
       if (window.airportAnimFrame) cancelAnimationFrame(window.airportAnimFrame);
       if (G.animating) {
@@ -2516,18 +2684,8 @@ function toggleSoundSettings() {
         }
 
         if (G.upgrades && G.upgrades.eng) {
-          const ex = W * 0.05; const ey = H * 0.55 + 10;
-          ctx.strokeStyle = '#cda34f'; ctx.lineWidth = 2;
-          ctx.beginPath(); ctx.moveTo(ex, ey); ctx.lineTo(ex, ey - 50); ctx.moveTo(ex + 40, ey); ctx.lineTo(ex + 40, ey - 50);
-          ctx.moveTo(ex, ey - 25); ctx.lineTo(ex + 40, ey - 25); ctx.moveTo(ex, ey - 50); ctx.lineTo(ex + 40, ey - 50);
-          ctx.moveTo(ex, ey); ctx.lineTo(ex + 40, ey - 25); ctx.moveTo(ex, ey - 25); ctx.lineTo(ex + 40, ey - 50); ctx.stroke();
-          ctx.strokeStyle = '#d9aa38'; ctx.lineWidth = 4;
-          ctx.beginPath(); ctx.moveTo(ex - 10, ey); ctx.lineTo(ex - 10, ey - 80); ctx.lineTo(ex + 50, ey - 80); ctx.stroke();
-          ctx.lineWidth = 1; ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.moveTo(ex + 45, ey - 80); ctx.lineTo(ex + 45, ey - 20); ctx.stroke();
-          if (Math.random() < 0.3) {
-            ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(ex + 20 + (Math.random() - 0.5) * 10, ey - 15 + (Math.random() - 0.5) * 10, Math.random() * 3 + 1, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#aaaaff'; ctx.beginPath(); ctx.arc(ex + 20 + (Math.random() - 0.5) * 20, ey - 15 + (Math.random() - 0.5) * 20, Math.random() * 2, 0, Math.PI * 2); ctx.fill();
-          }
+          const ex = W * 0.06; const ey = H * 0.55 + 16;
+          drawProcedural3DEngineeringUnit(ctx, ex, ey, globalTime);
         }
 
         if (G.upgrades && G.upgrades.ammo) {
