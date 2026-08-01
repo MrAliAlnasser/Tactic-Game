@@ -1701,10 +1701,10 @@ function toggleSoundSettings() {
         ctx.save();
         ctx.translate(radarX, roofTopY - 6);
 
-        // Pedestal/Mast
-        ctx.fillStyle = '#2a3442';
+        // Pedestal/Mast Stand
+        ctx.fillStyle = '#26303d';
         ctx.fillRect(-3, 0, 6, 8);
-        ctx.fillStyle = '#1c2430';
+        ctx.fillStyle = '#18202a';
         ctx.fillRect(-5, 6, 10, 2);
 
         // Continuous 360-degree Y-Axis Rotation
@@ -1712,64 +1712,87 @@ function toggleSoundSettings() {
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
 
-        const dishWidth = 22 * Math.abs(cosA) + 4;
+        const dishRadiusX = Math.max(5, 22 * Math.abs(cosA) + 3);
+        const dishRadiusY = 11;
         const isFacingFront = sinA >= 0;
         const facingSide = cosA >= 0 ? 1 : -1;
+
+        // Joint Cap
+        ctx.fillStyle = '#4a5768';
+        ctx.beginPath(); ctx.arc(0, 0, 3.5, 0, Math.PI * 2); ctx.fill();
 
         ctx.translate(0, -4);
 
         if (!isFacingFront) {
-          // Back Shell & Structural Ribs
-          ctx.strokeStyle = '#1e2633';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(-dishWidth * 0.4, 0); ctx.lineTo(dishWidth * 0.4, 0);
-          ctx.moveTo(0, 0); ctx.lineTo(0, -14);
-          ctx.stroke();
-
-          const backGrad = ctx.createLinearGradient(-dishWidth / 2, 0, dishWidth / 2, 0);
-          backGrad.addColorStop(0, '#2b3644');
-          backGrad.addColorStop(0.5, '#45566b');
-          backGrad.addColorStop(1, '#1e2632');
+          // --- BACK FACE OF DISH (Full 3D Curved Shell) ---
+          // Main Back Shell Body
+          const backGrad = ctx.createLinearGradient(-dishRadiusX, -6, dishRadiusX, -6);
+          backGrad.addColorStop(0, '#1c2533');
+          backGrad.addColorStop(0.35, '#3e4d61');
+          backGrad.addColorStop(0.7, '#2a3646');
+          backGrad.addColorStop(1, '#16202c');
           ctx.fillStyle = backGrad;
 
           ctx.beginPath();
-          ctx.ellipse(0, -6, dishWidth / 2, 10, 0, Math.PI, 0, true);
-          ctx.lineTo(dishWidth / 2 * 0.8, -3);
-          ctx.lineTo(-dishWidth / 2 * 0.8, -3);
-          ctx.closePath();
+          ctx.ellipse(0, -6, dishRadiusX, dishRadiusY, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Outer Edge Rim Highlight
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+
+          // Structural Back Bracing (X-Truss & Center Hub)
+          ctx.strokeStyle = '#141c26';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(-dishRadiusX * 0.7, -6); ctx.lineTo(dishRadiusX * 0.7, -6);
+          ctx.moveTo(0, -6 - dishRadiusY * 0.7); ctx.lineTo(0, -6 + dishRadiusY * 0.7);
+          ctx.stroke();
+
+          // Center Mounting Plate Hub
+          ctx.fillStyle = '#2d3848';
+          ctx.beginPath();
+          ctx.ellipse(0, -6, Math.min(5, dishRadiusX * 0.4), 3.5, 0, 0, Math.PI * 2);
           ctx.fill();
         } else {
-          // Front Concave Dish Bowl
-          const frontGrad = ctx.createLinearGradient(-dishWidth / 2, 0, dishWidth / 2, 0);
-          frontGrad.addColorStop(0, '#364454');
+          // --- FRONT FACE OF DISH (Full 3D Concave Metallic Bowl) ---
+          // Outer Metallic Dish Bowl
+          const frontGrad = ctx.createLinearGradient(-dishRadiusX, -6, dishRadiusX, -6);
+          frontGrad.addColorStop(0, '#324050');
           frontGrad.addColorStop(0.3, '#7c8e9e');
           frontGrad.addColorStop(0.7, '#a2b3c4');
-          frontGrad.addColorStop(1, '#2c3746');
+          frontGrad.addColorStop(1, '#24303e');
           ctx.fillStyle = frontGrad;
 
           ctx.beginPath();
-          ctx.ellipse(0, -6, dishWidth / 2, 11, 0, 0, Math.PI * 2);
+          ctx.ellipse(0, -6, dishRadiusX, dishRadiusY, 0, 0, Math.PI * 2);
           ctx.fill();
 
-          const innerGrad = ctx.createLinearGradient(-dishWidth / 3, -12, dishWidth / 3, 0);
-          innerGrad.addColorStop(0, 'rgba(15, 22, 30, 0.7)');
-          innerGrad.addColorStop(1, 'rgba(50, 65, 82, 0.2)');
+          // Outer Rim Highlight Line
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+          ctx.lineWidth = 1.4;
+          ctx.stroke();
+
+          // Inner Concave Depth Shadow
+          const innerGrad = ctx.createLinearGradient(-dishRadiusX * 0.5, -12, dishRadiusX * 0.5, 0);
+          innerGrad.addColorStop(0, 'rgba(12, 18, 26, 0.75)');
+          innerGrad.addColorStop(1, 'rgba(45, 60, 75, 0.15)');
           ctx.fillStyle = innerGrad;
           ctx.beginPath();
-          ctx.ellipse(0, -6, dishWidth / 2 - 2, 8, 0, 0, Math.PI * 2);
+          ctx.ellipse(0, -6, Math.max(3, dishRadiusX - 3), dishRadiusY - 2.5, 0, 0, Math.PI * 2);
           ctx.fill();
 
           // Feed Horn Receiver Arm
-          const hornLen = 11 * facingSide;
-          ctx.strokeStyle = '#d4deee';
-          ctx.lineWidth = 1.5;
+          const hornLen = (dishRadiusX * 0.55) * facingSide;
+          ctx.strokeStyle = '#e0e8f5';
+          ctx.lineWidth = 1.8;
           ctx.beginPath();
           ctx.moveTo(0, -6);
           ctx.lineTo(hornLen, -9);
           ctx.stroke();
 
-          // Sensor LED
+          // Red Receiver Sensor Light
           ctx.fillStyle = '#ff3333';
           ctx.shadowColor = '#ff3333';
           ctx.shadowBlur = 5;
