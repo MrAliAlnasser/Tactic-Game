@@ -2020,7 +2020,7 @@ function toggleSoundSettings() {
           drawProcedural3DHangar(ctx, bx, by, hangarW, hangarH, isDay, isSunset, globalTime, i);
         }
 
-        const tx = W * 0.82; const tw = 50; const th = H * 0.45; const ty = H * 0.55 - th + 20;
+        const tx = W * 0.82; const tw = 50; const th = H * 0.28; const ty = H * 0.55 - th + 20;
         drawProcedural3DControlTower(ctx, tx, ty, tw, th, isDay, isSunset, globalTime);
 
         // Upgrades Drawing
