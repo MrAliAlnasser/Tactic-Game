@@ -2362,7 +2362,7 @@ function toggleSoundSettings() {
 
         // Fortified Wall Background Perimeter (BEHIND hangars & tower)
         if (G.upgrades && G.upgrades.walls) {
-          drawProcedural3DFortifiedWalls(ctx, W, H, globalTime, false);
+          drawProcedural3DFortifiedWalls(ctx, W, H, globalTime, true);
         }
 
         const isNight = !isDay;
@@ -2419,9 +2419,7 @@ function toggleSoundSettings() {
           ctx.restore();
         }
 
-        if (G.upgrades && G.upgrades.walls) {
-          drawProcedural3DFortifiedWalls(ctx, W, H, globalTime);
-        }
+
 
         if (G.upgrades && G.upgrades.aa) {
           const aax = W * 0.70; const aay = H * 0.55 + 16;
