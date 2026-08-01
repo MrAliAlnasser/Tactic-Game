@@ -1695,27 +1695,110 @@ function toggleSoundSettings() {
       const roofTopY = cabY - 12;
       const centerX = tx + tw / 2;
 
-      // Radar Upgrade Dish
+      // 3D Rotating Radar Antenna
       if (G.upgrades && G.upgrades.radar) {
         ctx.save();
-        ctx.translate(centerX, roofTopY - 12);
-        ctx.fillStyle = '#2a3340';
-        ctx.fillRect(-4, 0, 8, 12);
+        ctx.translate(centerX, roofTopY - 8);
 
-        ctx.translate(0, -2);
-        ctx.rotate(globalTime * 0.05);
-        ctx.fillStyle = '#afb9c5';
-        ctx.beginPath(); ctx.ellipse(0, 0, 26, 8, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = '#6a7686';
-        ctx.beginPath(); ctx.ellipse(0, 0, 20, 5, 0, 0, Math.PI * 2); ctx.fill();
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-12, -14); ctx.moveTo(0, 0); ctx.lineTo(12, -14); ctx.lineTo(-12, -14); ctx.stroke();
-        if (Math.sin(globalTime * 0.2) > 0) {
+        // Stationary Radar Pedestal/Mast
+        ctx.fillStyle = '#2a3442';
+        ctx.fillRect(-3, 0, 6, 10);
+        ctx.fillStyle = '#1c2430';
+        ctx.fillRect(-6, 8, 12, 3);
+
+        // Horizontal Y-Axis 360-degree Rotation
+        const angle = globalTime * 0.04;
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+
+        const dishWidth = 26 * Math.abs(cosA) + 4; // Horizontal span projection
+        const isFacingFront = sinA >= 0;
+        const facingSide = cosA >= 0 ? 1 : -1;
+
+        // Pedestal Joint Cap
+        ctx.fillStyle = '#4a5768';
+        ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
+
+        ctx.translate(0, -6);
+
+        if (!isFacingFront) {
+          // --- BACK FACE OF DISH ---
+          ctx.strokeStyle = '#1e2633';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.moveTo(-dishWidth * 0.4, 0); ctx.lineTo(dishWidth * 0.4, 0);
+          ctx.moveTo(0, 0); ctx.lineTo(0, -18);
+          ctx.stroke();
+
+          const backGrad = ctx.createLinearGradient(-dishWidth / 2, 0, dishWidth / 2, 0);
+          backGrad.addColorStop(0, '#2b3644');
+          backGrad.addColorStop(0.5, '#45566b');
+          backGrad.addColorStop(1, '#1e2632');
+          ctx.fillStyle = backGrad;
+
+          ctx.beginPath();
+          ctx.ellipse(0, -8, dishWidth / 2, 12, 0, Math.PI, 0, true);
+          ctx.lineTo(dishWidth / 2 * 0.8, -4);
+          ctx.lineTo(-dishWidth / 2 * 0.8, -4);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(-dishWidth * 0.3, -12); ctx.lineTo(0, 0); ctx.lineTo(dishWidth * 0.3, -12);
+          ctx.stroke();
+        } else {
+          // --- FRONT FACE OF DISH (Concave Metallic Bowl) ---
+          const frontGrad = ctx.createLinearGradient(-dishWidth / 2, 0, dishWidth / 2, 0);
+          frontGrad.addColorStop(0, '#364454');
+          frontGrad.addColorStop(0.3, '#7c8e9e');
+          frontGrad.addColorStop(0.7, '#a2b3c4');
+          frontGrad.addColorStop(1, '#2c3746');
+          ctx.fillStyle = frontGrad;
+
+          ctx.beginPath();
+          ctx.ellipse(0, -8, dishWidth / 2, 14, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          const innerGrad = ctx.createLinearGradient(-dishWidth / 3, -16, dishWidth / 3, 0);
+          innerGrad.addColorStop(0, 'rgba(15, 22, 30, 0.7)');
+          innerGrad.addColorStop(1, 'rgba(50, 65, 82, 0.2)');
+          ctx.fillStyle = innerGrad;
+          ctx.beginPath();
+          ctx.ellipse(0, -8, dishWidth / 2 - 3, 11, 0, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Feed Horn Receiver Arm
+          const hornLen = 14 * facingSide;
+          ctx.strokeStyle = '#d4deee';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, -8);
+          ctx.lineTo(hornLen, -12);
+          ctx.stroke();
+
+          // Red Receiver Sensor Light
           ctx.fillStyle = '#ff3333';
-          ctx.shadowColor = '#ff3333'; ctx.shadowBlur = 8;
-          ctx.beginPath(); ctx.arc(0, -16, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.shadowColor = '#ff3333';
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.arc(hornLen, -12, 2.5, 0, Math.PI * 2);
+          ctx.fill();
           ctx.shadowBlur = 0;
         }
+
+        // Top Apex Flashing Warning Beacon Light
+        if (Math.floor(globalTime * 0.15) % 2 === 0) {
+          ctx.fillStyle = '#ff2222';
+          ctx.shadowColor = '#ff2222';
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(0, -22, 2, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+
         ctx.restore();
       }
 
@@ -2831,9 +2914,9 @@ function toggleSoundSettings() {
 
     function executeGatherIntel() {
       playActionAnimation('scout', '🕵️ جمع المعلومات...', () => {
-        const intelGain = G.upgrades.radar ? 4 : 2;
+        const intelGain = G.upgrades.radar ? 3 : 2;
         G.intel += intelGain;
-        let pros = [`جمع +${intelGain} نقاط معلومات هامة`];
+        let pros = [`جمع +${intelGain} نقاط معلومات هامة${G.upgrades.radar ? ' (+1 بفضل رادار الكشف المبكر)' : ''}`];
         let cons = ["استهلاك للموارد والوقت دون القيام بهجوم مباشر"];
         let story = "عملت شبكة جواسيسنا وراداراتنا على مدار الساعة، لجمع الشذرات المتناثرة من البيانات لتركيب الصورة الكاملة للموقف.";
 
@@ -3944,7 +4027,7 @@ function toggleSoundSettings() {
       grid.innerHTML = '';
 
       const options = [
-        { id: 'radar', icon: '📡', label: 'رادار كشف مبكر', desc: 'يزيد كفاءة جمع المعلومات', cost: 3 },
+        { id: 'radar', icon: '📡', label: 'رادار كشف مبكر', desc: 'يمنح +1 نقاط معلومات إضافية مع كل عملية جمع استخباراتي', cost: 3 },
         { id: 'walls', icon: '🛡️', label: 'جدران محصنة', desc: 'يزيد صحة القاعدة بمقدار 1', cost: 3 },
         { id: 'aa', icon: '🚀', label: 'دفاع جوي', desc: 'يصد هجوم بنسبة 100% (يحتاج لدور كامل لإعادة التذخير)', cost: 3 },
         { id: 'stealth', icon: '🛩️', label: 'سرب شبحي', desc: 'نجاح الضربة التسللية مضمون', cost: 3 },
