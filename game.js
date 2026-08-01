@@ -2030,6 +2030,187 @@ function toggleSoundSettings() {
       }
     }
 
+    function drawProcedural3DFortifiedWalls(ctx, W, H, globalTime) {
+      const wallY = H * 0.55 + 16;
+      const wallH = 22;
+
+      // 1. Outer Anti-Tank Concrete Barriers (Dragon's Teeth) on Tarmac
+      const toothSpacing = 50;
+      for (let tx = -10; tx <= W + 20; tx += toothSpacing) {
+        ctx.fillStyle = '#1c242c';
+        ctx.beginPath();
+        ctx.moveTo(tx, wallY + 12);
+        ctx.lineTo(tx + 8, wallY + 2);
+        ctx.lineTo(tx + 16, wallY + 12);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#3a4856';
+        ctx.beginPath();
+        ctx.moveTo(tx + 8, wallY + 2);
+        ctx.lineTo(tx + 16, wallY + 12);
+        ctx.lineTo(tx + 12, wallY + 12);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 2. Main 3D Reinforced Concrete & Armor Plate Perimeter Wall
+      const wallGrad = ctx.createLinearGradient(0, wallY - wallH, 0, wallY);
+      wallGrad.addColorStop(0, '#4a5a6b');
+      wallGrad.addColorStop(0.3, '#324150');
+      wallGrad.addColorStop(0.7, '#24303c');
+      wallGrad.addColorStop(1, '#151e26');
+      ctx.fillStyle = wallGrad;
+      ctx.fillRect(-20, wallY - wallH, W + 40, wallH);
+
+      // Top Steel Edge Rim & Bevel Highlight
+      ctx.fillStyle = '#6a7d91';
+      ctx.fillRect(-20, wallY - wallH, W + 40, 2.5);
+
+      // Interlocking Modular Armor Panels & Vertical Pillars
+      const panelW = 55;
+      for (let px = -20; px <= W + 40; px += panelW) {
+        // Vertical Steel Pillar Joint
+        const pillarGrad = ctx.createLinearGradient(px, wallY - wallH - 3, px + 10, wallY - wallH - 3);
+        pillarGrad.addColorStop(0, '#24303c');
+        pillarGrad.addColorStop(0.5, '#526478');
+        pillarGrad.addColorStop(1, '#18222a');
+        ctx.fillStyle = pillarGrad;
+        ctx.fillRect(px, wallY - wallH - 3, 10, wallH + 3);
+
+        // Pillar Top Cap
+        ctx.fillStyle = '#7a8fa6';
+        ctx.fillRect(px - 1, wallY - wallH - 5, 12, 2.5);
+
+        // Panel Recessed Grooves & Rivets
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(px + 12, wallY - wallH + 4, panelW - 14, wallH - 8);
+
+        // Steel Rivet Dots
+        ctx.fillStyle = '#8aa0b8';
+        ctx.fillRect(px + 14, wallY - wallH + 6, 2, 2);
+        ctx.fillRect(px + panelW - 4, wallY - wallH + 6, 2, 2);
+        ctx.fillRect(px + 14, wallY - 6, 2, 2);
+        ctx.fillRect(px + panelW - 4, wallY - 6, 2, 2);
+      }
+
+      // 3. High-Tech Hologram Laser Barrier Grid (Pulsing Cyan Shield Line)
+      const barrierY = wallY - wallH - 6;
+      ctx.strokeStyle = 'rgba(0, 220, 255, 0.6)';
+      ctx.shadowColor = '#00dcff';
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-20, barrierY);
+      ctx.lineTo(W + 20, barrierY);
+      ctx.stroke();
+
+      // Pulsing Vertical Security Nodes
+      for (let nx = 15; nx < W; nx += 110) {
+        const pulse = Math.sin(globalTime * 0.08 + nx) * 0.5 + 0.5;
+        ctx.fillStyle = pulse > 0.4 ? '#00e5ff' : '#0077aa';
+        ctx.shadowColor = '#00e5ff';
+        ctx.shadowBlur = 10 * pulse;
+        ctx.beginPath();
+        ctx.arc(nx, barrierY, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.shadowBlur = 0;
+
+      // 4. Razor Wire Coil Strand across Top Rim
+      ctx.strokeStyle = 'rgba(210, 225, 240, 0.8)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      for (let rx = -20; rx <= W + 20; rx += 8) {
+        const ry = barrierY - 4 + Math.sin(rx * 0.4) * 3;
+        if (rx === -20) ctx.moveTo(rx, ry);
+        else ctx.lineTo(rx, ry);
+      }
+      ctx.stroke();
+
+      // 5. Heavy Armored Guard Bastions / Watchtowers at Perimeter Intervals
+      const towerXs = [W * 0.15, W * 0.50, W * 0.85];
+      towerXs.forEach(tx => {
+        ctx.save();
+        ctx.translate(tx, wallY - wallH - 4);
+
+        // Bastion Octagonal Tower Shaft
+        const bGrad = ctx.createLinearGradient(-12, 0, 12, 0);
+        bGrad.addColorStop(0, '#1c2630');
+        bGrad.addColorStop(0.4, '#425366');
+        bGrad.addColorStop(1, '#141d24');
+        ctx.fillStyle = bGrad;
+        ctx.fillRect(-12, -18, 24, 22);
+
+        // Bastion Roof Canopy
+        ctx.fillStyle = '#101720';
+        ctx.beginPath();
+        ctx.moveTo(-16, -18);
+        ctx.lineTo(16, -18);
+        ctx.lineTo(12, -24);
+        ctx.lineTo(-12, -24);
+        ctx.closePath();
+        ctx.fill();
+
+        // Observation Slit with Glowing Security Glass
+        ctx.fillStyle = '#00dcff';
+        ctx.shadowColor = '#00dcff';
+        ctx.shadowBlur = 6;
+        ctx.fillRect(-8, -14, 16, 3);
+        ctx.shadowBlur = 0;
+
+        // Searchlight Sweep Beam
+        const beamAngle = Math.sin(globalTime * 0.03 + tx) * 0.4 - 0.2;
+        ctx.save();
+        ctx.translate(0, -22);
+        ctx.rotate(beamAngle);
+
+        const beamGrad = ctx.createLinearGradient(0, 0, 0, 140);
+        beamGrad.addColorStop(0, 'rgba(0, 220, 255, 0.45)');
+        beamGrad.addColorStop(1, 'rgba(0, 220, 255, 0)');
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-25, 140);
+        ctx.lineTo(25, 140);
+        ctx.closePath();
+        ctx.fill();
+
+        // Lens Bulb
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2); ctx.fill();
+
+        ctx.restore();
+        ctx.restore();
+      });
+
+      // 6. Bottom Security Hazard Stripe Line
+      const hazardY = H - 20;
+      ctx.fillStyle = '#182028';
+      ctx.fillRect(0, hazardY, W, 20);
+      for (let hx = 0; hx < W; hx += 30) {
+        ctx.fillStyle = '#ffcc00';
+        ctx.beginPath();
+        ctx.moveTo(hx, hazardY);
+        ctx.lineTo(hx + 15, hazardY);
+        ctx.lineTo(hx + 5, hazardY + 20);
+        ctx.lineTo(hx - 10, hazardY + 20);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#111';
+        ctx.beginPath();
+        ctx.moveTo(hx + 15, hazardY);
+        ctx.lineTo(hx + 30, hazardY);
+        ctx.lineTo(hx + 20, hazardY + 20);
+        ctx.lineTo(hx + 5, hazardY + 20);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.fillRect(0, hazardY, W, 2);
+    }
+
     function playAirportAnimation(callback, forceAnimState = null) {
       if (window.airportAnimFrame) cancelAnimationFrame(window.airportAnimFrame);
       if (G.animating) {
@@ -2229,16 +2410,7 @@ function toggleSoundSettings() {
         }
 
         if (G.upgrades && G.upgrades.walls) {
-          ctx.fillStyle = '#4a5059'; ctx.fillRect(0, H - 40, W, 40);
-          ctx.fillStyle = '#30343a';
-          for (let wx = 0; wx < W; wx += 80) ctx.fillRect(wx, H - 40, 2, 40);
-          for (let wx = 0; wx < W; wx += 40) {
-            ctx.fillStyle = '#ffcc00';
-            ctx.beginPath(); ctx.moveTo(wx, H - 40); ctx.lineTo(wx + 20, H - 40); ctx.lineTo(wx + 10, H - 30); ctx.lineTo(wx - 10, H - 30); ctx.fill();
-            ctx.fillStyle = '#111';
-            ctx.beginPath(); ctx.moveTo(wx + 20, H - 40); ctx.lineTo(wx + 40, H - 40); ctx.lineTo(wx + 30, H - 30); ctx.lineTo(wx + 10, H - 30); ctx.fill();
-          }
-          ctx.fillStyle = '#3a3f47'; ctx.fillRect(0, H * 0.55 - 15, W, 15);
+          drawProcedural3DFortifiedWalls(ctx, W, H, globalTime);
         }
 
         if (G.upgrades && G.upgrades.aa) {
