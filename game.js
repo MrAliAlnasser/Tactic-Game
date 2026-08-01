@@ -1389,93 +1389,103 @@ function toggleSoundSettings() {
     function drawProcedural3DMountains(ctx, W, H, isDay, isSunset) {
       const baseH = H * 0.55;
 
-      let bgLit = isDay ? '#3d4e61' : (isSunset ? '#482f3a' : '#141b26');
-      let bgShd = isDay ? '#222f3e' : (isSunset ? '#291823' : '#0a0e16');
-      let fgLit = isDay ? '#4a5d73' : (isSunset ? '#583a48' : '#1b2433');
-      let fgShd = isDay ? '#283645' : (isSunset ? '#311c27' : '#0d121c');
-      let peakHL = isDay ? 'rgba(255, 255, 255, 0.22)' : (isSunset ? 'rgba(255, 190, 150, 0.2)' : 'rgba(100, 130, 180, 0.12)');
+      // Color Palettes based on Time of Day
+      let bgTop = isDay ? '#3f566e' : (isSunset ? '#4a2f3a' : '#141c28');
+      let bgBot = isDay ? '#243445' : (isSunset ? '#261822' : '#0a0f18');
 
-      // Background Mountains (Distant Peaks)
-      const bgPeaks = [
-        { x: -50, h: 60 }, { x: 90, h: 100 }, { x: 220, h: 75 },
-        { x: 380, h: 120 }, { x: 530, h: 85 }, { x: 670, h: 110 }, { x: 850, h: 70 }
-      ];
+      let midTop = isDay ? '#4f6985' : (isSunset ? '#5d3b48' : '#1a2433');
+      let midBot = isDay ? '#293949' : (isSunset ? '#2e1c26' : '#0c121c');
 
-      for (let i = 0; i < bgPeaks.length - 1; i++) {
-        const p1 = bgPeaks[i]; const p2 = bgPeaks[i + 1];
-        const midX = (p1.x + p2.x) * 0.5 + 8;
-        const peakY1 = baseH - p1.h; const peakY2 = baseH - p2.h;
+      let fgTop = isDay ? '#6280a1' : (isSunset ? '#704656' : '#223044');
+      let fgMid = isDay ? '#415770' : (isSunset ? '#4c2d3b' : '#16202e');
+      let fgBot = isDay ? '#212f3d' : (isSunset ? '#24141d' : '#080d14');
 
-        // Lit Facet (Left slope)
-        const gLit = ctx.createLinearGradient(p1.x, peakY1, p1.x, baseH);
-        gLit.addColorStop(0, bgLit); gLit.addColorStop(1, bgShd);
-        ctx.fillStyle = gLit;
-        ctx.beginPath();
-        ctx.moveTo(p1.x, baseH);
-        ctx.lineTo(p1.x, peakY1);
-        ctx.lineTo(midX, baseH - (p1.h + p2.h) * 0.42);
-        ctx.lineTo(p1.x, baseH);
-        ctx.fill();
+      let highlightColor = isDay ? 'rgba(255, 255, 255, 0.35)' : (isSunset ? 'rgba(255, 200, 150, 0.3)' : 'rgba(120, 160, 220, 0.18)');
 
-        // Shadow Facet (Right slope)
-        const gShd = ctx.createLinearGradient(p2.x, peakY2, p2.x, baseH);
-        gShd.addColorStop(0, bgShd); gShd.addColorStop(1, '#0e141d');
-        ctx.fillStyle = gShd;
-        ctx.beginPath();
-        ctx.moveTo(midX, baseH - (p1.h + p2.h) * 0.42);
-        ctx.lineTo(p2.x, peakY2);
-        ctx.lineTo(p2.x, baseH);
-        ctx.lineTo(midX, baseH);
-        ctx.fill();
+      // --- LAYER 1: Far Distant Mountain Waves (Smooth Rolling Background) ---
+      const bgGrad = ctx.createLinearGradient(0, baseH - 120, 0, baseH);
+      bgGrad.addColorStop(0, bgTop);
+      bgGrad.addColorStop(1, bgBot);
+      ctx.fillStyle = bgGrad;
+
+      ctx.beginPath();
+      ctx.moveTo(0, baseH);
+      for (let x = 0; x <= W; x += 15) {
+        let mH = baseH - 55 - Math.sin(x * 0.007) * 35 - Math.cos(x * 0.015) * 45;
+        ctx.lineTo(x, mH);
       }
+      ctx.lineTo(W, baseH);
+      ctx.closePath();
+      ctx.fill();
 
-      // Foreground Mountains (3D Ridge Facets)
-      const fgPeaks = [
-        { x: -40, h: 45 }, { x: 70, h: 80 }, { x: 190, h: 50 },
-        { x: 310, h: 90 }, { x: 450, h: 60 }, { x: 600, h: 100 },
-        { x: 740, h: 55 }, { x: 870, h: 85 }
-      ];
+      // --- LAYER 2: Midground Mountain Ridge (Smooth Curved Ridge with Shading) ---
+      const midGrad = ctx.createLinearGradient(0, baseH - 90, 0, baseH);
+      midGrad.addColorStop(0, midTop);
+      midGrad.addColorStop(1, midBot);
+      ctx.fillStyle = midGrad;
 
-      for (let i = 0; i < fgPeaks.length - 1; i++) {
-        const p1 = fgPeaks[i]; const p2 = fgPeaks[i + 1];
-        const peakX = (p1.x + p2.x) * 0.5;
-        const peakY = baseH - p2.h;
-
-        // Left Slope (Sunlit Facet)
-        const gLeft = ctx.createLinearGradient(p1.x, peakY, p1.x, baseH);
-        gLeft.addColorStop(0, fgLit); gLeft.addColorStop(1, fgShd);
-        ctx.fillStyle = gLeft;
-        ctx.beginPath();
-        ctx.moveTo(p1.x, baseH);
-        ctx.lineTo(peakX, peakY);
-        ctx.lineTo(peakX, baseH);
-        ctx.fill();
-
-        // Right Slope (Shadow Facet)
-        const gRight = ctx.createLinearGradient(p2.x, peakY, p2.x, baseH);
-        gRight.addColorStop(0, fgShd); gRight.addColorStop(1, '#080d14');
-        ctx.fillStyle = gRight;
-        ctx.beginPath();
-        ctx.moveTo(peakX, baseH);
-        ctx.lineTo(peakX, peakY);
-        ctx.lineTo(p2.x, baseH);
-        ctx.fill();
-
-        // 3D Peak Ridge Highlight
-        ctx.strokeStyle = peakHL;
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.moveTo(p1.x + 8, baseH - 8);
-        ctx.lineTo(peakX, peakY);
-        ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, baseH);
+      for (let x = 0; x <= W; x += 15) {
+        let mH = baseH - 35 - Math.cos(x * 0.011) * 35 - Math.sin(x * 0.022) * 25;
+        ctx.lineTo(x, mH);
       }
+      ctx.lineTo(W, baseH);
+      ctx.closePath();
+      ctx.fill();
 
-      // Base Horizon Fog Blend
-      const fog = ctx.createLinearGradient(0, baseH - 25, 0, baseH);
+      // Midground Rim Highlight Curve
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let x = 0; x <= W; x += 15) {
+        let mH = baseH - 35 - Math.cos(x * 0.011) * 35 - Math.sin(x * 0.022) * 25;
+        if (x === 0) ctx.moveTo(x, mH);
+        else ctx.lineTo(x, mH);
+      }
+      ctx.stroke();
+
+      // --- LAYER 3: Main Foreground Mountain Range (3D Volumetric Curves with Multi-stop Gradients) ---
+      const fgGrad = ctx.createLinearGradient(0, baseH - 110, 0, baseH);
+      fgGrad.addColorStop(0, fgTop);
+      fgGrad.addColorStop(0.45, fgMid);
+      fgGrad.addColorStop(1, fgBot);
+      ctx.fillStyle = fgGrad;
+
+      ctx.beginPath();
+      ctx.moveTo(0, baseH);
+      for (let x = 0; x <= W; x += 12) {
+        let mH = baseH - 25 - Math.sin(x * 0.009 + 0.5) * 45 - Math.cos(x * 0.018) * 30 - Math.sin(x * 0.035) * 15;
+        ctx.lineTo(x, mH);
+      }
+      ctx.lineTo(W, baseH);
+      ctx.closePath();
+      ctx.fill();
+
+      // Foreground Sunlit Edge Sheen & Ridge Line Highlights (3D Depth Stroke)
+      ctx.strokeStyle = highlightColor;
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      let drawing = false;
+      for (let x = 0; x <= W; x += 10) {
+        let mH = baseH - 25 - Math.sin(x * 0.009 + 0.5) * 45 - Math.cos(x * 0.018) * 30 - Math.sin(x * 0.035) * 15;
+        let slope = (Math.cos(x * 0.009 + 0.5) * 0.009 * 45) - (Math.sin(x * 0.018) * 0.018 * 30);
+        if (slope > -0.1) {
+          if (!drawing) { ctx.moveTo(x, mH); drawing = true; }
+          else ctx.lineTo(x, mH);
+        } else {
+          drawing = false;
+        }
+      }
+      ctx.stroke();
+
+      // Base Atmospheric Haze Blend
+      const fog = ctx.createLinearGradient(0, baseH - 30, 0, baseH);
       fog.addColorStop(0, 'rgba(44, 64, 44, 0)');
-      fog.addColorStop(1, isDay ? 'rgba(38, 56, 38, 0.65)' : 'rgba(12, 18, 24, 0.85)');
+      fog.addColorStop(1, isDay ? 'rgba(38, 56, 38, 0.7)' : 'rgba(10, 16, 22, 0.9)');
       ctx.fillStyle = fog;
-      ctx.fillRect(0, baseH - 25, W, 25);
+      ctx.fillRect(0, baseH - 30, W, 30);
     }
 
     function drawProcedural3DHangar(ctx, bx, by, w, h, isDay, isSunset, globalTime, index) {
