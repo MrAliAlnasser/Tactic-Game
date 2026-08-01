@@ -522,6 +522,7 @@ function toggleSoundSettings() {
       let containerCx = 270 / 2;
       let containerCy = 300 / 2;
       
+      G.hexCoords = hexes;
       G.mapCoords = coords.map(c => ({
         left: c.x - cx + containerCx - 30, // 30 is half of 60px width
         top: c.y - cy + containerCy - 34.64 // 34.64 is half of 69.28px height
@@ -607,16 +608,6 @@ function toggleSoundSettings() {
       }
 
       // Upgrade display
-      // Reroll button check
-      const rerollBtn = document.getElementById('btn-reroll');
-      if (rerollBtn) {
-        if (G.intel < 3) {
-          rerollBtn.setAttribute('disabled', 'true');
-        } else {
-          rerollBtn.removeAttribute('disabled');
-        }
-      }
-
       // Music State Logic based on game state
       if (typeof SFX !== 'undefined' && SFX.setBGMState) {
         if (G.isEnemyFound) {
@@ -1125,6 +1116,136 @@ function toggleSoundSettings() {
       });
     }
 
+    // ===== PROCEDURAL VECTOR CLOUDS =====
+    function drawVectorCumulusCloud(ctx, x, y, scale, isNight, isSunset, alpha = 0.95) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+      ctx.globalAlpha = alpha;
+
+      let topColor = '#FFFFFF';
+      let bottomColor = '#D4EEFE';
+      let shadowColor = 'rgba(150, 205, 250, 0.75)';
+      let strokeHighlight = 'rgba(255, 255, 255, 0.95)';
+
+      if (isSunset) {
+        topColor = '#FFF5E4';
+        bottomColor = '#FFD8B3';
+        shadowColor = 'rgba(255, 175, 120, 0.75)';
+        strokeHighlight = 'rgba(255, 245, 230, 0.95)';
+      } else if (isNight) {
+        topColor = 'rgba(75, 90, 115, 0.85)';
+        bottomColor = 'rgba(42, 52, 72, 0.85)';
+        shadowColor = 'rgba(25, 32, 48, 0.75)';
+        strokeHighlight = 'rgba(130, 150, 185, 0.6)';
+      }
+
+      // Layer 1: Under-shadow Base Layer
+      ctx.fillStyle = shadowColor;
+      ctx.beginPath();
+      ctx.arc(-55, 2, 22, Math.PI * 0.5, Math.PI * 1.35);
+      ctx.arc(-30, -18, 30, Math.PI * 0.9, Math.PI * 1.7);
+      ctx.arc(8, -32, 40, Math.PI * 1.0, Math.PI * 1.9);
+      ctx.arc(48, -20, 28, Math.PI * 1.2, Math.PI * 2.0);
+      ctx.arc(75, 2, 20, Math.PI * 1.5, Math.PI * 0.5);
+      ctx.lineTo(-55, 22);
+      ctx.closePath();
+      ctx.fill();
+
+      // Layer 2: Main Cloud Body
+      const grad = ctx.createLinearGradient(0, -40, 0, 15);
+      grad.addColorStop(0, topColor);
+      grad.addColorStop(1, bottomColor);
+      ctx.fillStyle = grad;
+
+      ctx.beginPath();
+      ctx.arc(-55, -2, 20, Math.PI * 0.5, Math.PI * 1.35);
+      ctx.arc(-30, -22, 28, Math.PI * 0.9, Math.PI * 1.7);
+      ctx.arc(8, -36, 38, Math.PI * 1.0, Math.PI * 1.9);
+      ctx.arc(48, -24, 26, Math.PI * 1.2, Math.PI * 2.0);
+      ctx.arc(75, -2, 18, Math.PI * 1.5, Math.PI * 0.5);
+      ctx.lineTo(-55, 18);
+      ctx.closePath();
+      ctx.fill();
+
+      // Layer 3: Top White Highlight Arcs
+      if (!isNight) {
+        ctx.strokeStyle = strokeHighlight;
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+
+        ctx.beginPath();
+        ctx.arc(-30, -22, 26, Math.PI * 1.0, Math.PI * 1.55);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(8, -36, 35, Math.PI * 1.1, Math.PI * 1.75);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(48, -24, 23, Math.PI * 1.2, Math.PI * 1.85);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawVectorWhispyCloud(ctx, x, y, scale, isNight, isSunset, alpha = 0.85) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(scale, scale);
+      ctx.globalAlpha = alpha;
+
+      let topColor = '#FFFFFF';
+      let bottomColor = '#D4EEFE';
+      let shadowColor = 'rgba(150, 210, 250, 0.7)';
+
+      if (isSunset) {
+        topColor = '#FFF5E4';
+        bottomColor = '#FFE0C2';
+        shadowColor = 'rgba(255, 180, 130, 0.7)';
+      } else if (isNight) {
+        topColor = 'rgba(75, 90, 115, 0.75)';
+        bottomColor = 'rgba(40, 50, 70, 0.75)';
+        shadowColor = 'rgba(25, 32, 48, 0.6)';
+      }
+
+      // Shadow
+      ctx.fillStyle = shadowColor;
+      ctx.beginPath();
+      ctx.arc(-45, 2, 9, Math.PI * 0.5, Math.PI * 1.5);
+      ctx.arc(-15, -6, 12, Math.PI * 0.9, Math.PI * 1.7);
+      ctx.arc(18, -4, 10, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.arc(45, 2, 7, Math.PI * 1.5, Math.PI * 0.5);
+      ctx.closePath();
+      ctx.fill();
+
+      // Main body
+      const grad = ctx.createLinearGradient(0, -10, 0, 6);
+      grad.addColorStop(0, topColor);
+      grad.addColorStop(1, bottomColor);
+      ctx.fillStyle = grad;
+
+      ctx.beginPath();
+      ctx.arc(-45, 0, 8, Math.PI * 0.5, Math.PI * 1.5);
+      ctx.arc(-15, -8, 11, Math.PI * 0.9, Math.PI * 1.7);
+      ctx.arc(18, -6, 9, Math.PI * 1.1, Math.PI * 1.9);
+      ctx.arc(45, 0, 6, Math.PI * 1.5, Math.PI * 0.5);
+      ctx.closePath();
+      ctx.fill();
+
+      if (!isNight) {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.arc(-15, -8, 9, Math.PI * 1.0, Math.PI * 1.6);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
     // ===== AIRPORT CANVAS ANIMATION =====
 
 
@@ -1328,10 +1449,14 @@ function toggleSoundSettings() {
         for (let i = 0; i < 150; i++) rainDrops.push({ x: Math.random() * 1200, y: Math.random() * 600, s: Math.random() * 15 + 10 });
       }
 
-      let clouds = [];
-      for (let i = 0; i < 6; i++) {
-        clouds.push({ x: Math.random() * 800, y: Math.random() * 200, r: Math.random() * 30 + 20, speed: Math.random() * 0.5 + 0.1 });
-      }
+      let clouds = [
+        { x: 60,  y: 40,  scale: 1.1, speed: 0.25, type: 'cumulus', alpha: 0.95 },
+        { x: 380, y: 30,  scale: 0.85, speed: 0.18, type: 'cumulus', alpha: 0.88 },
+        { x: 680, y: 65,  scale: 1.25, speed: 0.32, type: 'cumulus', alpha: 0.92 },
+        { x: 220, y: 100, scale: 0.95, speed: 0.15, type: 'whispy',  alpha: 0.82 },
+        { x: 540, y: 120, scale: 1.05, speed: 0.22, type: 'whispy',  alpha: 0.78 },
+        { x: -100, y: 85, scale: 1.35, speed: 0.35, type: 'cumulus', alpha: 0.9 }
+      ];
 
       function drawPixelRect(x, y, w, h, c) {
         ctx.fillStyle = c;
@@ -1401,11 +1526,14 @@ function toggleSoundSettings() {
         }
         ctx.lineTo(W, H * 0.55); ctx.closePath(); ctx.fill();
 
-        ctx.fillStyle = isDay ? 'rgba(255,255,255,0.7)' : 'rgba(150,150,160,0.3)';
         clouds.forEach(c => {
           c.x += c.speed;
-          if (c.x - c.r > W) c.x = -c.r;
-          ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.arc(c.x + c.r * 0.6, c.y - c.r * 0.3, c.r * 0.8, 0, Math.PI * 2); ctx.arc(c.x - c.r * 0.6, c.y - c.r * 0.2, c.r * 0.7, 0, Math.PI * 2); ctx.fill();
+          if (c.x - 120 * c.scale > W) c.x = -130 * c.scale;
+          if (c.type === 'whispy') {
+            drawVectorWhispyCloud(ctx, c.x, c.y, c.scale, skyData.isMoon, isSunset, c.alpha);
+          } else {
+            drawVectorCumulusCloud(ctx, c.x, c.y, c.scale, skyData.isMoon, isSunset, c.alpha);
+          }
         });
 
         const groundGrad = ctx.createLinearGradient(0, H * 0.55, 0, H);
@@ -1846,7 +1974,7 @@ function toggleSoundSettings() {
           target: G.enemyPos,
           title: 'ضربة جوية مباشرة',
           advice: `قاعدة العدو مكشوفة في القطاع ${getCellName(G.enemyPos)}. أنصح بضربة مركزة بكل قوتنا النارية!`,
-          actionLabel: '💥 تنفيذ الضربة المباشرة',
+          actionLabel: '💥',
           cost: 3,
           consequence: 'سيكشف العدو موقع مطارنا وسيشن هجمات أقوى بنسبة 30%',
           consequenceType: 'expose_base'
@@ -1900,7 +2028,7 @@ function toggleSoundSettings() {
           action: 'diversion',
           title: 'خطة تمويه وإلهاء',
           advice: 'أقترح إرسال طائرات مسيّرة وهمية لإلهاء العدو ثم ضرب قاعدته من الجهة المعاكسة.',
-          actionLabel: '🎭 تنفيذ خطة التمويه',
+          actionLabel: '🎭',
           cost: 3,
           consequence: 'نجاح الضربة غير مضمون لكن إذا نجحت ستجعل العدو لا يهاجم لدور واحد',
           consequenceType: 'diversion'
@@ -1910,12 +2038,12 @@ function toggleSoundSettings() {
         pool.push({
           general: GENERALS[5], // سيف
           action: 'resource_raid',
-          title: 'غارة على إمدادات العدو',
-          advice: 'بدلاً من ضرب القاعدة مباشرة، أقترح قطع إمدادات العدو لإضعافه قبل الضربة القاضية.',
-          actionLabel: '🛢️ غارة على الإمدادات',
-          cost: 2,
-          consequence: 'ستضعف هجمات العدو القادمة لكنه سيعرف اتجاه قواتنا',
-          consequenceType: 'weaken_enemy'
+          title: 'غارة لنهب الموارد',
+          advice: 'أقترح تنفيذ غارة سريعة للاستيلاء على إمدادات وموارد جديدة.',
+          actionLabel: '🛢️',
+          cost: 1,
+          consequence: 'خطورة متوسطة ولكن المكافأة كبيرة',
+          consequenceType: 'raid_risk'
         });
 
         if (G.resources <= 1 || G.health <= 2) {
@@ -1924,8 +2052,8 @@ function toggleSoundSettings() {
             action: 'rest',
             title: 'التقاط الأنفاس وأعمال الصيانة',
             advice: 'إعطاء الجنود قسطاً من الراحة، وإصلاح ما يمكن إصلاحه وفرز الأدوات المدمّرة.',
-            actionLabel: '💤 تأكيد الراحة (+1 موارد، +1 صحة)',
-            cost: -1,
+            actionLabel: '💤 (+1 موارد، +1 صحة)',
+            cost: 0,
             consequence: null,
             consequenceType: null
           });
@@ -1950,7 +2078,7 @@ function toggleSoundSettings() {
           if (repairOption) G.currentAdvice[1] = repairOption;
         }
 
-        if (G.resources <= 1 && !G.currentAdvice.some(a => a.cost === 0)) {
+        if (G.resources <= 1 && !G.currentAdvice.some(a => a.cost <= 0)) {
           const restOption = pool.find(a => a.action === 'rest');
           if (restOption) G.currentAdvice[2] = restOption;
         }
@@ -2007,7 +2135,7 @@ function toggleSoundSettings() {
             action: 'repair',
             title: 'إصلاح القاعدة',
             advice: 'قاعدتنا متضررة! يجب إصلاحها فورًا قبل أن يضرب العدو مجددًا',
-            actionLabel: '🔧 إصلاح القاعدة',
+            actionLabel: '🔧',
             cost: 2,
             consequence: null,
             consequenceType: null
@@ -2056,8 +2184,8 @@ function toggleSoundSettings() {
             action: 'rest',
             title: 'التقاط الأنفاس وأعمال الصيانة',
             advice: 'إعطاء الجنود قسطاً من الراحة، وإصلاح ما يمكن إصلاحه وفرز الأدوات المدمّرة.',
-            actionLabel: '💤 تأكيد الراحة (+1 موارد، +1 صحة)',
-            cost: -1,
+            actionLabel: '💤 (+1 موارد، +1 صحة)',
+            cost: 0,
             consequence: null,
             consequenceType: null
           });
@@ -2080,7 +2208,7 @@ function toggleSoundSettings() {
           if (repairOption) G.currentAdvice[1] = repairOption;
         }
 
-        if (G.resources <= 1 && !G.currentAdvice.some(a => a.cost === 0)) {
+        if (G.resources <= 1 && !G.currentAdvice.some(a => a.cost <= 0)) {
           const restOption = pool.find(a => a.action === 'rest');
           if (restOption) G.currentAdvice[2] = restOption;
         }
@@ -2415,6 +2543,10 @@ function toggleSoundSettings() {
         let story = "عملت شبكة جواسيسنا وراداراتنا على مدار الساعة، لجمع الشذرات المتناثرة من البيانات لتركيب الصورة الكاملة للموقف.";
 
         if (G.intel >= 10 && !G.isEnemyFound) {
+          G.isEnemyFound = true;
+          G.map[G.enemyPos] = 2;
+          awardTrophy('eagle_eye');
+          if (typeof SFX !== 'undefined' && SFX.setBGMState) SFX.setBGMState('discovery');
           story = "أخيراً! تقاطعت خيوط المعلومات واكتملت الصورة في غرفة العمليات. لقد قمنا بتحديد مكان اختباء الجنرال المعادي بشكل قاطع!";
           pros.push(`اكتشاف موقع قاعدة العدو في القطاع ${getCellName(G.enemyPos)}`);
         } else {
@@ -3181,6 +3313,7 @@ function toggleSoundSettings() {
       }
 
       G.resources += 1;
+      G.visualTurn = G.turn;
       addLog('+1 موارد (إنتاج المطار)', '');
 
       setTimeout(() => enemyTurn(), 800);
@@ -3443,11 +3576,11 @@ function toggleSoundSettings() {
       { general: GENERALS[1], actionLabel: 'جمع المعلومات', title: 'تحليل استخباراتي', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف قطاعات في الخريطة. (عند وصول المعلومات إلى 10 يكشف موقع قاعدة العدو تلقائياً).' },
       { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة لدور واحد بنسبة 100%.' },
       { general: GENERALS[2], actionLabel: 'صيانة', title: 'إصلاح القاعدة', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة وتجنب الهزيمة المؤكدة.' },
-      { general: GENERALS[5], actionLabel: 'غارة', title: 'غارة لنهب الموارد', cost: 2, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة، وإذا نجحت تضعف هجماته القادمة.' },
+      { general: GENERALS[5], actionLabel: 'غارة', title: 'غارة لنهب الموارد', cost: 1, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة، وإذا نجحت تضعف هجماته القادمة.' },
       { general: GENERALS[5], actionLabel: 'تمويه', title: 'شن هجوم وهمي', cost: 3, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته وفي حال نجاحها تجعل العدو لا يهاجم لدور واحد.' },
       { general: GENERALS[4], actionLabel: 'توازن', title: 'تكتيك متوازن', cost: 2, advice: 'تأمين الموارد وكشف مناطق جديدة بشكل متوازن ومنهجي.' },
       { general: GENERALS[0], actionLabel: 'إطلاق النار', title: 'قصف عشوائي', cost: 2, advice: 'قصف منطقة مجهولة بشكل عشوائي بحثاً عن هدف. خيار يائس عند نفاد خيارات الاستطلاع.' },
-      { general: GENERALS[4], actionLabel: 'راحة', title: 'إراحة الطاقم', cost: -1, advice: 'أعطِ الجنود قسطاً من الراحة لالتقاط الأنفاس، وإصلاح القاعدة جزئياً واستعادة بعض الموارد.' }
+      { general: GENERALS[4], actionLabel: 'راحة', title: 'إراحة الطاقم', cost: 0, advice: 'أعطِ الجنود قسطاً من الراحة لالتقاط الأنفاس، وإصلاح القاعدة جزئياً واستعادة بعض الموارد.' }
     ];
 
     function toggleCodexModal() {
@@ -3581,7 +3714,8 @@ function toggleSoundSettings() {
 
       const banner = document.getElementById('ally-banner');
       document.getElementById('ally-text').textContent = offer.text;
-      document.getElementById('ally-warning-text').textContent = `(تبقى ${2 - (G.allyHelps || 0)} محاولات مساعدة قبل كشف موقع الحلفاء للعدو)`;
+      const remainingHelps = 2 - (G.allyHelps || 0);
+      document.getElementById('ally-warning-text').textContent = `(تبقى ${remainingHelps} ${remainingHelps === 1 ? 'محاولة مساعدة واحدة' : 'محاولات مساعدة'} قبل رصد العدو لترددات الاتصال)`;
       document.getElementById('btn-ally').textContent = offer.btn;
       banner.classList.add('active');
       addLog('🤝 وصل حلفاؤك لتقديم الدعم!', 'ally');
@@ -3604,6 +3738,7 @@ function toggleSoundSettings() {
             G.map[G.enemyPos] = 2;
             addLog('🎯 تم كشف موقع العدو بفضل الحلفاء!', 'danger');
             awardTrophy('eagle_eye');
+            if (typeof SFX !== 'undefined' && SFX.setBGMState) SFX.setBGMState('discovery');
           }
           break;
         case 'resources':
@@ -3618,7 +3753,15 @@ function toggleSoundSettings() {
       }
 
       G.allyHelps++;
-      if (G.allyHelps >= 2) awardTrophy('alliance');
+      if (G.allyHelps >= 2) {
+        awardTrophy('alliance');
+        setTimeout(() => {
+          showNotification('🚨 اختراق الاتصالات التكتيكية!', 'رصد العدو ترددات الاتصال المشفرة بين مطارنا وحلفائنا وتم اعتراض الإشارة بالكامل!\n\n<span style="color:#ff6666; font-weight:bold;">انقطعت خطوط التواصل التكتيكية ولن نتمكن من طلب أو استقبال أي مساعدة إضافية حتى نهاية المعركة.</span>', [
+            { text: 'علم، سنعتمد على أنفسنا', gold: true, action: () => hideNotification() }
+          ]);
+        }, 500);
+        addLog('📡🚨 تم اعتراض ترددات الاتصال بالحلفاء وانقطعت المساعدات نهائياً!', 'danger');
+      }
 
       document.getElementById('ally-banner').classList.remove('active');
       G.allyOffer = null;
@@ -3777,9 +3920,13 @@ function toggleSoundSettings() {
 
     // ===== HELPERS =====
     function isAdjacent(a, b) {
-      const ar = Math.floor(a / 4), ac = a % 4;
-      const br = Math.floor(b / 4), bc = b % 4;
-      return Math.abs(ar - br) <= 1 && Math.abs(ac - bc) <= 1 && a !== b;
+      if (a === b) return false;
+      if (!G.hexCoords || !G.hexCoords[a] || !G.hexCoords[b]) return false;
+      const ha = G.hexCoords[a], hb = G.hexCoords[b];
+      const dq = ha.q - hb.q;
+      const dr = ha.r - hb.r;
+      const dist = (Math.abs(dq) + Math.abs(dr) + Math.abs(dq + dr)) / 2;
+      return dist === 1;
     }
 
     function checkScoutTrophy() {
