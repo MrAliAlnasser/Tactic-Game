@@ -1385,6 +1385,362 @@ function toggleSoundSettings() {
       ctx.restore();
     }
 
+    // ===== PROCEDURAL 3D ENVIRONMENT GRAPHICS =====
+    function drawProcedural3DMountains(ctx, W, H, isDay, isSunset) {
+      const baseH = H * 0.55;
+
+      let bgLit = isDay ? '#3d4e61' : (isSunset ? '#482f3a' : '#141b26');
+      let bgShd = isDay ? '#222f3e' : (isSunset ? '#291823' : '#0a0e16');
+      let fgLit = isDay ? '#4a5d73' : (isSunset ? '#583a48' : '#1b2433');
+      let fgShd = isDay ? '#283645' : (isSunset ? '#311c27' : '#0d121c');
+      let peakHL = isDay ? 'rgba(255, 255, 255, 0.22)' : (isSunset ? 'rgba(255, 190, 150, 0.2)' : 'rgba(100, 130, 180, 0.12)');
+
+      // Background Mountains (Distant Peaks)
+      const bgPeaks = [
+        { x: -50, h: 60 }, { x: 90, h: 100 }, { x: 220, h: 75 },
+        { x: 380, h: 120 }, { x: 530, h: 85 }, { x: 670, h: 110 }, { x: 850, h: 70 }
+      ];
+
+      for (let i = 0; i < bgPeaks.length - 1; i++) {
+        const p1 = bgPeaks[i]; const p2 = bgPeaks[i + 1];
+        const midX = (p1.x + p2.x) * 0.5 + 8;
+        const peakY1 = baseH - p1.h; const peakY2 = baseH - p2.h;
+
+        // Lit Facet (Left slope)
+        const gLit = ctx.createLinearGradient(p1.x, peakY1, p1.x, baseH);
+        gLit.addColorStop(0, bgLit); gLit.addColorStop(1, bgShd);
+        ctx.fillStyle = gLit;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, baseH);
+        ctx.lineTo(p1.x, peakY1);
+        ctx.lineTo(midX, baseH - (p1.h + p2.h) * 0.42);
+        ctx.lineTo(p1.x, baseH);
+        ctx.fill();
+
+        // Shadow Facet (Right slope)
+        const gShd = ctx.createLinearGradient(p2.x, peakY2, p2.x, baseH);
+        gShd.addColorStop(0, bgShd); gShd.addColorStop(1, '#0e141d');
+        ctx.fillStyle = gShd;
+        ctx.beginPath();
+        ctx.moveTo(midX, baseH - (p1.h + p2.h) * 0.42);
+        ctx.lineTo(p2.x, peakY2);
+        ctx.lineTo(p2.x, baseH);
+        ctx.lineTo(midX, baseH);
+        ctx.fill();
+      }
+
+      // Foreground Mountains (3D Ridge Facets)
+      const fgPeaks = [
+        { x: -40, h: 45 }, { x: 70, h: 80 }, { x: 190, h: 50 },
+        { x: 310, h: 90 }, { x: 450, h: 60 }, { x: 600, h: 100 },
+        { x: 740, h: 55 }, { x: 870, h: 85 }
+      ];
+
+      for (let i = 0; i < fgPeaks.length - 1; i++) {
+        const p1 = fgPeaks[i]; const p2 = fgPeaks[i + 1];
+        const peakX = (p1.x + p2.x) * 0.5;
+        const peakY = baseH - p2.h;
+
+        // Left Slope (Sunlit Facet)
+        const gLeft = ctx.createLinearGradient(p1.x, peakY, p1.x, baseH);
+        gLeft.addColorStop(0, fgLit); gLeft.addColorStop(1, fgShd);
+        ctx.fillStyle = gLeft;
+        ctx.beginPath();
+        ctx.moveTo(p1.x, baseH);
+        ctx.lineTo(peakX, peakY);
+        ctx.lineTo(peakX, baseH);
+        ctx.fill();
+
+        // Right Slope (Shadow Facet)
+        const gRight = ctx.createLinearGradient(p2.x, peakY, p2.x, baseH);
+        gRight.addColorStop(0, fgShd); gRight.addColorStop(1, '#080d14');
+        ctx.fillStyle = gRight;
+        ctx.beginPath();
+        ctx.moveTo(peakX, baseH);
+        ctx.lineTo(peakX, peakY);
+        ctx.lineTo(p2.x, baseH);
+        ctx.fill();
+
+        // 3D Peak Ridge Highlight
+        ctx.strokeStyle = peakHL;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(p1.x + 8, baseH - 8);
+        ctx.lineTo(peakX, peakY);
+        ctx.stroke();
+      }
+
+      // Base Horizon Fog Blend
+      const fog = ctx.createLinearGradient(0, baseH - 25, 0, baseH);
+      fog.addColorStop(0, 'rgba(44, 64, 44, 0)');
+      fog.addColorStop(1, isDay ? 'rgba(38, 56, 38, 0.65)' : 'rgba(12, 18, 24, 0.85)');
+      ctx.fillStyle = fog;
+      ctx.fillRect(0, baseH - 25, W, 25);
+    }
+
+    function drawProcedural3DHangar(ctx, bx, by, w, h, isDay, isSunset, globalTime, index) {
+      const depthX = 14;
+      const depthY = -7;
+
+      const mainLit = isDay ? '#54637a' : (isSunset ? '#44333d' : '#202a38');
+      const mainMid = isDay ? '#3b4759' : (isSunset ? '#2f212a' : '#161e2b');
+      const mainShd = isDay ? '#252e3b' : (isSunset ? '#1c131a' : '#0c1018');
+
+      // 1. 3D Side Wall Perspective Extension
+      ctx.fillStyle = mainShd;
+      ctx.beginPath();
+      ctx.moveTo(bx + w, by + 22);
+      ctx.lineTo(bx + w + depthX, by + 22 + depthY);
+      ctx.lineTo(bx + w + depthX, by + h + depthY);
+      ctx.lineTo(bx + w, by + h);
+      ctx.closePath();
+      ctx.fill();
+
+      // 3D Roof Side Extension Curve
+      ctx.beginPath();
+      ctx.arc(bx + w / 2 + depthX, by + 22 + depthY, w / 2, Math.PI * 1.5, 0);
+      ctx.lineTo(bx + w, by + 22);
+      ctx.arc(bx + w / 2, by + 22, w / 2, 0, Math.PI * 1.5, true);
+      ctx.closePath();
+      ctx.fill();
+
+      // 2. 3D Vaulted Roof (Front Facade Arch)
+      const roofGrad = ctx.createLinearGradient(bx, by, bx + w, by);
+      roofGrad.addColorStop(0, mainShd);
+      roofGrad.addColorStop(0.25, mainLit);
+      roofGrad.addColorStop(0.65, mainMid);
+      roofGrad.addColorStop(1, mainShd);
+      ctx.fillStyle = roofGrad;
+
+      ctx.beginPath();
+      ctx.arc(bx + w / 2, by + 22, w / 2, Math.PI, 0);
+      ctx.fill();
+
+      // Structural 3D Roof Ribs
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+      ctx.lineWidth = 2;
+      for (let r = 0.22; r < 0.9; r += 0.24) {
+        ctx.beginPath();
+        ctx.arc(bx + w / 2, by + 22, (w / 2) * r, Math.PI, 0);
+        ctx.stroke();
+      }
+
+      // Front Wall Body
+      const facadeGrad = ctx.createLinearGradient(bx, by + 22, bx, by + h);
+      facadeGrad.addColorStop(0, mainLit);
+      facadeGrad.addColorStop(1, mainMid);
+      ctx.fillStyle = facadeGrad;
+      ctx.fillRect(bx, by + 22, w, h - 22);
+
+      // Support Columns / 3D Pillars
+      ctx.fillStyle = mainShd;
+      ctx.fillRect(bx, by + 22, 10, h - 22);
+      ctx.fillRect(bx + w - 10, by + 22, 10, h - 22);
+
+      // 3D Recessed Door Entrance
+      const doorW = w - 28;
+      const doorH = h - 32;
+      const doorX = bx + 14;
+      const doorY = by + 32;
+
+      // Dark Interior
+      ctx.fillStyle = '#070b10';
+      ctx.fillRect(doorX, doorY, doorW, doorH);
+
+      // Recess Shadow
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.fillRect(doorX, doorY, doorW, 5);
+      ctx.fillRect(doorX, doorY, 5, doorH);
+
+      // Light Cone from inside hangar
+      const isNight = G.visualTurn % 4 > 1.5 && G.visualTurn % 4 < 3.5;
+      const lightGrad = ctx.createLinearGradient(doorX + doorW / 2, doorY, doorX + doorW / 2, doorY + doorH);
+      lightGrad.addColorStop(0, isNight ? 'rgba(255, 210, 80, 0.45)' : 'rgba(255, 235, 160, 0.22)');
+      lightGrad.addColorStop(1, 'rgba(255, 190, 40, 0.01)');
+      ctx.fillStyle = lightGrad;
+      ctx.beginPath();
+      ctx.moveTo(doorX + 8, doorY);
+      ctx.lineTo(doorX + doorW - 8, doorY);
+      ctx.lineTo(doorX + doorW + 12, doorY + doorH);
+      ctx.lineTo(doorX - 12, doorY + doorH);
+      ctx.fill();
+
+      // Yellow/Black Industrial Hazard Header
+      const hazardY = doorY - 7;
+      ctx.fillStyle = '#111';
+      ctx.fillRect(doorX, hazardY, doorW, 7);
+      ctx.fillStyle = '#d4a030';
+      for (let s = 0; s < doorW; s += 12) {
+        ctx.beginPath();
+        ctx.moveTo(doorX + s, hazardY + 7);
+        ctx.lineTo(doorX + s + 6, hazardY);
+        ctx.lineTo(doorX + s + 10, hazardY);
+        ctx.lineTo(doorX + s + 4, hazardY + 7);
+        ctx.fill();
+      }
+
+      // Floodlights
+      for (let s = 0; s < doorW - 8; s += 15) {
+        const lx = doorX + s + 7;
+        const ly = hazardY - 3;
+        ctx.fillStyle = '#ffcc00';
+        ctx.shadowColor = '#ffcc00';
+        ctx.shadowBlur = isNight ? 10 : 3;
+        ctx.beginPath();
+        ctx.arc(lx, ly, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // 3D Roof Highlight Edge
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(bx, by + 22);
+      ctx.lineTo(bx + w, by + 22);
+      ctx.stroke();
+    }
+
+    function drawProcedural3DControlTower(ctx, tx, ty, tw, th, isDay, isSunset, globalTime) {
+      // 3D Shaft Gradient
+      const shaftGrad = ctx.createLinearGradient(tx, ty, tx + tw, ty);
+      shaftGrad.addColorStop(0, '#1a222e');
+      shaftGrad.addColorStop(0.3, '#384657');
+      shaftGrad.addColorStop(0.75, '#283445');
+      shaftGrad.addColorStop(1, '#121822');
+
+      ctx.fillStyle = shaftGrad;
+      ctx.fillRect(tx + 8, ty, tw - 16, th);
+
+      // Tower Support Ribs
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.35)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(tx + 17, ty); ctx.lineTo(tx + 17, ty + th);
+      ctx.moveTo(tx + tw - 17, ty); ctx.lineTo(tx + tw - 17, ty + th);
+      ctx.stroke();
+
+      // 3D Cantilevered Glass Cabin
+      const cabY = ty - 24;
+      const cabH = 26;
+      const cabW = tw + 16;
+      const cabX = tx - 8;
+
+      // 3D Underside Cone Support
+      ctx.fillStyle = '#161f2a';
+      ctx.beginPath();
+      ctx.moveTo(tx + 6, ty);
+      ctx.lineTo(tx + tw - 6, ty);
+      ctx.lineTo(cabX + cabW, cabY + cabH);
+      ctx.lineTo(cabX, cabY + cabH);
+      ctx.closePath();
+      ctx.fill();
+
+      // Glass Cabin Facets
+      const isNight = G.visualTurn % 4 > 1.5 && G.visualTurn % 4 < 3.5;
+      const glassGrad = ctx.createLinearGradient(cabX, cabY, cabX + cabW, cabY);
+      glassGrad.addColorStop(0, '#183a46');
+      glassGrad.addColorStop(0.3, isNight ? '#5fe0ed' : '#7ce8f5');
+      glassGrad.addColorStop(0.7, isNight ? '#2ab0c0' : '#4fc4d0');
+      glassGrad.addColorStop(1, '#102833');
+
+      ctx.fillStyle = glassGrad;
+      ctx.beginPath();
+      ctx.moveTo(cabX + 6, cabY);
+      ctx.lineTo(cabX + cabW - 6, cabY);
+      ctx.lineTo(cabX + cabW, cabY + cabH);
+      ctx.lineTo(cabX, cabY + cabH);
+      ctx.closePath();
+      ctx.fill();
+
+      // Glass Reflections
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.beginPath();
+      ctx.moveTo(cabX + 12, cabY + 2);
+      ctx.lineTo(cabX + 26, cabY + 2);
+      ctx.lineTo(cabX + 18, cabY + cabH - 2);
+      ctx.lineTo(cabX + 6, cabY + cabH - 2);
+      ctx.fill();
+
+      // Glass Frame Struts
+      ctx.strokeStyle = '#121a24';
+      ctx.lineWidth = 2;
+      for (let s = 10; s < cabW - 5; s += 12) {
+        ctx.beginPath();
+        ctx.moveTo(cabX + s, cabY);
+        ctx.lineTo(cabX + s, cabY + cabH);
+        ctx.stroke();
+      }
+
+      // Roof Cap
+      ctx.fillStyle = '#0e141e';
+      ctx.beginPath();
+      ctx.moveTo(cabX - 4, cabY);
+      ctx.lineTo(cabX + cabW + 4, cabY);
+      ctx.lineTo(cabX + cabW - 6, cabY - 12);
+      ctx.lineTo(cabX + 6, cabY - 12);
+      ctx.closePath();
+      ctx.fill();
+
+      const roofTopY = cabY - 12;
+      const centerX = tx + tw / 2;
+
+      // Radar Upgrade Dish
+      if (G.upgrades && G.upgrades.radar) {
+        ctx.save();
+        ctx.translate(centerX, roofTopY - 12);
+        ctx.fillStyle = '#2a3340';
+        ctx.fillRect(-4, 0, 8, 12);
+
+        ctx.translate(0, -2);
+        ctx.rotate(globalTime * 0.05);
+        ctx.fillStyle = '#afb9c5';
+        ctx.beginPath(); ctx.ellipse(0, 0, 26, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#6a7686';
+        ctx.beginPath(); ctx.ellipse(0, 0, 20, 5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-12, -14); ctx.moveTo(0, 0); ctx.lineTo(12, -14); ctx.lineTo(-12, -14); ctx.stroke();
+        if (Math.sin(globalTime * 0.2) > 0) {
+          ctx.fillStyle = '#ff3333';
+          ctx.shadowColor = '#ff3333'; ctx.shadowBlur = 8;
+          ctx.beginPath(); ctx.arc(0, -16, 3, 0, Math.PI * 2); ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+        ctx.restore();
+      }
+
+      // Rotating Beacon Light
+      if (G.enemyKnowsUs || G.health < G.maxHealth) G.alarmActive = true;
+      if (G.alarmActive) {
+        const rotAngle = globalTime * 0.08;
+        const isFront = Math.sin(rotAngle) > 0;
+        ctx.fillStyle = isFront ? '#ff3333' : '#660000';
+        ctx.shadowColor = '#ff3333'; ctx.shadowBlur = isFront ? 15 : 4;
+        ctx.beginPath(); ctx.arc(centerX, roofTopY - 8, 4.5, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+
+        if (isFront) {
+          ctx.save();
+          ctx.translate(centerX, roofTopY - 8);
+          const beamX = Math.cos(rotAngle) * 280;
+          const beamY = Math.sin(rotAngle) * 90 + 40;
+          const grad = ctx.createLinearGradient(0, 0, beamX, beamY);
+          grad.addColorStop(0, 'rgba(255, 30, 30, 0.6)');
+          grad.addColorStop(1, 'rgba(255, 30, 30, 0)');
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(beamX - 90, beamY);
+          ctx.lineTo(beamX + 90, beamY);
+          ctx.fill();
+          ctx.restore();
+        }
+      } else {
+        ctx.fillStyle = '#880000';
+        ctx.beginPath(); ctx.arc(centerX, roofTopY - 8, 4, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
     function playAirportAnimation(callback, forceAnimState = null) {
       if (window.airportAnimFrame) cancelAnimationFrame(window.airportAnimFrame);
       if (G.animating) {
@@ -1510,21 +1866,7 @@ function toggleSoundSettings() {
           }
         }
 
-        ctx.fillStyle = isDay ? '#2b3b4a' : (isSunset ? '#36222b' : '#0f141e');
-        ctx.beginPath(); ctx.moveTo(0, H * 0.55);
-        for (let x = 0; x <= W; x += 40) {
-          let mH = H * 0.55 - 40 - Math.sin(x * 0.01) * 30 - Math.cos(x * 0.02) * 50;
-          ctx.lineTo(x, mH);
-        }
-        ctx.lineTo(W, H * 0.55); ctx.closePath(); ctx.fill();
-
-        ctx.fillStyle = isDay ? '#1e2c38' : (isSunset ? '#26141a' : '#080b12');
-        ctx.beginPath(); ctx.moveTo(0, H * 0.55);
-        for (let x = 0; x <= W; x += 30) {
-          let mH = H * 0.55 - 20 - Math.cos(x * 0.015) * 40 - Math.sin(x * 0.03) * 20;
-          ctx.lineTo(x, mH);
-        }
-        ctx.lineTo(W, H * 0.55); ctx.closePath(); ctx.fill();
+        drawProcedural3DMountains(ctx, W, H, isDay, isSunset);
 
         clouds.forEach(c => {
           c.x += c.speed;
@@ -1572,74 +1914,11 @@ function toggleSoundSettings() {
         for (let i = 0; i < 3; i++) {
           const bx = W * 0.1 + i * W * 0.28;
           const by = H * 0.55 - hangarH + 20;
-
-          // Hangar Dome
-          const hGrad = ctx.createLinearGradient(bx, by, bx, by + hangarH);
-          hGrad.addColorStop(0, '#5a657a');
-          hGrad.addColorStop(1, '#2a3240');
-          ctx.fillStyle = hGrad;
-          ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 20, hangarW / 2, Math.PI, 0); ctx.fill();
-
-          ctx.fillStyle = '#3a4050'; ctx.fillRect(bx, by + 20, hangarW, hangarH - 20);
-
-          // Hangar Interior
-          ctx.fillStyle = '#10151c'; ctx.fillRect(bx + 15, by + 30, hangarW - 30, hangarH - 30);
-
-          // Lights
-          for (let s = 0; s < hangarW - 30; s += 15) {
-            ctx.fillStyle = '#ffcc00';
-            ctx.shadowColor = '#ffcc00'; ctx.shadowBlur = 10;
-            ctx.beginPath(); ctx.arc(bx + 15 + s + 5, by + 25, 3, 0, Math.PI * 2); ctx.fill();
-            ctx.shadowBlur = 0;
-          }
-
-          if (G.visualTurn % 4 > 1.5 && G.visualTurn % 4 < 3.5) {
-            // Night interior glow
-            ctx.fillStyle = 'rgba(255,255,100,0.15)';
-            ctx.beginPath(); ctx.arc(bx + hangarW / 2, by + 40, 40, 0, Math.PI * 2); ctx.fill();
-          }
+          drawProcedural3DHangar(ctx, bx, by, hangarW, hangarH, isDay, isSunset, globalTime, i);
         }
 
-        {
-          const tx = W * 0.82; const tw = 50; const th = H * 0.45; const ty = H * 0.55 - th + 20;
-          ctx.fillStyle = '#2a3240'; ctx.fillRect(tx + 10, ty, tw - 20, th);
-          ctx.fillStyle = '#3a4050'; ctx.fillRect(tx, ty - 20, tw, 20);
-          ctx.fillStyle = '#4fc4d0'; ctx.fillRect(tx + 5, ty - 15, tw - 10, 10);
-          ctx.fillStyle = 'rgba(255,255,255,0.2)'; ctx.fillRect(tx + 5, ty - 15, 10, 10);
-          ctx.fillStyle = '#1c2533'; ctx.beginPath(); ctx.moveTo(tx - 5, ty - 20); ctx.lineTo(tx + tw + 5, ty - 20); ctx.lineTo(tx + tw - 10, ty - 35); ctx.lineTo(tx + 10, ty - 35); ctx.fill();
-
-          if (G.upgrades && G.upgrades.radar) {
-            ctx.save(); ctx.translate(tx + tw / 2, ty - 45);
-            ctx.fillStyle = '#2c332c'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(10, 0); ctx.lineTo(5, -15); ctx.lineTo(-5, -15); ctx.fill();
-            ctx.translate(0, -15);
-            ctx.rotate(globalTime * 0.05);
-            ctx.fillStyle = '#a0aab5'; ctx.beginPath(); ctx.ellipse(0, 0, 25, 8, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.fillStyle = '#7a8590'; ctx.beginPath(); ctx.ellipse(0, 0, 20, 5, 0, 0, Math.PI * 2); ctx.fill();
-            ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-10, -15); ctx.moveTo(0, 0); ctx.lineTo(10, -15); ctx.lineTo(-10, -15); ctx.stroke();
-            if (Math.sin(globalTime * 0.2) > 0) {
-              ctx.fillStyle = '#ff0000'; ctx.beginPath(); ctx.arc(0, -18, 3, 0, Math.PI * 2); ctx.fill();
-            }
-            ctx.restore();
-          }
-
-          if (G.enemyKnowsUs || G.health < G.maxHealth) G.alarmActive = true;
-          if (G.alarmActive) {
-            const rotAngle = globalTime * 0.08;
-            const isFront = Math.sin(rotAngle) > 0;
-            ctx.fillStyle = isFront ? '#ff3333' : '#660000';
-            ctx.beginPath(); ctx.arc(tx + tw / 2, ty - 40, 4, 0, Math.PI * 2); ctx.fill();
-            if (isFront) {
-              ctx.save(); ctx.translate(tx + tw / 2, ty - 40);
-              const beamX = Math.cos(rotAngle) * 250; const beamY = Math.sin(rotAngle) * 80 + 40;
-              const grad = ctx.createLinearGradient(0, 0, beamX, beamY);
-              grad.addColorStop(0, 'rgba(255, 20, 20, 0.5)'); grad.addColorStop(1, 'rgba(255, 20, 20, 0)');
-              ctx.fillStyle = grad; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(beamX - 80, beamY); ctx.lineTo(beamX + 80, beamY); ctx.fill();
-              ctx.restore();
-            }
-          } else {
-            ctx.fillStyle = '#660000'; ctx.beginPath(); ctx.arc(tx + tw / 2, ty - 40, 4, 0, Math.PI * 2); ctx.fill();
-          }
-        }
+        const tx = W * 0.82; const tw = 50; const th = H * 0.45; const ty = H * 0.55 - th + 20;
+        drawProcedural3DControlTower(ctx, tx, ty, tw, th, isDay, isSunset, globalTime);
 
         // Upgrades Drawing
         if (G.upgrades && G.upgrades.stealth) {
