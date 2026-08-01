@@ -1488,16 +1488,23 @@ function toggleSoundSettings() {
       ctx.fillRect(0, baseH - 30, W, 30);
     }
 
-    function drawProcedural3DHangar(ctx, bx, by, w, h, isDay, isSunset, globalTime, index) {
+    function drawProcedural3DHangar(ctx, bx, by, w, h, isDay, isSunset, globalTime, index = 0) {
       const depthX = 14;
-      const depthY = -7;
+      const depthY = 6;
 
-      const mainLit = isDay ? '#54637a' : (isSunset ? '#44333d' : '#202a38');
-      const mainMid = isDay ? '#3b4759' : (isSunset ? '#2f212a' : '#161e2b');
-      const mainShd = isDay ? '#252e3b' : (isSunset ? '#1c131a' : '#0c1018');
+      // Color Palettes for Time-of-Day
+      const roofLit = isDay ? '#6a7e96' : (isSunset ? '#5c4554' : '#283648');
+      const roofMid = isDay ? '#48576b' : (isSunset ? '#3e2d38' : '#1a2432');
+      const roofShd = isDay ? '#2a3545' : (isSunset ? '#22161e' : '#0e1520');
+      const roofSpec = isDay ? '#9bb0c7' : (isSunset ? '#8a6b7d' : '#455b75');
 
-      // 1. 3D Side Wall Perspective Extension
-      ctx.fillStyle = mainShd;
+      // --- 1. 3D SIDE WALL & ROOF PERSPECTIVE EXTENSION (Depth Back Side) ---
+      // Side Wall Perspective Face
+      const sideGrad = ctx.createLinearGradient(bx + w, by + 22, bx + w + depthX, by + h + depthY);
+      sideGrad.addColorStop(0, roofMid);
+      sideGrad.addColorStop(1, '#0b1017');
+      ctx.fillStyle = sideGrad;
+
       ctx.beginPath();
       ctx.moveTo(bx + w, by + 22);
       ctx.lineTo(bx + w + depthX, by + 22 + depthY);
@@ -1506,7 +1513,18 @@ function toggleSoundSettings() {
       ctx.closePath();
       ctx.fill();
 
-      // 3D Roof Side Extension Curve
+      // Side Wall Vertical Panel Seams
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+      ctx.lineWidth = 1;
+      for (let sx = 4; sx < depthX; sx += 4) {
+        ctx.beginPath();
+        ctx.moveTo(bx + w + sx, by + 22 + (sx / depthX) * depthY);
+        ctx.lineTo(bx + w + sx, by + h + (sx / depthX) * depthY);
+        ctx.stroke();
+      }
+
+      // Roof Side Perspective Arch Extension
+      ctx.fillStyle = roofShd;
       ctx.beginPath();
       ctx.arc(bx + w / 2 + depthX, by + 22 + depthY, w / 2, Math.PI * 1.5, 0);
       ctx.lineTo(bx + w, by + 22);
@@ -1514,101 +1532,157 @@ function toggleSoundSettings() {
       ctx.closePath();
       ctx.fill();
 
-      // 2. 3D Vaulted Roof (Front Facade Arch)
+      // --- 2. 3D FRONT FACADE & VAULTED METALLIC ROOF DOME ---
       const roofGrad = ctx.createLinearGradient(bx, by, bx + w, by);
-      roofGrad.addColorStop(0, mainShd);
-      roofGrad.addColorStop(0.25, mainLit);
-      roofGrad.addColorStop(0.65, mainMid);
-      roofGrad.addColorStop(1, mainShd);
+      roofGrad.addColorStop(0, roofShd);
+      roofGrad.addColorStop(0.2, roofMid);
+      roofGrad.addColorStop(0.4, roofLit);
+      roofGrad.addColorStop(0.55, roofSpec); // Metallic spec sheen
+      roofGrad.addColorStop(0.75, roofMid);
+      roofGrad.addColorStop(1, roofShd);
       ctx.fillStyle = roofGrad;
 
       ctx.beginPath();
       ctx.arc(bx + w / 2, by + 22, w / 2, Math.PI, 0);
       ctx.fill();
 
-      // Structural 3D Roof Ribs
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
-      ctx.lineWidth = 2;
-      for (let r = 0.22; r < 0.9; r += 0.24) {
+      // Corrugated 3D Roof Steel Arch Ribs (Concentric Arches with dual highlights)
+      for (let r = 0.25; r <= 0.88; r += 0.21) {
+        // Dark Under-shadow Line
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.arc(bx + w / 2, by + 22, (w / 2) * r, Math.PI, 0);
         ctx.stroke();
+
+        // Bright Specular Edge Highlight Line
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.28)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.arc(bx + w / 2, by + 22, (w / 2) * r - 1, Math.PI, 0);
+        ctx.stroke();
       }
 
-      // Front Wall Body
+      // Outer Arch Fascia Steel Rim Frame
+      ctx.strokeStyle = '#8297af';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(bx + w / 2, by + 22, w / 2, Math.PI, 0);
+      ctx.stroke();
+
+      // --- 3. FRONT WALL BODY & SUPPORT COLUMNS ---
       const facadeGrad = ctx.createLinearGradient(bx, by + 22, bx, by + h);
-      facadeGrad.addColorStop(0, mainLit);
-      facadeGrad.addColorStop(1, mainMid);
+      facadeGrad.addColorStop(0, roofLit);
+      facadeGrad.addColorStop(0.6, roofMid);
+      facadeGrad.addColorStop(1, roofShd);
       ctx.fillStyle = facadeGrad;
       ctx.fillRect(bx, by + 22, w, h - 22);
 
-      // Support Columns / 3D Pillars
-      ctx.fillStyle = mainShd;
-      ctx.fillRect(bx, by + 22, 10, h - 22);
-      ctx.fillRect(bx + w - 10, by + 22, 10, h - 22);
+      // Heavy 3D Armored Corner Pillars
+      const pillarGradLeft = ctx.createLinearGradient(bx, by + 22, bx + 12, by + 22);
+      pillarGradLeft.addColorStop(0, '#1c2533');
+      pillarGradLeft.addColorStop(0.5, '#45566b');
+      pillarGradLeft.addColorStop(1, '#222d3d');
+      ctx.fillStyle = pillarGradLeft;
+      ctx.fillRect(bx, by + 22, 12, h - 22);
 
-      // 3D Recessed Door Entrance
-      const doorW = w - 28;
-      const doorH = h - 32;
-      const doorX = bx + 14;
-      const doorY = by + 32;
+      const pillarGradRight = ctx.createLinearGradient(bx + w - 12, by + 22, bx + w, by + 22);
+      pillarGradRight.addColorStop(0, '#222d3d');
+      pillarGradRight.addColorStop(0.5, '#45566b');
+      pillarGradRight.addColorStop(1, '#151d28');
+      ctx.fillStyle = pillarGradRight;
+      ctx.fillRect(bx + w - 12, by + 22, 12, h - 22);
 
-      // Dark Interior
-      ctx.fillStyle = '#070b10';
+      // --- 4. RECESSED HANGAR BAY ENTRANCE & VOLUMETRIC ATMOSPHERE ---
+      const doorW = w - 30;
+      const doorH = h - 30;
+      const doorX = bx + 15;
+      const doorY = by + 30;
+
+      // Dark Deep Interior Vault
+      const intGrad = ctx.createLinearGradient(doorX, doorY, doorX, doorY + doorH);
+      intGrad.addColorStop(0, '#04070c');
+      intGrad.addColorStop(1, '#0d131c');
+      ctx.fillStyle = intGrad;
       ctx.fillRect(doorX, doorY, doorW, doorH);
 
-      // Recess Shadow
-      ctx.fillStyle = 'rgba(0,0,0,0.65)';
-      ctx.fillRect(doorX, doorY, doorW, 5);
+      // Deep Recess Top & Side Shadows
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+      ctx.fillRect(doorX, doorY, doorW, 6);
       ctx.fillRect(doorX, doorY, 5, doorH);
+      ctx.fillRect(doorX + doorW - 5, doorY, 5, doorH);
 
-      // Light Cone from inside hangar
-      const isNight = G.visualTurn % 4 > 1.5 && G.visualTurn % 4 < 3.5;
-      const lightGrad = ctx.createLinearGradient(doorX + doorW / 2, doorY, doorX + doorW / 2, doorY + doorH);
-      lightGrad.addColorStop(0, isNight ? 'rgba(255, 210, 80, 0.45)' : 'rgba(255, 235, 160, 0.22)');
-      lightGrad.addColorStop(1, 'rgba(255, 190, 40, 0.01)');
-      ctx.fillStyle = lightGrad;
+      // Interior Stealth Fighter Nose Silhouette (Adds realism inside bay!)
+      ctx.fillStyle = '#080d14';
       ctx.beginPath();
-      ctx.moveTo(doorX + 8, doorY);
-      ctx.lineTo(doorX + doorW - 8, doorY);
-      ctx.lineTo(doorX + doorW + 12, doorY + doorH);
-      ctx.lineTo(doorX - 12, doorY + doorH);
+      ctx.moveTo(doorX + doorW / 2 - 12, doorY + doorH);
+      ctx.lineTo(doorX + doorW / 2, doorY + doorH - 18);
+      ctx.lineTo(doorX + doorW / 2 + 12, doorY + doorH);
+      ctx.closePath();
       ctx.fill();
 
-      // Yellow/Black Industrial Hazard Header
-      const hazardY = doorY - 7;
-      ctx.fillStyle = '#111';
-      ctx.fillRect(doorX, hazardY, doorW, 7);
-      ctx.fillStyle = '#d4a030';
-      for (let s = 0; s < doorW; s += 12) {
+      // Volumetric Amber Floodlight Light Cone Output
+      const isNight = G.visualTurn % 4 > 1.5 && G.visualTurn % 4 < 3.5;
+      const lightGrad = ctx.createLinearGradient(doorX + doorW / 2, doorY, doorX + doorW / 2, doorY + doorH + 15);
+      lightGrad.addColorStop(0, isNight ? 'rgba(255, 205, 70, 0.55)' : 'rgba(255, 230, 150, 0.28)');
+      lightGrad.addColorStop(0.6, isNight ? 'rgba(255, 180, 40, 0.2)' : 'rgba(255, 210, 100, 0.08)');
+      lightGrad.addColorStop(1, 'rgba(255, 160, 20, 0)');
+      ctx.fillStyle = lightGrad;
+      ctx.beginPath();
+      ctx.moveTo(doorX + 6, doorY);
+      ctx.lineTo(doorX + doorW - 6, doorY);
+      ctx.lineTo(doorX + doorW + 18, doorY + doorH + 15);
+      ctx.lineTo(doorX - 18, doorY + doorH + 15);
+      ctx.closePath();
+      ctx.fill();
+
+      // --- 5. INDUSTRIAL HAZARD HEADER LINTEL & OVERHEAD FLOODLIGHTS ---
+      const hazardY = doorY - 8;
+      ctx.fillStyle = '#11171d';
+      ctx.fillRect(doorX - 2, hazardY, doorW + 4, 8);
+
+      // Yellow/Black Diagonal Stripe Pattern
+      ctx.fillStyle = '#e6b800';
+      for (let s = -2; s < doorW + 4; s += 14) {
         ctx.beginPath();
-        ctx.moveTo(doorX + s, hazardY + 7);
-        ctx.lineTo(doorX + s + 6, hazardY);
-        ctx.lineTo(doorX + s + 10, hazardY);
-        ctx.lineTo(doorX + s + 4, hazardY + 7);
+        ctx.moveTo(doorX + s, hazardY + 8);
+        ctx.lineTo(doorX + s + 7, hazardY);
+        ctx.lineTo(doorX + s + 11, hazardY);
+        ctx.lineTo(doorX + s + 4, hazardY + 8);
+        ctx.closePath();
         ctx.fill();
       }
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(doorX - 2, hazardY, doorW + 4, 8);
 
-      // Floodlights
-      for (let s = 0; s < doorW - 8; s += 15) {
-        const lx = doorX + s + 7;
+      // Overhead Fixture Lamps
+      for (let s = 0; s < doorW - 10; s += 18) {
+        const lx = doorX + s + 9;
         const ly = hazardY - 3;
-        ctx.fillStyle = '#ffcc00';
-        ctx.shadowColor = '#ffcc00';
-        ctx.shadowBlur = isNight ? 10 : 3;
+
+        ctx.fillStyle = '#222d38';
+        ctx.fillRect(lx - 4, ly - 3, 8, 4);
+
+        ctx.fillStyle = '#ffe066';
+        ctx.shadowColor = '#ffe066';
+        ctx.shadowBlur = isNight ? 12 : 4;
         ctx.beginPath();
-        ctx.arc(lx, ly, 2.5, 0, Math.PI * 2);
+        ctx.arc(lx, ly + 1, 2.8, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
       }
 
-      // 3D Roof Highlight Edge
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(bx, by + 22);
-      ctx.lineTo(bx + w, by + 22);
-      ctx.stroke();
+      // --- 6. APEX AVIATION WARNING BEACON (On Center Hangar) ---
+      if (index === 1 && Math.floor(globalTime * 0.15) % 2 === 0) {
+        ctx.fillStyle = '#ff2222';
+        ctx.shadowColor = '#ff2222';
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.arc(bx + w / 2, by - 2, 3, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
     }
 
     function drawProcedural3DControlTower(ctx, tx, ty, tw, th, isDay, isSunset, globalTime) {
