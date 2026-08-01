@@ -3062,7 +3062,7 @@ function toggleSoundSettings() {
           target: G.enemyPos,
           title: 'ضربة تسللية ليلية',
           advice: `أقترح هجومًا تسلليًا بطائرات خفية. الضربة أضعف لكنها لن تكشف موقعنا للعدو.`,
-          actionLabel: '🌙 تنفيذ الضربة التسللية',
+          actionLabel: '🌙',
           cost: 4,
           consequence: 'ضربة أضعف (قد لا تنجح) لكن لن يكتشف العدو مطارنا',
           consequenceType: 'safe_strike'
@@ -3075,7 +3075,7 @@ function toggleSoundSettings() {
           target: G.enemyPos,
           title: 'هجوم شامل بالسلاح الجوي',
           advice: `أقترح إطلاق كل طائراتنا في هجوم ساحق! سيسبب ضررًا مضاعفًا لكنه مكلف جدًا وسيترك دفاعاتنا مكشوفة.`,
-          actionLabel: '🔥 هجوم شامل ساحق',
+          actionLabel: '🔥',
           cost: 6,
           consequence: 'ضرر مضاعف لكن العدو سيكتشف مطارنا ويهاجم مباشرة هذا الدور',
           consequenceType: 'full_assault'
@@ -3336,7 +3336,7 @@ function toggleSoundSettings() {
           <span>${adv.general.name}</span>
         </div>
         <span class="general-rank">${adv.general.rank}</span>
-        <div class="dogtag-title">${adv.actionLabel} — ${adv.title}</div>
+        <div class="dogtag-title">${(adv.actionLabel && adv.actionLabel.trim().length <= 3) ? adv.actionLabel + ' ' + adv.title : adv.actionLabel + ' — ' + adv.title}</div>
         <div class="general-advice">"${adv.advice}"</div>
         ${adv.consequence ? `<div class="general-consequence">⚠️ ${adv.consequence}</div>` : ''}
       </div>
