@@ -1409,12 +1409,12 @@ function toggleSoundSettings() {
       ctx.fillStyle = bgGrad;
 
       ctx.beginPath();
-      ctx.moveTo(0, baseH);
-      for (let x = 0; x <= W; x += 15) {
+      ctx.moveTo(-20, baseH);
+      for (let x = -20; x <= W + 20; x += 15) {
         let mH = baseH - 55 - Math.sin(x * 0.007) * 35 - Math.cos(x * 0.015) * 45;
         ctx.lineTo(x, mH);
       }
-      ctx.lineTo(W, baseH);
+      ctx.lineTo(W + 20, baseH);
       ctx.closePath();
       ctx.fill();
 
@@ -1425,12 +1425,12 @@ function toggleSoundSettings() {
       ctx.fillStyle = midGrad;
 
       ctx.beginPath();
-      ctx.moveTo(0, baseH);
-      for (let x = 0; x <= W; x += 15) {
+      ctx.moveTo(-20, baseH);
+      for (let x = -20; x <= W + 20; x += 15) {
         let mH = baseH - 35 - Math.cos(x * 0.011) * 35 - Math.sin(x * 0.022) * 25;
         ctx.lineTo(x, mH);
       }
-      ctx.lineTo(W, baseH);
+      ctx.lineTo(W + 20, baseH);
       ctx.closePath();
       ctx.fill();
 
@@ -1438,9 +1438,9 @@ function toggleSoundSettings() {
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
-      for (let x = 0; x <= W; x += 15) {
+      for (let x = -20; x <= W + 20; x += 15) {
         let mH = baseH - 35 - Math.cos(x * 0.011) * 35 - Math.sin(x * 0.022) * 25;
-        if (x === 0) ctx.moveTo(x, mH);
+        if (x === -20) ctx.moveTo(x, mH);
         else ctx.lineTo(x, mH);
       }
       ctx.stroke();
@@ -1453,12 +1453,12 @@ function toggleSoundSettings() {
       ctx.fillStyle = fgGrad;
 
       ctx.beginPath();
-      ctx.moveTo(0, baseH);
-      for (let x = 0; x <= W; x += 12) {
+      ctx.moveTo(-20, baseH);
+      for (let x = -20; x <= W + 20; x += 12) {
         let mH = baseH - 25 - Math.sin(x * 0.009 + 0.5) * 45 - Math.cos(x * 0.018) * 30 - Math.sin(x * 0.035) * 15;
         ctx.lineTo(x, mH);
       }
-      ctx.lineTo(W, baseH);
+      ctx.lineTo(W + 20, baseH);
       ctx.closePath();
       ctx.fill();
 
@@ -1468,7 +1468,7 @@ function toggleSoundSettings() {
       ctx.lineCap = 'round';
       ctx.beginPath();
       let drawing = false;
-      for (let x = 0; x <= W; x += 10) {
+      for (let x = -20; x <= W + 20; x += 10) {
         let mH = baseH - 25 - Math.sin(x * 0.009 + 0.5) * 45 - Math.cos(x * 0.018) * 30 - Math.sin(x * 0.035) * 15;
         let slope = (Math.cos(x * 0.009 + 0.5) * 0.009 * 45) - (Math.sin(x * 0.018) * 0.018 * 30);
         if (slope > -0.1) {
@@ -1695,39 +1695,36 @@ function toggleSoundSettings() {
       const roofTopY = cabY - 12;
       const centerX = tx + tw / 2;
 
-      // 3D Rotating Radar Antenna
+      // --- 1. RADAR DISH (ON LEFT SIDE OF ROOF: centerX - 14) ---
       if (G.upgrades && G.upgrades.radar) {
+        const radarX = centerX - 14;
         ctx.save();
-        ctx.translate(centerX, roofTopY - 8);
+        ctx.translate(radarX, roofTopY - 6);
 
-        // Stationary Radar Pedestal/Mast
+        // Pedestal/Mast
         ctx.fillStyle = '#2a3442';
-        ctx.fillRect(-3, 0, 6, 10);
+        ctx.fillRect(-3, 0, 6, 8);
         ctx.fillStyle = '#1c2430';
-        ctx.fillRect(-6, 8, 12, 3);
+        ctx.fillRect(-5, 6, 10, 2);
 
-        // Horizontal Y-Axis 360-degree Rotation
+        // Continuous 360-degree Y-Axis Rotation
         const angle = globalTime * 0.04;
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
 
-        const dishWidth = 26 * Math.abs(cosA) + 4; // Horizontal span projection
+        const dishWidth = 22 * Math.abs(cosA) + 4;
         const isFacingFront = sinA >= 0;
         const facingSide = cosA >= 0 ? 1 : -1;
 
-        // Pedestal Joint Cap
-        ctx.fillStyle = '#4a5768';
-        ctx.beginPath(); ctx.arc(0, 0, 4, 0, Math.PI * 2); ctx.fill();
-
-        ctx.translate(0, -6);
+        ctx.translate(0, -4);
 
         if (!isFacingFront) {
-          // --- BACK FACE OF DISH ---
+          // Back Shell & Structural Ribs
           ctx.strokeStyle = '#1e2633';
-          ctx.lineWidth = 2.5;
+          ctx.lineWidth = 2;
           ctx.beginPath();
           ctx.moveTo(-dishWidth * 0.4, 0); ctx.lineTo(dishWidth * 0.4, 0);
-          ctx.moveTo(0, 0); ctx.lineTo(0, -18);
+          ctx.moveTo(0, 0); ctx.lineTo(0, -14);
           ctx.stroke();
 
           const backGrad = ctx.createLinearGradient(-dishWidth / 2, 0, dishWidth / 2, 0);
@@ -1737,19 +1734,13 @@ function toggleSoundSettings() {
           ctx.fillStyle = backGrad;
 
           ctx.beginPath();
-          ctx.ellipse(0, -8, dishWidth / 2, 12, 0, Math.PI, 0, true);
-          ctx.lineTo(dishWidth / 2 * 0.8, -4);
-          ctx.lineTo(-dishWidth / 2 * 0.8, -4);
+          ctx.ellipse(0, -6, dishWidth / 2, 10, 0, Math.PI, 0, true);
+          ctx.lineTo(dishWidth / 2 * 0.8, -3);
+          ctx.lineTo(-dishWidth / 2 * 0.8, -3);
           ctx.closePath();
           ctx.fill();
-
-          ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(-dishWidth * 0.3, -12); ctx.lineTo(0, 0); ctx.lineTo(dishWidth * 0.3, -12);
-          ctx.stroke();
         } else {
-          // --- FRONT FACE OF DISH (Concave Metallic Bowl) ---
+          // Front Concave Dish Bowl
           const frontGrad = ctx.createLinearGradient(-dishWidth / 2, 0, dishWidth / 2, 0);
           frontGrad.addColorStop(0, '#364454');
           frontGrad.addColorStop(0.3, '#7c8e9e');
@@ -1758,63 +1749,56 @@ function toggleSoundSettings() {
           ctx.fillStyle = frontGrad;
 
           ctx.beginPath();
-          ctx.ellipse(0, -8, dishWidth / 2, 14, 0, 0, Math.PI * 2);
+          ctx.ellipse(0, -6, dishWidth / 2, 11, 0, 0, Math.PI * 2);
           ctx.fill();
 
-          const innerGrad = ctx.createLinearGradient(-dishWidth / 3, -16, dishWidth / 3, 0);
+          const innerGrad = ctx.createLinearGradient(-dishWidth / 3, -12, dishWidth / 3, 0);
           innerGrad.addColorStop(0, 'rgba(15, 22, 30, 0.7)');
           innerGrad.addColorStop(1, 'rgba(50, 65, 82, 0.2)');
           ctx.fillStyle = innerGrad;
           ctx.beginPath();
-          ctx.ellipse(0, -8, dishWidth / 2 - 3, 11, 0, 0, Math.PI * 2);
+          ctx.ellipse(0, -6, dishWidth / 2 - 2, 8, 0, 0, Math.PI * 2);
           ctx.fill();
 
           // Feed Horn Receiver Arm
-          const hornLen = 14 * facingSide;
+          const hornLen = 11 * facingSide;
           ctx.strokeStyle = '#d4deee';
-          ctx.lineWidth = 2;
+          ctx.lineWidth = 1.5;
           ctx.beginPath();
-          ctx.moveTo(0, -8);
-          ctx.lineTo(hornLen, -12);
+          ctx.moveTo(0, -6);
+          ctx.lineTo(hornLen, -9);
           ctx.stroke();
 
-          // Red Receiver Sensor Light
+          // Sensor LED
           ctx.fillStyle = '#ff3333';
           ctx.shadowColor = '#ff3333';
-          ctx.shadowBlur = 6;
-          ctx.beginPath();
-          ctx.arc(hornLen, -12, 2.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        }
-
-        // Top Apex Flashing Warning Beacon Light
-        if (Math.floor(globalTime * 0.15) % 2 === 0) {
-          ctx.fillStyle = '#ff2222';
-          ctx.shadowColor = '#ff2222';
-          ctx.shadowBlur = 8;
-          ctx.beginPath();
-          ctx.arc(0, -22, 2, 0, Math.PI * 2);
-          ctx.fill();
+          ctx.shadowBlur = 5;
+          ctx.beginPath(); ctx.arc(hornLen, -9, 2, 0, Math.PI * 2); ctx.fill();
           ctx.shadowBlur = 0;
         }
 
         ctx.restore();
       }
 
-      // Rotating Beacon Light
+      // --- 2. RED WARNING ALARM BEACON (ON RIGHT SIDE OF ROOF: centerX + 14) ---
+      const beaconX = centerX + (G.upgrades && G.upgrades.radar ? 14 : 0);
+      const beaconY = roofTopY - 6;
+
+      ctx.fillStyle = '#222';
+      ctx.fillRect(beaconX - 2, beaconY, 4, 6);
+
       if (G.enemyKnowsUs || G.health < G.maxHealth) G.alarmActive = true;
       if (G.alarmActive) {
         const rotAngle = globalTime * 0.08;
         const isFront = Math.sin(rotAngle) > 0;
         ctx.fillStyle = isFront ? '#ff3333' : '#660000';
         ctx.shadowColor = '#ff3333'; ctx.shadowBlur = isFront ? 15 : 4;
-        ctx.beginPath(); ctx.arc(centerX, roofTopY - 8, 4.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(beaconX, beaconY - 3, 4, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0;
 
         if (isFront) {
           ctx.save();
-          ctx.translate(centerX, roofTopY - 8);
+          ctx.translate(beaconX, beaconY - 3);
           const beamX = Math.cos(rotAngle) * 280;
           const beamY = Math.sin(rotAngle) * 90 + 40;
           const grad = ctx.createLinearGradient(0, 0, beamX, beamY);
@@ -1830,7 +1814,7 @@ function toggleSoundSettings() {
         }
       } else {
         ctx.fillStyle = '#880000';
-        ctx.beginPath(); ctx.arc(centerX, roofTopY - 8, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(beaconX, beaconY - 3, 3.5, 0, Math.PI * 2); ctx.fill();
       }
     }
 
@@ -1919,10 +1903,13 @@ function toggleSoundSettings() {
         if (!G.visualTurn) G.visualTurn = G.turn;
         G.visualTurn += (G.turn - G.visualTurn) * 0.05;
 
-        if (canvas.parentElement && canvas.parentElement.clientWidth > 0 &&
-          (canvas.width !== canvas.parentElement.clientWidth || canvas.height !== canvas.parentElement.clientHeight)) {
-          canvas.width = canvas.parentElement.clientWidth;
-          canvas.height = canvas.parentElement.clientHeight;
+        if (canvas.parentElement && canvas.parentElement.clientWidth > 0) {
+          const targetW = Math.floor(canvas.parentElement.clientWidth);
+          const targetH = Math.floor(canvas.parentElement.clientHeight);
+          if (canvas.width !== targetW || canvas.height !== targetH) {
+            canvas.width = targetW;
+            canvas.height = targetH;
+          }
         }
 
         const W = canvas.width || 800;
