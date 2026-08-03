@@ -51,21 +51,29 @@
     }
 
     .exec-text-container {
-      height: 40px;
-      overflow: hidden;
+      min-height: 50px;
+      height: auto;
+      max-width: 90vw;
+      padding: 10px 15px;
       display: flex;
       align-items: center;
       justify-content: center;
+      text-align: center;
+      overflow: visible;
     }
 
     .exec-text {
       color: var(--gold);
-      font-size: 24px;
+      font-size: clamp(16px, 4.5vw, 24px);
       font-weight: 700;
+      line-height: 1.4;
       text-shadow: 0 0 15px rgba(212, 160, 48, 0.8);
       transition: opacity 0.4s ease, transform 0.4s ease;
       opacity: 0;
       transform: translateY(20px);
+      word-break: break-word;
+      white-space: normal;
+      text-align: center;
     }
 
     .exec-text.show {
@@ -75,6 +83,7 @@
 
     .exec-progress-bar {
       width: 300px;
+      max-width: 85vw;
       height: 6px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 3px;
@@ -1914,5 +1923,96 @@
       100% {
         box-shadow: inset 0 0 80px rgba(255, 0, 0, 0.4);
         background: radial-gradient(circle, transparent 50%, rgba(255, 0, 0, 0.3) 100%);
+      }
+    }
+
+    /* ===== SMARTPHONE MOBILE RESPONSIVE SUITE ===== */
+    @media screen and (max-width: 768px) {
+      .execution-overlay {
+        padding: 20px 15px !important;
+        box-sizing: border-box !important;
+      }
+
+      .exec-spinner-container {
+        width: 75px !important;
+        height: 75px !important;
+        margin-bottom: 20px !important;
+      }
+
+      .exec-text-container {
+        min-height: 60px !important;
+        height: auto !important;
+        max-width: 92vw !important;
+        padding: 10px !important;
+        overflow: visible !important;
+      }
+
+      .exec-text {
+        font-size: 17px !important;
+        line-height: 1.4 !important;
+        text-align: center !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+      }
+
+      .exec-progress-bar {
+        width: 85vw !important;
+        max-width: 280px !important;
+        margin-top: 15px !important;
+      }
+
+      .modal-content {
+        width: 94vw !important;
+        max-width: 94vw !important;
+        padding: 16px 12px !important;
+        margin: 10px auto !important;
+        box-sizing: border-box !important;
+        max-height: 88vh !important;
+        overflow-y: auto !important;
+        border-radius: 12px !important;
+      }
+
+      .result-columns {
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+
+      .battle-overlay-content {
+        width: 96vw !important;
+        padding: 10px !important;
+        box-sizing: border-box !important;
+      }
+
+      #battleCanvas {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 2 / 1 !important;
+        border-radius: 8px !important;
+      }
+
+      #exec-container {
+        flex-direction: column !important;
+        gap: 10px !important;
+        width: 100% !important;
+        padding: 0 10px !important;
+        box-sizing: border-box !important;
+      }
+
+      #btn-execute, #btn-skip {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 14px 20px !important;
+        font-size: 15px !important;
+      }
+
+      .stats-bar {
+        gap: 6px !important;
+        padding: 8px !important;
+      }
+
+      .stat-box {
+        font-size: 12px !important;
+        padding: 6px 10px !important;
       }
     }

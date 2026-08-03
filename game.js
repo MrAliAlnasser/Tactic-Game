@@ -314,7 +314,9 @@ function toggleSoundSettings() {
       { name: 'جنرال التحصينات', rank: 'دفاع', type: 'defense', emoji: '🛡️', img: 'assets/generals/shield_nation.png' },
       { name: 'الجنرال نسر', rank: 'استطلاع', type: 'scout', emoji: '👁️', img: 'assets/generals/eagle_eye.png' },
       { name: 'الجنرال قلب الأسد', rank: 'قيادة', type: 'versatile', emoji: '🦁', img: 'assets/generals/lionheart.png' },
-      { name: 'الجنرال سيف', rank: 'تكتيك', type: 'tactical', emoji: '⚔️', img: 'assets/generals/sword_justice.png' }
+      { name: 'الجنرال سيف', rank: 'تكتيك', type: 'tactical', emoji: '⚔️', img: 'assets/generals/sword_justice.png' },
+      { name: 'الجنرال ظل الليل', rank: 'عمليات خاصة', type: 'stealth', emoji: '🌙', img: 'assets/generals/night_shadow.png' },
+      { name: 'الجنرال العاصفة', rank: 'سلاح جو', type: 'airforce', emoji: '✈️', img: 'assets/generals/iron_storm.png' }
     ];
 
     // ===== STORY =====
@@ -601,7 +603,6 @@ function toggleSoundSettings() {
             pip.innerHTML = `<span style="font-size: 11px; display: flex; align-items: center; justify-content: center; height: 100%; color: #d4a030; text-shadow: 0 0 2px #000;">🔧${G.repairTimer}</span>`;
           }
         } else {
-          if (i === G.health - 1 && G.damageWithoutRepair > 0) pip.classList.add('damaged');
           if (G._fortified) pip.classList.add('shielded');
         }
         hd.appendChild(pip);
@@ -879,14 +880,34 @@ function toggleSoundSettings() {
       ctx.beginPath(); ctx.ellipse(0, 32, 12, 3, 0, 0, Math.PI * 2); ctx.fill();
 
       // Legs (Dark tactical pants)
-      ctx.fillStyle = '#2b2f2b';
-      ctx.beginPath(); ctx.roundRect(-6, 12, 5, 18, 2); ctx.fill();
-      ctx.beginPath(); ctx.roundRect(1, 12, 5, 18, 2); ctx.fill();
+      if (state === 'pilot_walk') {
+        const walkPhase = Math.sin(performance.now() * 0.015);
+        // Left leg
+        ctx.save();
+        ctx.translate(-3.5, 12);
+        ctx.rotate(walkPhase * 0.45);
+        ctx.fillStyle = '#2b2f2b'; ctx.beginPath(); ctx.roundRect(-2.5, 0, 5, 16, 2); ctx.fill();
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.roundRect(-3.5, 14, 6, 4, 1); ctx.fill();
+        ctx.restore();
 
-      // Boots
-      ctx.fillStyle = '#111';
-      ctx.beginPath(); ctx.roundRect(-7, 28, 6, 4, 1); ctx.fill();
-      ctx.beginPath(); ctx.roundRect(1, 28, 6, 4, 1); ctx.fill();
+        // Right leg
+        ctx.save();
+        ctx.translate(3.5, 12);
+        ctx.rotate(-walkPhase * 0.45);
+        ctx.fillStyle = '#2b2f2b'; ctx.beginPath(); ctx.roundRect(-2.5, 0, 5, 16, 2); ctx.fill();
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.roundRect(-3.5, 14, 6, 4, 1); ctx.fill();
+        ctx.restore();
+      } else {
+        // Static standing legs
+        ctx.fillStyle = '#2b2f2b';
+        ctx.beginPath(); ctx.roundRect(-6, 12, 5, 18, 2); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(1, 12, 5, 18, 2); ctx.fill();
+
+        // Boots
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.roundRect(-7, 28, 6, 4, 1); ctx.fill();
+        ctx.beginPath(); ctx.roundRect(1, 28, 6, 4, 1); ctx.fill();
+      }
 
       // Torso & Tactical Jacket (Olive green)
       ctx.fillStyle = '#3a4435';
@@ -956,7 +977,27 @@ function toggleSoundSettings() {
       // Arms & Actions
       ctx.fillStyle = '#3a4435'; // Sleeves
 
-      if (state === 'pilot_salute') {
+      if (state === 'pilot_walk') {
+        const armPhase = Math.sin(performance.now() * 0.015);
+        // Left arm swinging
+        ctx.save();
+        ctx.translate(-9, 0);
+        ctx.rotate(-armPhase * 0.4);
+        ctx.strokeStyle = '#3a4435'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 12); ctx.stroke();
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0, 12, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        // Right arm swinging
+        ctx.save();
+        ctx.translate(9, 0);
+        ctx.rotate(armPhase * 0.4);
+        ctx.strokeStyle = '#3a4435'; ctx.lineWidth = 4; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, 12); ctx.stroke();
+        ctx.fillStyle = '#111'; ctx.beginPath(); ctx.arc(0, 12, 2.5, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+      } else if (state === 'pilot_salute') {
         // Left arm down
         ctx.beginPath(); ctx.roundRect(-11, 0, 4, 12, 2); ctx.fill();
         ctx.fillStyle = '#111'; ctx.beginPath(); ctx.roundRect(-11, 10, 4, 4, 1); ctx.fill();
@@ -1250,9 +1291,10 @@ function toggleSoundSettings() {
 
 
 
-    function drawDetailedPlane(ctx, px, py, scale, frame, animState) {
+    function drawDetailedPlane(ctx, px, py, scale, frame, animState, gearDeploy = 1, flipX = false) {
       ctx.save();
       ctx.translate(px, py);
+      if (flipX) ctx.scale(-1, 1);
       // Make the plane intrinsically larger for a majestic appearance
       ctx.scale(scale * 1.8, scale * 1.8);
 
@@ -1267,6 +1309,108 @@ function toggleSoundSettings() {
         ctx.beginPath();
         ctx.moveTo(45, -2); ctx.lineTo(45 + glowLen, -10); ctx.lineTo(45 + glowLen, 10); ctx.lineTo(45, 2);
         ctx.fill();
+      }
+
+      // === Landing Gear System (Deployed underneath before fuselage) ===
+      if (gearDeploy > 0.01) {
+        ctx.save();
+        const gd = gearDeploy; // 0 = retracted, 1 = fully deployed
+        const gearDropY = gd * 18; // How far the gear extends downward
+        const gearAlpha = Math.min(gd * 1.5, 1); // Fade in smoothly
+
+        // --- Nose Gear (Front) ---
+        ctx.save();
+        ctx.translate(-45, 4);
+        ctx.rotate((1 - gd) * -Math.PI * 0.4); // Retract rotation
+
+        // Strut (hydraulic piston)
+        ctx.fillStyle = `rgba(100, 110, 120, ${gearAlpha})`;
+        ctx.fillRect(-1.5, 0, 3, gearDropY * 0.9);
+        // Hydraulic shine
+        ctx.fillStyle = `rgba(180, 200, 220, ${gearAlpha * 0.4})`;
+        ctx.fillRect(-0.5, 2, 1, gearDropY * 0.6);
+
+        // Axle
+        ctx.fillStyle = `rgba(60, 65, 70, ${gearAlpha})`;
+        ctx.fillRect(-4, gearDropY * 0.85, 8, 2);
+
+        // Wheel (Front - single)
+        const wheelR = 3.5 * gd;
+        ctx.fillStyle = `rgba(20, 20, 20, ${gearAlpha})`;
+        ctx.beginPath(); ctx.arc(0, gearDropY, wheelR, 0, Math.PI * 2); ctx.fill();
+        // Tire tread highlight
+        ctx.strokeStyle = `rgba(50, 50, 50, ${gearAlpha * 0.8})`;
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.arc(0, gearDropY, wheelR * 0.7, 0, Math.PI * 2); ctx.stroke();
+        // Hub cap (silver center)
+        ctx.fillStyle = `rgba(160, 170, 180, ${gearAlpha})`;
+        ctx.beginPath(); ctx.arc(0, gearDropY, wheelR * 0.3, 0, Math.PI * 2); ctx.fill();
+
+        ctx.restore();
+
+        // --- Main Gear Left (Under left wing root) ---
+        ctx.save();
+        ctx.translate(-5, 8);
+        ctx.rotate((1 - gd) * -Math.PI * 0.45);
+
+        // Main strut (thicker)
+        ctx.fillStyle = `rgba(80, 90, 100, ${gearAlpha})`;
+        ctx.fillRect(-2, 0, 4, gearDropY);
+        // Brace strut
+        ctx.strokeStyle = `rgba(90, 100, 110, ${gearAlpha})`;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.moveTo(6, -2); ctx.lineTo(1, gearDropY * 0.8); ctx.stroke();
+        // Hydraulic shine
+        ctx.fillStyle = `rgba(180, 200, 220, ${gearAlpha * 0.35})`;
+        ctx.fillRect(-0.5, 1, 1, gearDropY * 0.7);
+
+        // Axle
+        ctx.fillStyle = `rgba(55, 60, 65, ${gearAlpha})`;
+        ctx.fillRect(-6, gearDropY - 1, 12, 2.5);
+
+        // Dual wheels (main gear has 2 wheels)
+        const mWheelR = 4.2 * gd;
+        // Left wheel
+        ctx.fillStyle = `rgba(18, 18, 18, ${gearAlpha})`;
+        ctx.beginPath(); ctx.arc(-3.5, gearDropY + 1, mWheelR, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(45, 45, 45, ${gearAlpha * 0.7})`; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.arc(-3.5, gearDropY + 1, mWheelR * 0.65, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = `rgba(150, 160, 170, ${gearAlpha})`;
+        ctx.beginPath(); ctx.arc(-3.5, gearDropY + 1, mWheelR * 0.25, 0, Math.PI * 2); ctx.fill();
+        // Right wheel
+        ctx.fillStyle = `rgba(18, 18, 18, ${gearAlpha})`;
+        ctx.beginPath(); ctx.arc(3.5, gearDropY + 1, mWheelR, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(45, 45, 45, ${gearAlpha * 0.7})`; ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.arc(3.5, gearDropY + 1, mWheelR * 0.65, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = `rgba(150, 160, 170, ${gearAlpha})`;
+        ctx.beginPath(); ctx.arc(3.5, gearDropY + 1, mWheelR * 0.25, 0, Math.PI * 2); ctx.fill();
+
+        ctx.restore();
+
+        // --- Main Gear Right (Far side wing root, slightly darker) ---
+        ctx.save();
+        ctx.translate(-5, 4);
+        ctx.rotate((1 - gd) * -Math.PI * 0.45);
+
+        ctx.fillStyle = `rgba(65, 75, 85, ${gearAlpha * 0.85})`;
+        ctx.fillRect(-2, 0, 4, gearDropY);
+        ctx.strokeStyle = `rgba(75, 85, 95, ${gearAlpha * 0.7})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(6, -2); ctx.lineTo(1, gearDropY * 0.8); ctx.stroke();
+
+        ctx.fillStyle = `rgba(50, 55, 60, ${gearAlpha * 0.85})`;
+        ctx.fillRect(-6, gearDropY - 1, 12, 2.5);
+
+        const fWheelR = 3.8 * gd;
+        ctx.fillStyle = `rgba(15, 15, 15, ${gearAlpha * 0.85})`;
+        ctx.beginPath(); ctx.arc(-3.5, gearDropY + 1, fWheelR, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(3.5, gearDropY + 1, fWheelR, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = `rgba(130, 140, 150, ${gearAlpha * 0.8})`;
+        ctx.beginPath(); ctx.arc(-3.5, gearDropY + 1, fWheelR * 0.25, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(3.5, gearDropY + 1, fWheelR * 0.25, 0, Math.PI * 2); ctx.fill();
+
+        ctx.restore();
+        ctx.restore(); // Restore outer gearDeploy save block
       }
 
       // === Stealth Fighter Design (3D faceted appearance) ===
@@ -2234,20 +2378,20 @@ function toggleSoundSettings() {
         ctx.fillRect(-8, -14, 16, 3);
         ctx.shadowBlur = 0;
 
-        // Searchlight Sweep Beam
-        const beamAngle = Math.sin(globalTime * 0.03 + tx) * 0.4 - 0.2;
+        // Searchlight Sweep Beam (Scanning Upwards into Night Sky)
+        const beamAngle = Math.sin(globalTime * 0.03 + tx) * 0.35;
         ctx.save();
         ctx.translate(0, -22);
         ctx.rotate(beamAngle);
 
-        const beamGrad = ctx.createLinearGradient(0, 0, 0, 140);
-        beamGrad.addColorStop(0, 'rgba(0, 220, 255, 0.45)');
+        const beamGrad = ctx.createLinearGradient(0, 0, 0, -140);
+        beamGrad.addColorStop(0, 'rgba(0, 220, 255, 0.5)');
         beamGrad.addColorStop(1, 'rgba(0, 220, 255, 0)');
         ctx.fillStyle = beamGrad;
         ctx.beginPath();
         ctx.moveTo(0, 0);
-        ctx.lineTo(-25, 140);
-        ctx.lineTo(25, 140);
+        ctx.lineTo(-28, -140);
+        ctx.lineTo(28, -140);
         ctx.closePath();
         ctx.fill();
 
@@ -2990,6 +3134,9 @@ function toggleSoundSettings() {
         let pilotVisible = true;
         let pilotState = 'pilot_idle';
         let pilotX = px - 180, pilotY = py - 30;
+        let gearDeploy = 1; // 1 = fully deployed on runway
+        let pilotYOffset = 0;
+        let planeFacingRight = true; // true = face RIGHT (mirror), false = face LEFT (natural)
 
         if (animState === 'takeoff') {
           if (frame < 30) {
@@ -3008,20 +3155,132 @@ function toggleSoundSettings() {
             const takeoffDur = 100;
             const planeProgress = Math.min(pFrame / takeoffDur, 1);
             if (planeProgress < 0.4) {
+              // Taxi and accelerate on runway - gear fully deployed
               px = basePx + planeProgress * W * 0.8; py = runwayY + 30; planeScale = 1;
-            } else if (planeProgress < 0.7) {
-              const t = (planeProgress - 0.4) / 0.3;
+              gearDeploy = 1;
+            } else if (planeProgress < 0.55) {
+              // Rotate and liftoff - gear starts retracting smoothly
+              const t = (planeProgress - 0.4) / 0.15;
               const startX = basePx + 0.4 * W * 0.8;
-              px = startX + t * W * 0.5; py = runwayY + 30 - t * 40; planeScale = 1 - t * 0.2;
+              px = startX + t * W * 0.3; py = runwayY + 30 - t * 20; planeScale = 1;
+              // Smooth cubic ease-out retraction
+              gearDeploy = 1 - t * t * (3 - 2 * t);
+            } else if (planeProgress < 0.75) {
+              // Climbing away - gear fully retracted
+              const t = (planeProgress - 0.55) / 0.2;
+              const startX = basePx + 0.4 * W * 0.8 + W * 0.3;
+              px = startX + t * W * 0.35; py = runwayY + 10 - t * 50; planeScale = 1 - t * 0.15;
+              gearDeploy = 0;
             } else {
-              const t = (planeProgress - 0.7) / 0.3;
-              const startX = basePx + 0.4 * W * 0.8 + W * 0.5;
-              px = startX + t * W * 0.3; py = runwayY - 10 - t * 100; planeScale = 0.8 - t * 0.3;
+              // Flying off into the distance
+              const t = (planeProgress - 0.75) / 0.25;
+              const startX = basePx + 0.4 * W * 0.8 + W * 0.3 + W * 0.35;
+              px = startX + t * W * 0.2; py = runwayY - 40 - t * 80; planeScale = 0.85 - t * 0.35;
+              gearDeploy = 0;
             }
           }
         }
 
-        let pilotYOffset = (animState === 'idle') ? Math.sin(globalTime * 0.05 + 1) * 2 : 0;
+        // === LANDING ANIMATION (Realistic Left-to-Right approach + Pilot walk & salute) ===
+        if (animState === 'landing') {
+          pilotVisible = false;
+          planeFacingRight = true; // Plane approaches from LEFT heading RIGHT
+          const landingDur = 220; // Extended for realistic cinematic pacing
+          const landProg = Math.min(frame / landingDur, 1);
+
+          if (landProg < 0.22) {
+            // Phase 1: High Glideslope approach from far left sky
+            const t = landProg / 0.22;
+            const easeT = t * t * (3 - 2 * t);
+            px = -150 + easeT * (W * 0.18 - (-150));
+            py = runwayY - 105 + easeT * 50;
+            planeScale = 0.4 + easeT * 0.3;
+            gearDeploy = 0;
+          } else if (landProg < 0.42) {
+            // Phase 2: Final approach - hydraulic gear deploys downward
+            const t = (landProg - 0.22) / 0.20;
+            const easeT = t * t * (3 - 2 * t);
+            px = W * 0.18 + easeT * (W * 0.42 - W * 0.18);
+            py = runwayY - 55 + easeT * 42;
+            planeScale = 0.7 + easeT * 0.2;
+            gearDeploy = easeT; // Smooth gear extension
+          } else if (landProg < 0.55) {
+            // Phase 3: Flare & Touchdown - Main gear touches tarmac first
+            const t = (landProg - 0.42) / 0.13;
+            const easeT = 1 - Math.pow(1 - t, 3);
+            px = W * 0.42 + easeT * (W * 0.56 - W * 0.42);
+            py = runwayY - 13 + easeT * 43; // Sinks to runway level py = runwayY + 30
+            planeScale = 0.9 + easeT * 0.1;
+            gearDeploy = 1;
+
+            // Tire friction smoke puffs popping under wheels
+            if (t < 0.5) {
+              const smokeAlpha = (0.5 - t) / 0.5;
+              for (let s = 0; s < 4; s++) {
+                const sx = px - 25 - Math.random() * 45;
+                const sy = runwayY + 26 + Math.random() * 8;
+                const sr = 7 + Math.random() * 18;
+                ctx.fillStyle = `rgba(210, 210, 210, ${smokeAlpha * 0.4})`;
+                ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+              }
+            }
+          } else if (landProg < 0.68) {
+            // Phase 4: Deceleration roll down runway
+            const t = (landProg - 0.55) / 0.13;
+            const easeT = t * t * (3 - 2 * t);
+            px = W * 0.56 + easeT * (W * 0.66 - W * 0.56);
+            py = runwayY + 30;
+            planeScale = 1;
+            gearDeploy = 1;
+          } else if (landProg < 0.78) {
+            // Phase 5: Turn & taxi back to hangar parking apron (basePx)
+            const t = (landProg - 0.68) / 0.10;
+            const easeT = t * t * (3 - 2 * t);
+            px = W * 0.66 - easeT * (W * 0.66 - basePx);
+            py = runwayY + 30;
+            planeScale = 1;
+            gearDeploy = 1;
+            planeFacingRight = false; // Turn left to taxi back to parking spot
+          } else {
+            // Phase 6: Jet parked facing right -> Pilot dismount, walk to spot, then salute!
+            px = basePx; py = runwayY + 30; planeScale = 1; gearDeploy = 1;
+            planeFacingRight = true; // Parked facing right
+            pilotVisible = true;
+
+            const dismountProg = (landProg - 0.78) / 0.22;
+            if (dismountProg < 0.22) {
+              // 1. Canopy opens - Pilot climbs down ladder beside cockpit (at px - 25)
+              const dt = dismountProg / 0.22;
+              const easeDt = dt * dt * (3 - 2 * dt);
+              pilotState = 'pilot_climb';
+              pilotX = px - 25; // Directly beside cockpit
+              pilotY = (py - 30) - (1 - easeDt) * 18; // Descends ladder to tarmac
+              pilotYOffset = 0;
+            } else if (dismountProg < 0.62) {
+              // 2. Pilot walks across tarmac from aircraft (px - 25) to usual spot (px - 180)
+              const walkT = (dismountProg - 0.22) / 0.40;
+              const easeWalk = walkT * walkT * (3 - 2 * walkT);
+              pilotState = 'pilot_walk';
+              pilotX = (px - 25) - easeWalk * 155; // Walks 155px left to usual spot
+              pilotY = py - 30;
+              pilotYOffset = Math.sin(walkT * Math.PI * 14) * 2.5; // Natural walking step bob!
+            } else if (dismountProg < 0.88) {
+              // 3. Arrived at usual spot (px - 180) -> Turn to commander & perform Military Salute! 🫡
+              pilotState = 'pilot_salute';
+              pilotX = px - 180;
+              pilotY = py - 30;
+              pilotYOffset = 0;
+            } else {
+              // 4. Return to regular idle standing stance
+              pilotState = 'pilot_idle';
+              pilotX = px - 180;
+              pilotY = py - 30;
+              pilotYOffset = 0;
+            }
+          }
+        }
+
+        if (animState === 'idle') pilotYOffset = Math.sin(globalTime * 0.05 + 1) * 2;
         if (pilotVisible && animState !== 'enemy_attack') {
           drawHighResPilot(ctx, pilotX, pilotY + pilotYOffset, 2.2, pilotState);
         }
@@ -3033,11 +3292,9 @@ function toggleSoundSettings() {
             let shadowScale = 1 - (altitude / 350);
 
             ctx.save();
-            // Ground Y position for shadow directly underneath the plane fuselage/wheels
             let groundY = py + 18 + altitude * 0.55;
             ctx.translate(px + altitude * 0.25, groundY);
 
-            // Contact shadow directly beneath wheels when landed
             if (altitude < 20) {
               ctx.fillStyle = `rgba(0, 0, 0, ${(1 - altitude / 20) * 0.5})`;
               ctx.beginPath();
@@ -3045,44 +3302,60 @@ function toggleSoundSettings() {
               ctx.fill();
             }
 
-            // Scale and skew the aircraft directional shadow
             ctx.scale(-planeScale * 1.6 * shadowScale, planeScale * 1.6 * shadowScale * 0.25);
-            ctx.transform(1, 0, -0.35, 1, 0, 0); // Natural perspective shear
+            ctx.transform(1, 0, -0.35, 1, 0, 0);
 
             ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha * 0.75})`;
             ctx.beginPath();
-            // Stealth Fighter Silhouette (Top-down)
-            ctx.moveTo(-75, 0); // Nose tip
-            ctx.lineTo(-40, -10); // Nose widen
-            ctx.lineTo(-20, -15); // Wing root front
-            ctx.lineTo(-5, -45); // Wing tip front
-            ctx.lineTo(15, -45); // Wing tip rear
-            ctx.lineTo(15, -15); // Wing root rear
-            ctx.lineTo(35, -10); // Tail root front
-            ctx.lineTo(45, -25); // Tail tip front
-            ctx.lineTo(55, -25); // Tail tip rear
-            ctx.lineTo(50, -5); // Tail root rear
-            ctx.lineTo(50, 5); // Engine rear
-            ctx.lineTo(55, 25); // Near Tail tip rear
-            ctx.lineTo(45, 25); // Near Tail tip front
-            ctx.lineTo(35, 10); // Near Tail root front
-            ctx.lineTo(15, 15); // Near Wing root rear
-            ctx.lineTo(15, 45); // Near Wing tip rear
-            ctx.lineTo(-5, 45); // Near Wing tip front
-            ctx.lineTo(-20, 15); // Near Wing root front
-            ctx.lineTo(-40, 10); // Nose widen
+            ctx.moveTo(-75, 0);
+            ctx.lineTo(-40, -10); ctx.lineTo(-20, -15); ctx.lineTo(-5, -45);
+            ctx.lineTo(15, -45); ctx.lineTo(15, -15); ctx.lineTo(35, -10);
+            ctx.lineTo(45, -25); ctx.lineTo(55, -25); ctx.lineTo(50, -5);
+            ctx.lineTo(50, 5); ctx.lineTo(55, 25); ctx.lineTo(45, 25);
+            ctx.lineTo(35, 10); ctx.lineTo(15, 15); ctx.lineTo(15, 45);
+            ctx.lineTo(-5, 45); ctx.lineTo(-20, 15); ctx.lineTo(-40, 10);
             ctx.closePath();
             ctx.fill();
 
             ctx.restore();
           }
 
-          ctx.save();
-          ctx.translate(px, py);
-          ctx.scale(-1, 1);
-          ctx.translate(-px, -py);
-          drawDetailedPlane(ctx, px, py, planeScale, frame, animState);
-          ctx.restore();
+          drawDetailedPlane(ctx, px, py, planeScale, frame, animState, gearDeploy, planeFacingRight);
+        }
+
+        const currentMissing = Math.max(0, G.maxHealth - G.health);
+        if (currentMissing === 0) {
+          fires = [];
+          smokes = [];
+          fireOrigins = [];
+        } else if (fireOrigins.length !== currentMissing) {
+          fireOrigins = [];
+          fires = [];
+          smokes = [];
+          for (let i = 0; i < currentMissing; i++) {
+            fireOrigins.push({
+              x: 0.2 + Math.random() * 0.6,
+              y: 0.6 + Math.random() * 0.2
+            });
+          }
+          for (let i = 0; i < currentMissing * 40; i++) {
+            fires.push({
+              originIndex: i % currentMissing,
+              rx: (Math.random() - 0.5) * 40, ry: (Math.random() - 0.5) * 10,
+              vx: (Math.random() - 0.5) * 1, vy: -Math.random() * 2 - 1.5,
+              life: Math.random() * 40, maxLife: 40,
+              size: Math.random() * 15 + 10
+            });
+          }
+          for (let i = 0; i < currentMissing * 30; i++) {
+            smokes.push({
+              originIndex: i % currentMissing,
+              rx: (Math.random() - 0.5) * 60, ry: (Math.random() - 0.5) * 20 - 20,
+              vx: (Math.random() - 0.5) * 2 + 1, vy: -Math.random() * 1.5 - 1.5,
+              life: Math.random() * 80, maxLife: 80,
+              size: Math.random() * 30 + 20
+            });
+          }
         }
 
         if (fires.length > 0 || smokes.length > 0) {
@@ -3140,8 +3413,10 @@ function toggleSoundSettings() {
         }
 
         if (frame === totalFrames) {
-          if (callback) { callback(); callback = null; }
+          const cb = callback;
+          callback = null;
           if (animState !== 'idle') { animState = 'idle'; totalFrames = 60; frame = 0; }
+          if (cb) cb();
         } else if (animState === 'idle' && frame > totalFrames) {
           frame = 0;
         }
@@ -3173,20 +3448,20 @@ function toggleSoundSettings() {
 
         // Attack option 2: Stealth strike (lower risk but costs more)
         pool.push({
-          general: { name: 'الجنرال ظل الليل', rank: 'عمليات خاصة', type: 'stealth', emoji: '🌙', img: 'assets/generals/night_shadow.png' },
+          general: GENERALS[6],
           action: 'stealth_strike',
           target: G.enemyPos,
           title: 'ضربة تسللية ليلية',
           advice: `أقترح هجومًا تسلليًا بطائرات خفية. الضربة أضعف لكنها لن تكشف موقعنا للعدو.`,
           actionLabel: '🌙',
-          cost: 4,
+          cost: 3,
           consequence: 'ضربة أضعف (قد لا تنجح) لكن لن يكتشف العدو مطارنا',
           consequenceType: 'safe_strike'
         });
 
         // Attack option 3: Full assault (devastating but very costly)
         pool.push({
-          general: { name: 'الجنرال العاصفة', rank: 'سلاح جو', type: 'airforce', emoji: '✈️', img: 'assets/generals/iron_storm.png' },
+          general: GENERALS[7],
           action: 'full_assault',
           target: G.enemyPos,
           title: 'هجوم شامل بالسلاح الجوي',
@@ -3796,7 +4071,7 @@ function toggleSoundSettings() {
     function executeStealthStrike(adv) {
       G.totalStrikes++;
       playActionAnimation('strike', '🌙 جاري تنفيذ الضربة التسللية...', () => {
-        const successChance = G.upgrades.stealth ? 1.0 : 0.55;
+        const successChance = G.upgrades.stealth ? 1.0 : 0.75;
         let pros = []; let cons = []; let story = ""; let title = "";
 
         if (Math.random() < successChance) {
@@ -3829,7 +4104,7 @@ function toggleSoundSettings() {
       G.totalStrikes++;
       playActionAnimation('strike', '🔥 هجوم شامل بكل القوة الجوية...', () => {
         let pros = []; let cons = [];
-        const dmg = G.upgrades.ammo ? 3 : 2;
+        const dmg = G.upgrades.ammo ? 4 : 3;
         G.enemyHp -= dmg;
         G.map[adv.target] = 3;
         pros.push(`هجوم كاسح دمر دفاعات العدو بضرر مضاعف (-${dmg} صحة)`);
@@ -3854,12 +4129,27 @@ function toggleSoundSettings() {
             pros.push('منظومة الدفاع الجوي ثاد تصدت للهجوم المضاد بنجاح وصانت المطار!');
             story += " وحاول العدو الرد بهجوم مضاد، لكن منظومة الدفاع الجوي ثاد اعترضت صواريخهم ودمرتها في الجو قبل وصولها للمطار!";
           } else if (G._fortified) {
+            G._fortified = false;
             pros.push('التحصينات المنشورة خففت الضرر الناجم عن الهجوم المضاد!');
             story += " وحاول العدو الرد بهجوم مضاد، لكن التحصينات العسكرية حمت المطار من الأضرار!";
           } else {
             triggerRedAlarm();
             G.health--;
             G.damageWithoutRepair++;
+
+            const boughtUpgrades = Object.keys(G.upgrades).filter(k => G.upgrades[k]);
+            if (boughtUpgrades.length > 0 && Math.random() < 0.5) {
+              const toDestroy = boughtUpgrades[Math.floor(Math.random() * boughtUpgrades.length)];
+              G.upgrades[toDestroy] = false;
+              const names = { radar: 'رادار الكشف المبكر', walls: 'الجدران المحصنة', aa: 'منظومة الدفاع الجوي', stealth: 'السرب الشبحي', eng: 'الوحدة الهندسية', ammo: 'الذخائر الخارقة' };
+              const destroyedName = names[toDestroy];
+              cons.push(`تسبب الهجوم المضاد بتحطم [${destroyedName}]!`);
+              if (toDestroy === 'walls') {
+                G.maxHealth--;
+                if (G.health > G.maxHealth) G.health = G.maxHealth;
+              }
+            }
+
             cons.push('تعرضنا لهجوم مضاد فوري وموجع (-1 صحة للقاعدة)');
             story += " ولم نكد نحتفل حتى انهالت علينا صواريخ العدو الانتقامية في هجوم مضاد سريع ألحق بنا أضراراً بالغة!";
             if (G.health <= 0) {
@@ -4054,7 +4344,12 @@ function toggleSoundSettings() {
 
       if (type === 'strike' || type === 'scout' || type === 'raid') {
         playAirportAnimation(() => {
-          showBattleOverlay(text, type, callback);
+          showBattleOverlay(text, type, () => {
+            playAirportAnimation(() => {
+              G.animating = false;
+              if (callback) callback();
+            }, 'landing');
+          });
         }, 'takeoff');
       } else if (type === 'resource') {
         playAirportAnimation(() => {
@@ -4149,9 +4444,7 @@ function toggleSoundSettings() {
           // Plane passing by (NO BOMB)
           const px = -100 + frame * 6; // slightly faster since it's just passing
           const py = 80 + Math.sin(frame * 0.08) * 10;
-          ctx.save(); ctx.translate(px, py); ctx.scale(-1, 1); ctx.translate(-px, -py);
-          drawDetailedPlane(ctx, px, py, 1.2, frame, 'idle');
-          ctx.restore();
+          drawDetailedPlane(ctx, px, py, 1.2, frame, 'idle', 0, true);
 
           ctx.restore(); // End window clip
 
@@ -4305,12 +4598,7 @@ function toggleSoundSettings() {
           const px = 100 + frame * 3;
           const py = 80 + Math.sin(frame * 0.08) * 15;
 
-          ctx.save();
-          ctx.translate(px, py);
-          ctx.scale(-1, 1);
-          ctx.translate(-px, -py);
-          drawDetailedPlane(ctx, px, py, 1.4, frame, 'idle');
-          ctx.restore();
+          drawDetailedPlane(ctx, px, py, 1.4, frame, 'idle', 0, true);
 
           if (frame > 40 && frame < 90) {
             const dropProgress = (frame - 40) / 50;
@@ -4676,17 +4964,14 @@ function toggleSoundSettings() {
                 ammo: "مخازن الذخيرة الخاصة انفجرت في عرض مرعب! قوتنا الضاربة تراجعت بشكل كارثي."
               };
 
-              let damageWithoutRepairBefore = Math.max(0, G.damageWithoutRepair - 1);
               let healthBeforeHtml = '';
               for (let i = 0; i < maxHealthBefore; i++) {
                 if (i >= healthBefore) healthBeforeHtml += '⬛';
-                else if (i === healthBefore - 1 && damageWithoutRepairBefore > 0) healthBeforeHtml += '🟥';
                 else healthBeforeHtml += '🟩';
               }
               let healthAfterHtml = '';
               for (let i = 0; i < G.maxHealth; i++) {
                 if (i >= G.health) healthAfterHtml += '⬛';
-                else if (i === G.health - 1 && G.damageWithoutRepair > 0) healthAfterHtml += '🟥';
                 else healthAfterHtml += '🟩';
               }
 
@@ -4775,8 +5060,8 @@ function toggleSoundSettings() {
     // ===== MODAL TOGGLES =====
     const CODEX_CARDS = [
       { general: GENERALS[0], actionLabel: 'توجيه الضربة', title: 'هجوم موجه مباشر', cost: 3, advice: 'قصف مباشر على قاعدة العدو. الوسيلة الأساسية لحسم المعركة لكنها ستكشف موقعنا للعدو!' },
-      { general: { name: 'الجنرال ظل الليل', rank: 'عمليات خاصة', emoji: '🌙', img: 'assets/generals/night_shadow.png' }, actionLabel: 'قصف خفي', title: 'هجوم جوي خفي', cost: 4, advice: 'قصف موقع العدو باستخدام طائرات الشبح. موقعنا سيبقى آمناً تماماً وتكلفتها أعلى.' },
-      { general: { name: 'الجنرال العاصفة ', rank: 'سلاح جو', emoji: '✈️', img: 'assets/generals/iron_storm.png' }, actionLabel: 'هجوم شامل', title: 'قصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف تماماً. أضرار جسيمة وتكشف موقعنا للعدو.' },
+      { general: GENERALS[6], actionLabel: 'قصف خفي', title: 'هجوم جوي خفي', cost: 3, advice: 'قصف موقع العدو باستخدام طائرات الشبح. موقعنا سيبقى آمناً تماماً وتكلفتها مناسبة.' },
+      { general: GENERALS[7], actionLabel: 'هجوم شامل', title: 'قصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف بضرر كاسح. تسبب أضراراً هائلة وتكشف موقعنا للعدو.' },
       { general: GENERALS[3], actionLabel: 'استطلاع', title: 'استطلاع جوي', cost: 1, advice: 'إرسال طائرة استطلاع لمسح منطقة محددة في الخريطة لتأكيد وجود العدو أو خلوها، وتزيد نقاط المعلومات.' },
       { general: GENERALS[1], actionLabel: 'جمع المعلومات', title: 'تحليل استخباراتي', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف قطاعات في الخريطة. (عند وصول المعلومات إلى 10 يكشف موقع قاعدة العدو تلقائياً).' },
       { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة لدور واحد بنسبة 100%.' },
