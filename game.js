@@ -264,8 +264,8 @@ const SFX = {
 const G = {
   turn: 1,
   visualTurn: 1,
-  health: 3,
-  maxHealth: 3,
+  health: 2,
+  maxHealth: 2,
   resources: 5,
   knowledge: 0,
   intel: 0,
@@ -328,8 +328,8 @@ const STORY = [
 function initGame() {
   G.turn = 1;
   G.visualTurn = 1;
-  G.health = 3;
-  G.maxHealth = 3;
+  G.health = 2;
+  G.maxHealth = 2;
   G.resources = 5;
   G.intel = 0;
   G.enemyHp = 3;
@@ -3512,13 +3512,13 @@ function generateAdvice() {
       consequenceType: 'raid_risk'
     });
 
-    if (G.resources <= 1 || G.health <= 2) {
+    if (G.resources <= 1 || G.health < G.maxHealth) {
       pool.push({
         general: pickGeneral('versatile'),
         action: 'rest',
         title: 'التقاط الأنفاس وأعمال الصيانة',
         advice: 'إعطاء الجنود قسطاً من الراحة، وإصلاح ما يمكن إصلاحه وفرز الأدوات المدمّرة.',
-        actionLabel: '💤 (+1 موارد، +1 صحة)',
+        actionLabel: G.health < G.maxHealth ? '💤 (+1 موارد، 50% فرصة +1 صحة)' : '💤 (+1 موارد)',
         cost: 0,
         consequence: null,
         consequenceType: null
@@ -3539,7 +3539,7 @@ function generateAdvice() {
     }
     G.currentAdvice = [firstAttack, ...remaining];
 
-    if (G.health <= 2 && !G.currentAdvice.some(a => a.action === 'repair')) {
+    if (G.health < G.maxHealth && !G.currentAdvice.some(a => a.action === 'repair')) {
       const repairOption = pool.find(a => a.action === 'repair');
       if (repairOption) G.currentAdvice[1] = repairOption;
     }
@@ -3615,7 +3615,7 @@ function generateAdvice() {
       title: 'تحصين الدفاعات',
       advice: 'نحتاج لتعزيز دفاعاتنا لصد هجمات العدو المحتملة',
       actionLabel: '🏰',
-      cost: 2,
+      cost: 3,
       consequence: 'يقلل احتمال الإصابة لدور واحد بنسبة 100%',
       consequenceType: 'fortify'
     });
@@ -3644,13 +3644,13 @@ function generateAdvice() {
       consequenceType: 'raid_risk'
     });
 
-    if (G.resources <= 1 || G.health <= 2) {
+    if (G.resources <= 1 || G.health < G.maxHealth) {
       pool.push({
         general: pickGeneral('versatile'),
         action: 'rest',
         title: 'التقاط الأنفاس وأعمال الصيانة',
         advice: 'إعطاء الجنود قسطاً من الراحة، وإصلاح ما يمكن إصلاحه وفرز الأدوات المدمّرة.',
-        actionLabel: '💤 (+1 موارد، +1 صحة)',
+        actionLabel: G.health < G.maxHealth ? '💤 (+1 موارد، 50% فرصة +1 صحة)' : '💤 (+1 موارد)',
         cost: 0,
         consequence: null,
         consequenceType: null
@@ -3669,7 +3669,7 @@ function generateAdvice() {
     }
     G.currentAdvice = uniqueAdvice;
 
-    if (G.health <= 2 && !G.currentAdvice.some(a => a.action === 'repair')) {
+    if (G.health < G.maxHealth && !G.currentAdvice.some(a => a.action === 'repair')) {
       const repairOption = pool.find(a => a.action === 'repair');
       if (repairOption) G.currentAdvice[1] = repairOption;
     }
@@ -3910,17 +3910,33 @@ function executeChoice() {
 function executeRest() {
   playActionAnimation('resource', '⏳ جاري إراحة القوات وإجراء الصيانة...', () => {
     G.resources += 1;
-    let healLog = '';
-    if (G.health < G.maxHealth) {
+    let didHeal = false;
+    if (G.health < G.maxHealth && Math.random() < 0.5) {
       G.health++;
       G.damageWithoutRepair = Math.max(0, G.damageWithoutRepair - 1);
-      healLog = ' و +1 صحة للقاعدة';
+      didHeal = true;
     }
-    let pros = ['تأمين (+1) موارد واستعادة النشاط', 'إراحة الجنود يخفف من خطر انهيار المعنويات' + (healLog ? '، وإصلاح أضرار القاعدة' : '')];
+    let pros = ['تأمين (+1) موارد واستعادة النشاط'];
     let cons = ['ترك الفرصة للعدو للمبادرة والحركة بحرية'];
-    let story = "خيم الهدوء على المطار لأول مرة منذ بدء العمليّات. ارتاح الجنود وتلقت الطائرات صيانة شاملة، بينما وصلت إمدادات جديدة بهدوء استعداداً للجولة القادمة.";
+    let story = "";
+    let logText = "";
+
+    if (didHeal) {
+      pros.push('💚 نجحت أعمال الصيانة وإصلاح أضرار القاعدة (+1 صحة)');
+      story = "خيم الهدوء على المطار لالتقاط الأنفاس. ارتاح الجنود ونجحت طواقم الصيانة في إصلاح جزئي لأضرار القاعدة (+1 صحة)، بالإضافة إلى تأمين إمدادات جديدة.";
+      logText = "+1 موارد و +1 صحة (نجح إصلاح القاعدة أثناء التقاط الأنفاس)";
+    } else {
+      if (G.health < G.maxHealth) {
+        cons.push('لم يوفق المهندسون في إنجاز إصلاحات القاعدة هذا الدور (فرصة الإصلاح 50%)');
+        story = "خيم الهدوء على المطار لالتقاط الأنفاس وتأمين الموارد. حاول فريق الصيانة صيانة الأضرار لكن الوقت لم يكفِ لإصلاح نقطة صحة في هذه الجولة.";
+      } else {
+        story = "خيم الهدوء على المطار لالتقاط الأنفاس. ارتاح الجنود وتلقت الطائرات صيانة دورية، بينما وصلت إمدادات جديدة بهدوء (+1 موارد).";
+      }
+      logText = "+1 موارد (التقاط الأنفاس وأعمال الصيانة)";
+    }
+
     showResultModal("التقاط الأنفاس ⛺", story, pros, cons, () => {
-      addLog(`+1 موارد${healLog} (التقاط الأنفاس وأعمال الصيانة)`, 'ally');
+      addLog(logText, 'ally');
       endPlayerTurn();
     });
     updateUI();
@@ -4312,7 +4328,7 @@ function executeResourceRaid(consequenceType) {
     let isSuccess = false;
     if (Math.random() < 0.85) {
       isSuccess = true;
-      const gain = 3 + Math.floor(Math.random() * 3);
+      const gain = 2 + Math.floor(Math.random() * 2);
       G.resources += gain;
       pros.push(`غناءم ممتازة! الحصول على (+${gain}) موارد`);
       story = "انقضّت قواتنا الخاصة على قوافل إمداد العدو بسرعة مذهلة. تمكنا من السيطرة على الشاحنات المليئة بالذخيرة والوقود والعودة للقاعدة دون خسائر تذكر.";
@@ -5064,13 +5080,13 @@ const CODEX_CARDS = [
   { general: GENERALS[7], actionLabel: 'هجوم شامل', title: 'قصف مكثف', cost: 6, advice: 'إرسال الأسطول بالكامل وتدمير الهدف بضرر كاسح. تسبب أضراراً هائلة وتكشف موقعنا للعدو.' },
   { general: GENERALS[3], actionLabel: 'استطلاع', title: 'استطلاع جوي', cost: 1, advice: 'إرسال طائرة استطلاع لمسح منطقة محددة في الخريطة لتأكيد وجود العدو أو خلوها، وتزيد نقاط المعلومات.' },
   { general: GENERALS[1], actionLabel: 'جمع المعلومات', title: 'تحليل استخباراتي', cost: 2, advice: 'جمع معلومات دقيقة لاكتشاف قطاعات في الخريطة. (عند وصول المعلومات إلى 10 يكشف موقع قاعدة العدو تلقائياً).' },
-  { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 2, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة لدور واحد بنسبة 100%.' },
+  { general: GENERALS[2], actionLabel: 'تحصين', title: 'تعزيز الدفاعات', cost: 3, advice: 'تعزيز دفاعات المطار لصد أي هجوم مفاجئ من العدو، تقلل فرصة الإصابة لدور واحد بنسبة 100%.' },
   { general: GENERALS[2], actionLabel: 'صيانة', title: 'إصلاح القاعدة', cost: 2, advice: 'إجراء صيانة عاجلة للمدرج والطائرات لاستعادة نقاط الصحة وتجنب الهزيمة المؤكدة.' },
   { general: GENERALS[5], actionLabel: 'غارة', title: 'غارة لنهب الموارد', cost: 1, advice: 'غارة على خطوط إمداد العدو لسرقة الموارد. بها نسبة مخاطرة، وإذا نجحت تضعف هجماته القادمة.' },
   { general: GENERALS[5], actionLabel: 'تمويه', title: 'شن هجوم وهمي', cost: 3, advice: 'عملية تمويه لتشتيت انتباه العدو وتقليل عدوانيته وفي حال نجاحها تجعل العدو لا يهاجم لدور واحد.' },
   { general: GENERALS[4], actionLabel: 'توازن', title: 'تكتيك متوازن', cost: 2, advice: 'تأمين الموارد وكشف مناطق جديدة بشكل متوازن ومنهجي.' },
   { general: GENERALS[0], actionLabel: 'إطلاق النار', title: 'قصف عشوائي', cost: 2, advice: 'قصف منطقة مجهولة بشكل عشوائي بحثاً عن هدف. خيار يائس عند نفاد خيارات الاستطلاع.' },
-  { general: GENERALS[4], actionLabel: 'راحة', title: 'إراحة الطاقم', cost: 0, advice: 'أعطِ الجنود قسطاً من الراحة لالتقاط الأنفاس، وإصلاح القاعدة جزئياً واستعادة بعض الموارد.' }
+  { general: GENERALS[4], actionLabel: 'راحة', title: 'إراحة الطاقم', cost: 0, advice: 'أعِطِ الجنود قسطاً من الراحة لالتقاط الأنفاس، وتأمين الموارد (+1) مع فرصة 50% لإصلاح القاعدة إذا كانت متضررة.' }
 ];
 
 function toggleCodexModal() {
